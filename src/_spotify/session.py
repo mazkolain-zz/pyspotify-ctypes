@@ -1,4 +1,6 @@
 from ctypes import *
+from user import User
+from _spotify import libspotify
 
 #structure definitions
 class sp_audioformat(Structure):
@@ -63,8 +65,75 @@ sp_session_config._fields_ = [
 ]
 
 
+#Function declarations
+create = libspotify.sp_session_init
+create.argtypes = [sp_session_config, c_void_p]
+create.restype = c_int
 
+release = libspotify.sp_session_release
+release.argtypes = [c_void_p]
+release.restype = c_int
 
+login = libspotify.sp_session_login
+login.argtypes = [c_void_p, c_char_p, c_char_p]
+login.restype = c_int
+
+user = libspotify.sp_session_user
+user.argtypes = [c_void_p]
+user.restype = c_void_p
+
+logout = libspotify.sp_session_logout
+logout.argtypes = [c_void_p]
+logout.restype = c_int
+
+connectionstate = libspotify.sp_session_connectionstate
+connectionstate.argtypes = [c_void_p]
+connectionstate.restype = c_int
+
+userdata = libspotify.sp_session_userdata
+userdata.argtypes = [c_void_p]
+userdata.restype = c_void_p
+
+set_cache_size = libspotify.sp_session_set_cache_size
+set_cache_size.argtypes = [c_void_p, c_size_t]
+
+process_events = libspotify.sp_session_process_events
+process_events.argtypes = [c_void_p, POINTER(c_int)]
+
+player_load = libspotify.sp_session_player_load
+player_load.argtypes = [c_void_p, c_void_p]
+player_load.restype = c_int
+
+player_seek = libspotify.sp_session_player_seek
+player_seek.argtypes = [c_void_p, c_int]
+player_seek.restype = c_int
+
+player_play = libspotify.sp_session_player_play
+player_play.argtypes = [c_void_p, c_bool]
+player_play.restype = c_int
+
+player_unload = libspotify.sp_session_player_unload
+player_unload.argtypes = [c_void_p]
+
+player_prefetch = libspotify.sp_session_player_prefetch
+player_prefetch.argtypes = [c_void_p, c_void_p]
+player_prefetch.restype = c_int
+
+playlistcontainer = libspotify.sp_session_playlistcontainer
+playlistcontainer.argtypes = [c_void_p]
+playlistcontainer.restype = c_void_p
+
+inbox_create = libspotify.sp_session_inbox_create
+inbox_create.argtypes = [c_void_p]
+inbox_create.restype = c_void_p
+
+starred_create = libspotify.sp_session_starred_create
+starred_create.argtypes = [c_void_p]
+starred_create.restype = c_void_p
+
+starred_for_user_create = libspotify.sp_session_starred_for_user_create
+starred_for_user_create.argtypes = [c_void_p, c_char_p]
+starred_for_user_create.restype = c_void_p
 
 class LibSpotifyError(Exception):
     def __init__(self, msg):
@@ -123,7 +192,10 @@ class Session:
     
     
     def user(self):
-        pass
+        return User(
+            self._libspotify,
+            self._libspotify.sp_session_user(self._session)
+        )
     
     
     def logout(self):
@@ -132,13 +204,14 @@ class Session:
         )
     
     def connectionstate(self):
-        pass
+        return self._libspotify.sp_session_connectionstate(self._session)
     
     def userdata(self):
-        pass
+        return self._libspotify.sp_session_userdata(self._session)
     
     def process_events(self):
-        pass
+        #next_timeout =
+        pass 
     
     def player_load(self, track):
         pass
