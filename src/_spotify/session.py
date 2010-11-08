@@ -59,7 +59,7 @@ config._fields_ = [
 
 
 #Function declarations
-create = _spotify.libspotify.sp_session_init
+create = _spotify.libspotify.sp_session_create
 create.argtypes = [config, ctypes.c_void_p]
 create.restype = ctypes.c_int
 
