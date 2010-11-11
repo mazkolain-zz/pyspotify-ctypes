@@ -1,6 +1,15 @@
+import os
 import ctypes
 
-libspotify = ctypes.WinDLL("libspotify")
+if os.name == "nt":
+    dllobj = ctypes.WinDLL
+    dllfile = "win32/libspotify.dll"
+
+else:
+    raise OSError("Cannot run in that environment: %s" % os.name)
+
+
+libspotify = dllobj(os.path.join(os.path.dirname(__file__), "../../lib", dllfile))
 
 __all__ = ["album", "artist", "search", "session", "user"]
 
