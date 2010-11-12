@@ -5,6 +5,10 @@ if os.name == "nt":
     dllobj = ctypes.WinDLL
     dllfile = "win32/libspotify.dll"
 
+if os.name == "posix":
+    dllobj = ctypes.CDLL
+    dllfile = "linux/x86/libspotify.so"
+
 else:
     raise OSError("Cannot run in that environment: %s" % os.name)
 
