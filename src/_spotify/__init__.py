@@ -1,25 +1,35 @@
 import os
 import ctypes
 
+#Module index
+__all__ = ["album", "artist", "search", "session", "user"]
+
+
+#Platform-specific initializations
 if os.name == "nt":
-    dllobj = ctypes.WinDLL
+    library = ctypes.WinDLL
+    callback = ctypes.WINFUNCTYPE
     dllfile = "win32/libspotify.dll"
 
 if os.name == "posix":
-    dllobj = ctypes.CDLL
+    library = ctypes.CDLL
+    callback = ctypes.CFUNCTYPE
     dllfile = "linux/x86/libspotify.so"
 
 else:
     raise OSError("Cannot run in that environment: %s" % os.name)
 
 
-libspotify = dllobj(os.path.join(os.path.dirname(__file__), "../../lib", dllfile))
+#Global libspotify instance
+libspotify = library(
+    os.path.join(os.path.dirname(__file__), "../../lib", dllfile)
+)
 
-__all__ = ["album", "artist", "search", "session", "user"]
 
 #structure definitions
 class audioformat(ctypes.Structure):
     pass
+
 
 #completion of types
 audioformat._fields = [

@@ -1,8 +1,8 @@
 import ctypes
 import _spotify
 
-#Import libspotify to the global namespace
-from _spotify import libspotify
+#Import handy globals
+from _spotify import libspotify, callback
 
 
 #Structure definitions
@@ -14,22 +14,22 @@ class config(ctypes.Structure):
 
 
 #Callbacks
-cb_logged_in = ctypes.WINFUNCTYPE(None, ctypes.c_void_p, ctypes.c_int)
-cb_logged_out = ctypes.WINFUNCTYPE(None, ctypes.c_void_p)
-cb_metadata_updated = ctypes.WINFUNCTYPE(None, ctypes.c_void_p)
-cb_connection_error = ctypes.WINFUNCTYPE(None, ctypes.c_int)
-cb_message_to_user = ctypes.WINFUNCTYPE(None, ctypes.c_char_p)
-cb_notify_main_thread = ctypes.WINFUNCTYPE(None, ctypes.c_void_p)
+cb_logged_in = callback(None, ctypes.c_void_p, ctypes.c_int)
+cb_logged_out = callback(None, ctypes.c_void_p)
+cb_metadata_updated = callback(None, ctypes.c_void_p)
+cb_connection_error = callback(None, ctypes.c_int)
+cb_message_to_user = callback(None, ctypes.c_char_p)
+cb_notify_main_thread = callback(None, ctypes.c_void_p)
 
-cb_music_delivery = ctypes.WINFUNCTYPE(
+cb_music_delivery = callback(
     ctypes.c_int,
     ctypes.POINTER(_spotify.audioformat),
     ctypes.c_void_p, ctypes.c_int
 )
 
-cb_play_token_lost = ctypes.WINFUNCTYPE(None, ctypes.c_void_p)
-cb_log_message = ctypes.WINFUNCTYPE(None, ctypes.c_void_p, ctypes.c_char_p)
-cb_end_of_track = ctypes.WINFUNCTYPE(None, ctypes.c_void_p)
+cb_play_token_lost = callback(None, ctypes.c_void_p)
+cb_log_message = callback(None, ctypes.c_void_p, ctypes.c_char_p)
+cb_end_of_track = callback(None, ctypes.c_void_p)
 
 
 #Completion of structure defs
