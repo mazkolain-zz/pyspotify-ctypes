@@ -11,7 +11,7 @@ if os.name == "nt":
     callback = ctypes.WINFUNCTYPE
     dllfile = "win32/libspotify.dll"
 
-if os.name == "posix":
+elif os.name == "posix":
     library = ctypes.CDLL
     callback = ctypes.CFUNCTYPE
     dllfile = "linux/x86/libspotify.so"
