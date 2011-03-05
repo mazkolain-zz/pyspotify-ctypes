@@ -60,16 +60,14 @@ config._fields_ = [
 
 #Function declarations
 create = _spotify.libspotify.sp_session_create
-create.argtypes = [config, ctypes.c_void_p]
+create.argtypes = [config, ctypes.POINTER(ctypes.c_void_p)]
 create.restype = ctypes.c_int
 
 release = libspotify.sp_session_release
 release.argtypes = [ctypes.c_void_p]
-release.restype = ctypes.c_int
 
 login = libspotify.sp_session_login
 login.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
-login.restype = ctypes.c_int
 
 user = libspotify.sp_session_user
 user.argtypes = [ctypes.c_void_p]
@@ -77,7 +75,6 @@ user.restype = ctypes.c_void_p
 
 logout = libspotify.sp_session_logout
 logout.argtypes = [ctypes.c_void_p]
-logout.restype = ctypes.c_int
 
 connectionstate = libspotify.sp_session_connectionstate
 connectionstate.argtypes = [ctypes.c_void_p]
@@ -99,11 +96,9 @@ player_load.restype = ctypes.c_int
 
 player_seek = libspotify.sp_session_player_seek
 player_seek.argtypes = [ctypes.c_void_p, ctypes.c_int]
-player_seek.restype = ctypes.c_int
 
 player_play = libspotify.sp_session_player_play
 player_play.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-player_play.restype = ctypes.c_int
 
 player_unload = libspotify.sp_session_player_unload
 player_unload.argtypes = [ctypes.c_void_p]
@@ -128,12 +123,13 @@ starred_for_user_create = libspotify.sp_session_starred_for_user_create
 starred_for_user_create.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
 starred_for_user_create.restype = ctypes.c_void_p
 
-publishedcontainer_for_user = libspotify.sp_session_publishedcontainer_for_user
-publishedcontainer_for_user.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-publishedcontainer_for_user.restype = ctypes.c_void_p
+publishedcontainer_for_user_create = libspotify.sp_session_publishedcontainer_for_user_create
+publishedcontainer_for_user_create.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+publishedcontainer_for_user_create.restype = ctypes.c_void_p
 
-publishedcontainer_for_user_release = libspotify.sp_session_publishedcontainer_for_user_release
-publishedcontainer_for_user_release.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+#Gone since 0.6?
+#publishedcontainer_for_user_release = libspotify.sp_session_publishedcontainer_for_user_release
+#publishedcontainer_for_user_release.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
 
 preferred_bitrate = libspotify.sp_session_preferred_bitrate
 preferred_bitrate.argtypes = [ctypes.c_void_p, ctypes.c_int]
