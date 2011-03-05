@@ -30,6 +30,14 @@ cb_music_delivery = callback(
 cb_play_token_lost = callback(None, ctypes.c_void_p)
 cb_log_message = callback(None, ctypes.c_void_p, ctypes.c_char_p)
 cb_end_of_track = callback(None, ctypes.c_void_p)
+cb_streaming_error = callback(None, ctypes.c_void_p, ctypes.c_int)
+cb_userinfo_updated = callback(None, ctypes.c_void_p)
+cb_start_playback = callback(None, ctypes.c_void_p)
+cb_stop_playback = callback(None, ctypes.c_void_p)
+
+cb_get_audio_buffer_stats = callback(
+    None, ctypes.POINTER(_spotify.audio_buffer_stats)
+)
 
 
 #Completion of structure defs
@@ -44,6 +52,11 @@ callbacks._fields_ = [
     ("play_token_lost", cb_play_token_lost),
     ("log_message", cb_log_message),
     ("end_of_track", cb_end_of_track),
+    ("streaming_error", cb_streaming_error),
+    ("userinfo_updated", cb_userinfo_updated),
+    ("start_playback", cb_start_playback),
+    ("stop_playback", cb_stop_playback),
+    ("get_audio_buffer_stats", cb_get_audio_buffer_stats),
 ]
 
 config._fields_ = [
