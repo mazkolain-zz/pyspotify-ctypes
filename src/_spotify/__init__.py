@@ -2,7 +2,12 @@ import os
 import ctypes
 
 #Module index
-__all__ = ["album", "artist", "search", "session", "user"]
+__all__ = [
+    "album", "albumbrowse", "artist", "artistbrowse",
+    "image", "inbox", "link", "localtrack",
+    "playlist", "playlistcontainer", "radio", "search",
+    "session", "toplistbrowse", "track", "user",
+]
 
 
 #Platform-specific initializations
