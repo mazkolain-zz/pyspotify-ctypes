@@ -7,7 +7,7 @@ from _spotify import libspotify
 #Function prototypes
 canonical_name = libspotify.sp_user_canonical_name
 canonical_name.argtypes = [ctypes.c_void_p]
-canonical_name.restype = [ctypes.c_char_p]
+canonical_name.restype = ctypes.c_char_p
 
 display_name = libspotify.sp_user_display_name
 display_name.argtypes = [ctypes.c_void_p]

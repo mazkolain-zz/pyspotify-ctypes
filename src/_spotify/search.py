@@ -48,7 +48,7 @@ num_artists.restype = ctypes.c_int
 
 artist = libspotify.sp_search_artist
 artist.argtypes = [ctypes.c_void_p, ctypes.c_int]
-artist.argtypes = ctypes.c_void_p
+artist.restype = ctypes.c_void_p
 
 query = libspotify.sp_search_query
 query.argtypes = [ctypes.c_void_p]
@@ -56,11 +56,11 @@ query.restype = ctypes.c_char_p
 
 did_you_mean = libspotify.sp_search_did_you_mean
 did_you_mean.argtypes = [ctypes.c_void_p]
-did_you_mean.restype = [ctypes.c_char_p]
+did_you_mean.restype = ctypes.c_char_p
 
 total_tracks = libspotify.sp_search_total_tracks
 total_tracks.argtypes = [ctypes.c_void_p]
-total_tracks.restype = [ctypes.c_int]
+total_tracks.restype = ctypes.c_int
 
 total_albums = libspotify.sp_search_total_albums
 total_albums.argtypes = [ctypes.c_void_p]
