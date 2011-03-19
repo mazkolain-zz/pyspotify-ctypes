@@ -63,17 +63,20 @@ config._fields_ = [
     ("api_version", ctypes.c_int),
     ("cache_location", ctypes.c_char_p),
     ("settings_location", ctypes.c_char_p),
-    ("application_key", ctypes.c_void_p),
+    ("application_key", ctypes.POINTER(ctypes.c_byte)),
     ("application_key_size", ctypes.c_uint),
     ("user_agent", ctypes.c_char_p),
-    ("callbacks", callbacks),
+    ("callbacks", ctypes.POINTER(callbacks)),
     ("userdata", ctypes.c_void_p),
+    ("compress_playlists", ctypes.c_bool),
+    ("dont_save_metadata_for_playlists", ctypes.c_bool),
+    ("initially_unload_playlists", ctypes.c_bool),
 ]
 
 
 #Function declarations
 create = _spotify.libspotify.sp_session_create
-create.argtypes = [config, ctypes.POINTER(ctypes.c_void_p)]
+create.argtypes = [ctypes.POINTER(config), ctypes.POINTER(ctypes.c_void_p)]
 create.restype = ctypes.c_int
 
 release = libspotify.sp_session_release
