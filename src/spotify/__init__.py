@@ -9,8 +9,9 @@ class LibSpotifyError(Exception):
 class SpotifySessionManager:
     _session = None
     
-    def __init__(self, **kwargs):
+    def __init__(self, username="", password="", **kwargs):
         _session = session.Session(self, **kwargs)
+        _session.login(username, password)
     
     def search(self, query):
         pass
@@ -28,9 +29,6 @@ class SpotifySessionManager:
         pass
     
     def message_to_user(self, session, message):
-        pass
-    
-    def notify_main_thread(self, session):
         pass
     
     def music_delivery(self, format, frames, num_frames):
