@@ -9,18 +9,26 @@ from _spotify import libspotify
 import spotify
 from spotify import user
 
+import threading
+
 
 
 #classes
 class Session:
     api_version = 7
     _manager = None
+    _main_lock = None
+    
+    #Instance variable to avoid them getting garbage collected
+    _callbacks = None
+    
     
     def __init__(self, manager, cache_location="", settings_location="", app_key=None, user_agent=None):
         self._manager = manager
+        self._main_lock = threading.Lock()
         
         #prepare callbacks
-        callbacks = _session.callbacks(
+        self._callbacks = _session.callbacks(
             _session.cb_logged_in(self._logged_in),
             _session.cb_logged_out(self._logged_out),
             _session.cb_metadata_updated(self._metadata_updated),
@@ -50,17 +58,16 @@ class Session:
             appkey_c,
             ctypes.sizeof(appkey_c),
             user_agent,
-            ctypes.pointer(callbacks),
+            ctypes.pointer(self._callbacks),
             ctypes.c_void_p(),
             1,
             0,
             1,
         )
         
-        sess_p = ctypes.c_void_p()
-        err = _session.create(ctypes.byref(config), ctypes.byref(sess_p))
-        
-        self._session = sess_p
+        self._session = ctypes.c_void_p()
+        err = _session.create(ctypes.byref(config), ctypes.byref(self._session))
+        self._handle_sp_error(err)
     
     
     def __del__(self):
@@ -74,10 +81,10 @@ class Session:
     
     
     def login(self, username, password):
-        self._handle_sp_error(
-           _session.login(self._session, username, password)
-        )
-    
+        with self._main_lock:
+            self._handle_sp_error(
+               _session.login(self._session, username, password)
+            )
     
     def user(self):
         return user.User(
@@ -100,9 +107,9 @@ class Session:
         _session.set_cache_size(size)
     
     def process_events(self):
-        next_timeout = 0
-        _session.process_events(self._session, next_timeout)
-        return next_timeout
+        with self._main_lock:
+            next_timeout = ctypes.c_int(0)
+            _session.process_events(self._session, ctypes.byref(next_timeout))
     
     def player_load(self, track):
         pass
@@ -136,7 +143,7 @@ class Session:
         self._manager.message_to_user(self, message)
     
     def _notify_main_thread(self, session):
-        self._manager.notify_main_thread(self)
+        self.process_events()
     
     def _music_delivery(self, session, format, frames, num_frames):
         self._manager.music_delivery(self, format, frames, num_frames)
