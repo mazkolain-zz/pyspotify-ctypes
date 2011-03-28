@@ -1,16 +1,16 @@
 import ctypes
 
-#Import low level session api
+#Import low level api
 from _spotify import session as _session
 
-#Libspotify instance available globally
-from _spotify import libspotify
-
+#Import general classes from the high level module
 import spotify
+
+#Also import this one's siblings
 from spotify import user
 
+#Threading stuff
 import threading
-
 
 
 #classes
@@ -67,64 +67,71 @@ class Session:
         
         self._session = ctypes.c_void_p()
         err = _session.create(ctypes.byref(config), ctypes.byref(self._session))
-        self._handle_sp_error(err)
+        spotify.handle_sp_error(err)
     
     
     def __del__(self):
-        _session.release(self._session)
-    
-    
-    def _handle_sp_error(self, errorcode):
-        if errorcode != 0:
-            msg = libspotify.sp_error_message(errorcode)
-            raise spotify.LibSpotifyError(msg)
+        with self._main_lock:
+            _session.release(self._session)
     
     
     def login(self, username, password):
         with self._main_lock:
-            self._handle_sp_error(
-               _session.login(self._session, username, password)
-            )
+            _session.login(self._session, username, password)
+    
     
     def user(self):
-        return user.User(
-            libspotify, _session.user(self._session)
-        )
+        with self._main_lock:
+            return user.User(
+                _session.user(self._session)
+            )
     
     
     def logout(self):
-        self._handle_sp_error(
+        with self._main_lock:
             _session.logout(self._session)
-        )
+    
     
     def connectionstate(self):
-        return _session.connectionstate(self._session)
+        with self._main_lock:
+            return _session.connectionstate(self._session)
+    
     
     def userdata(self):
-        return _session.userdata(self._session)
+        with self._main_lock:
+            return _session.userdata(self._session)
+    
     
     def set_cache_size(self, size):
-        _session.set_cache_size(size)
+        with self._main_lock:
+            _session.set_cache_size(size)
+    
     
     def process_events(self):
         with self._main_lock:
             next_timeout = ctypes.c_int(0)
             _session.process_events(self._session, ctypes.byref(next_timeout))
     
+    
     def player_load(self, track):
         pass
+    
     
     def player_seek(self, offset):
         pass
     
+    
     def player_play(self, play):
         pass
+    
     
     def player_unload(self):
         pass
     
+    
     def playlistcontainer(self):
         pass
+    
     
     #Callback proxies
     def _logged_in(self, session, error):

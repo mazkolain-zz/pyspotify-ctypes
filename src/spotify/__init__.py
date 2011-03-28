@@ -1,21 +1,20 @@
 __all__ = ["session", "user"]
 
-import session
+
+import _spotify
+
+
+def handle_sp_error(errcode):
+    if errcode != 0:
+        msg = _spotify.error_message(errcode)
+        raise LibSpotifyError(msg)
+
 
 class LibSpotifyError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
+    pass
 
-class SpotifySessionManager:
-    _session = None
-    
-    def __init__(self, username="", password="", **kwargs):
-        _session = session.Session(self, **kwargs)
-        _session.login(username, password)
-    
-    def search(self, query):
-        pass
-    
+
+class SessionCallbacks:
     def logged_in(self, session, error):
         pass
     
