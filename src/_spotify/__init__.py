@@ -1,6 +1,10 @@
 import os
 import ctypes
 
+#For arch calculations
+import struct
+
+
 #Module index
 __all__ = [
     "album", "albumbrowse", "artist", "artistbrowse",
@@ -10,19 +14,31 @@ __all__ = [
 ]
 
 
+#Calculate void pointer size, 32 or 64
+voidp_size = struct.calcsize("P") * 8
+
+
 #Platform-specific initializations
-if os.name == "nt":
+if os.name == "nt" and voidp_size == 32:
     library = ctypes.WinDLL
     callback = ctypes.WINFUNCTYPE
     dllfile = "win32/libspotify.dll"
 
-elif os.name == "posix":
+elif os.name == "posix" and voidp_size in [32,64]:
     library = ctypes.CDLL
     callback = ctypes.CFUNCTYPE
-    dllfile = "linux/x86/libspotify.so"
+    
+    if voidp_size == 32:
+        dllfile = "linux/x86/libspotify.so"
+    
+    elif voidp_size == 64:
+        dllfile = "linux/x86_64/libspotify.so"
 
 else:
-    raise OSError("Cannot run in that environment: %s" % os.name)
+    raise OSError(
+        "Cannot run in that environment (os: %s; arch: %d)" %
+        (os.name, voidp_size)
+    )
 
 
 #Global libspotify instance
