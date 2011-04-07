@@ -2,6 +2,7 @@ __all__ = ["session", "user"]
 
 
 import _spotify
+import threading
 
 
 def handle_sp_error(errcode):
@@ -12,6 +13,24 @@ def handle_sp_error(errcode):
 
 class LibSpotifyError(Exception):
     pass
+
+
+class MainLoop:
+    _event = None
+    
+    def __init__(self):
+        self._event = threading.Event()
+    
+    def loop(self, session):
+        timeout = None
+        
+        while True:
+            self._event.wait(timeout)
+            timeout = session.process_events()
+            self._event.clear()
+    
+    def notify(self):
+        self._event.set()
 
 
 class SessionCallbacks:
@@ -28,6 +47,9 @@ class SessionCallbacks:
         pass
     
     def message_to_user(self, session, message):
+        pass
+    
+    def notify_main_thread(self, session):
         pass
     
     def music_delivery(self, format, frames, num_frames):
