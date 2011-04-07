@@ -17,7 +17,7 @@ import threading
 class Session:
     api_version = 7
     _manager = None
-    _main_lock = None
+    _session_lock = None
     
     #Instance variable to avoid them getting garbage collected
     _callbacks = None
@@ -25,7 +25,7 @@ class Session:
     
     def __init__(self, manager, cache_location="", settings_location="", app_key=None, user_agent=None):
         self._manager = manager
-        self._main_lock = threading.Lock()
+        self._session_lock = threading.RLock()
         
         #prepare callbacks
         self._callbacks = _session.callbacks(
@@ -71,46 +71,48 @@ class Session:
     
     
     def __del__(self):
-        with self._main_lock:
+        with self._session_lock:
             _session.release(self._session)
     
     
     def login(self, username, password):
-        with self._main_lock:
+        with self._session_lock:
             _session.login(self._session, username, password)
     
     
     def user(self):
-        with self._main_lock:
+        with self._session_lock:
             return user.User(
-                _session.user(self._session)
+                self._session, _session.user(self._session)
             )
     
     
     def logout(self):
-        with self._main_lock:
+        with self._session_lock:
             _session.logout(self._session)
     
     
     def connectionstate(self):
-        with self._main_lock:
+        with self._session_lock:
             return _session.connectionstate(self._session)
     
     
     def userdata(self):
-        with self._main_lock:
+        with self._session_lock:
             return _session.userdata(self._session)
     
     
     def set_cache_size(self, size):
-        with self._main_lock:
+        with self._session_lock:
             _session.set_cache_size(size)
     
     
     def process_events(self):
-        with self._main_lock:
+        with self._session_lock:
             next_timeout = ctypes.c_int(0)
             _session.process_events(self._session, ctypes.byref(next_timeout))
+            return next_timeout.value / 1000
+        
     
     
     def player_load(self, track):
@@ -135,46 +137,60 @@ class Session:
     
     #Callback proxies
     def _logged_in(self, session, error):
-        self._manager.logged_in(self, error)
+        with self._session_lock:
+            self._manager.logged_in(self, error)
     
     def _logged_out(self, session):
-        self._manager.logged_out(self)
+        with self._session_lock:
+            self._manager.logged_out(self)
     
     def _metadata_updated(self, session):
-        self._manager.metadata_updated(self)
+        with self._session_lock:
+            self._manager.metadata_updated(self)
     
     def _connection_error(self, session, error):
-        self._manager.connection_error(self, error)
+        with self._session_lock:
+            self._manager.connection_error(self, error)
     
     def _message_to_user(self, session, message):
-        self._manager.message_to_user(self, message)
+        with self._session_lock:
+            self._manager.message_to_user(self, message)
     
     def _notify_main_thread(self, session):
-        self.process_events()
+        with self._session_lock:
+            self._manager.notify_main_thread(self)
     
     def _music_delivery(self, session, format, frames, num_frames):
-        self._manager.music_delivery(self, format, frames, num_frames)
+        with self._session_lock:
+            self._manager.music_delivery(self, format, frames, num_frames)
     
     def _play_token_lost(self, session):
-        self._manager.play_token_lost(self)
+        with self._session_lock:
+            self._manager.play_token_lost(self)
     
     def _log_message(self, session, data):
-        self._manager.log_message(self, data)
+        with self._session_lock:
+            self._manager.log_message(self, data)
     
     def _end_of_track(self, session, error):
-        self._manager.end_of_track(self, error)
+        with self._session_lock:
+            self._manager.end_of_track(self, error)
     
     def _streaming_error(self, session, error):
-        self._manager.streaming_error(self, error)
+        with self._session_lock:
+            self._manager.streaming_error(self, error)
     
     def _userinfo_updated(self, session):
         self._manager.userinfo_updated(self)
     
     def _start_playback(self, session):
-        self._manager.start_playback(self)
+        with self._session_lock:
+            self._manager.start_playback(self)
     
     def _stop_playback(self, session):
-        self._manager.stop_playback(self)
+        with self._session_lock:
+            self._manager.stop_playback(self)
     
     def _get_audio_buffer_stats(self, session, stats):
-        self._manager.get_audio_buffer_stats(self, stats)
+        with self._session_lock:
+            self._manager.get_audio_buffer_stats(self, stats)
