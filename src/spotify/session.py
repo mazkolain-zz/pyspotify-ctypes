@@ -7,7 +7,7 @@ from _spotify import session as _session
 import spotify
 
 #Also import this one's siblings
-from spotify import user
+from spotify import user, playlistcontainer
 
 #Threading stuff
 import threading
@@ -23,9 +23,17 @@ class Session:
     _callbacks = None
     
     
+    _user_callbacks = None
+    _metadata_callbacks = None
+    
+    
     def __init__(self, manager, cache_location="", settings_location="", app_key=None, user_agent=None):
         self._manager = manager
         self._session_lock = threading.RLock()
+        
+        #Callback managers
+        self._user_callbacks = spotify.CallbackQueueManager()
+        self._metadata_callbacks = spotify.CallbackQueueManager()
         
         #prepare callbacks
         self._callbacks = _session.callbacks(
@@ -80,11 +88,16 @@ class Session:
             _session.login(self._session, username, password)
     
     
-    def user(self):
+    def user(self, onload=None):
         with self._session_lock:
-            return user.User(
-                self._session, _session.user(self._session)
-            )
+            user_obj = user.User(self._session, _session.user(self._session))
+            
+            if onload != None:
+                self._user_callbacks.add_callback(
+                    user_obj.is_loaded, onload, user_obj
+                )
+                
+            return user_obj
     
     
     def logout(self):
@@ -114,7 +127,6 @@ class Session:
             return next_timeout.value / 1000
         
     
-    
     def player_load(self, track):
         pass
     
@@ -131,8 +143,12 @@ class Session:
         pass
     
     
-    def playlistcontainer(self):
-        pass
+    def playlistcontainer(self, **kwargs):
+        return playlistcontainer.PlaylistContainer(
+            self._session,
+            _session.playlistcontainer(self._session),
+            **kwargs
+        )
     
     
     #Callback proxies
@@ -181,6 +197,7 @@ class Session:
             self._manager.streaming_error(self, error)
     
     def _userinfo_updated(self, session):
+        self._user_callbacks.process_callbacks()
         self._manager.userinfo_updated(self)
     
     def _start_playback(self, session):

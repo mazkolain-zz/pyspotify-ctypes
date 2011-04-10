@@ -33,6 +33,33 @@ class MainLoop:
         self._event.set()
 
 
+class CallbackItem:
+    def __init__(self, **args):
+        self.__dict__.update(args)
+
+
+class CallbackQueueManager:
+    _callbacks = None
+    
+    def __init__(self):
+        self._callbacks = []
+        
+    def add_callback(self, condition, callback, *args):
+        self._callbacks.append(
+            CallbackItem(
+                condition = condition,
+                callback = callback,
+                args = args,
+            )
+        )
+    
+    def process_callbacks(self):
+        for item in self._callbacks:
+            if item.condition():
+                self._callbacks.remove(item)
+                item.callback(*item.args)
+
+
 class SessionCallbacks:
     def logged_in(self, session, error):
         pass
