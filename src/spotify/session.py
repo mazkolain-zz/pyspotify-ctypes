@@ -143,11 +143,10 @@ class Session:
         pass
     
     
-    def playlistcontainer(self, **kwargs):
+    def playlistcontainer(self):
         return playlistcontainer.PlaylistContainer(
             self._session,
             _session.playlistcontainer(self._session),
-            **kwargs
         )
     
     

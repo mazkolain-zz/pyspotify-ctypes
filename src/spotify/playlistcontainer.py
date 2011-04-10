@@ -56,13 +56,14 @@ class PlaylistContainer:
     #Avoid garbage collection
     _callbacks = None
 
-    def __init__(self, session, container, onload=None):
+    def __init__(self, session, container):
         self._session = session
         self._container = container
         _playlistcontainer.add_ref(self._container)
-        self._onload_callback = onload
-        
-        #Register callbacks as soon as possible
+    
+    
+    def add_callbacks(self, manager):
+        self._manager = manager
         self._callbacks = _playlistcontainer.callbacks(
             _playlistcontainer.cb_playlist_added(self._playlist_added),
             _playlistcontainer.cb_playlist_removed(self._playlist_removed),
@@ -76,9 +77,13 @@ class PlaylistContainer:
         )
     
     
-    def add_callbacks(self, manager):
-        self._manager = manager
-        
+    def remove_callbacks(self):
+        _playlistcontainer.remove_callbacks(
+            self._container,
+            ctypes.pointer(self._callbacks),
+            ctypes.c_void_p()
+        )
+    
     
     def num_playlists(self):
         return _playlistcontainer.num_playlists(self._container)
@@ -99,6 +104,7 @@ class PlaylistContainer:
     
     
     def __del__(self):
+        self.remove_callbacks()
         _playlistcontainer.release(self._container)
     
     
@@ -113,25 +119,17 @@ class PlaylistContainer:
     
     def _playlist_removed(self, container, playlist_p, position, data):
         po = playlist.Playlist(self._session, playlist_p)
-        if self._manager != None:
-            self._manager.playlist_removed(
-                self, po, position
-            )
+        self._manager.playlist_removed(
+            self, po, position
+        )
     
     
     def _playlist_moved(self, container, playlist_p, position, new_position, data):
         po = playlist.Playlist(self._session, playlist_p)
-        if self._manager != None:
-            self._manager.playlist_moved(
-                self, po, position, new_position
-            )
+        self._manager.playlist_moved(
+            self, po, position, new_position
+        )
     
     
     def _container_loaded(self, container, data):
-        #Try with the shortcut callback
-        if self._onload_callback != None:
-            self._onload_callback(self)
-        
-        #With the manager one
-        if self._manager != None:
-            self._manager.container_loaded(self)
+        self._manager.container_loaded(self)
