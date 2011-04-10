@@ -27,7 +27,7 @@ cb_playlist_moved = callback(
     ctypes.c_void_p
 )
 
-cb_container_loaded = callback(None, ctypes.c_void_p)
+cb_container_loaded = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 
 
 #Completion of structure defs
@@ -40,10 +40,10 @@ callbacks._fields_ = [
 
 
 add_callbacks = libspotify.sp_playlistcontainer_add_callbacks
-add_callbacks.argtypes = [ctypes.c_void_p, callbacks, ctypes.c_void_p]
+add_callbacks.argtypes = [ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p]
 
 remove_callbacks = libspotify.sp_playlistcontainer_remove_callbacks
-remove_callbacks.argtypes = [ctypes.c_void_p, callbacks, ctypes.c_void_p]
+remove_callbacks.argtypes = [ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p]
 
 num_playlists = libspotify.sp_playlistcontainer_num_playlists
 num_playlists.argtypes = [ctypes.c_void_p]
