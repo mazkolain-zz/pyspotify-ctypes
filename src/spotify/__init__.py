@@ -15,6 +15,14 @@ class LibSpotifyError(Exception):
     pass
 
 
+class DuplicateCallbackError(LibSpotifyError):
+    pass
+
+
+class UnknownCallbackError(LibSpotifyError):
+    pass
+
+
 class MainLoop:
     _event = None
     
