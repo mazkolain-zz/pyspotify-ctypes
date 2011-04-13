@@ -172,8 +172,9 @@ class Session:
             self._manager.message_to_user(self, message)
     
     def _notify_main_thread(self, session):
-        with self._session_lock:
+        if self._session_lock.acquire(False):
             self._manager.notify_main_thread(self)
+            self._session_lock.release()
     
     def _music_delivery(self, session, format, frames, num_frames):
         with self._session_lock:
