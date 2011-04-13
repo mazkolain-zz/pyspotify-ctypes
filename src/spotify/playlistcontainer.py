@@ -55,10 +55,15 @@ class PlaylistContainer:
     
     #Avoid garbage collection
     _callbacks = None
-
+    
+    #To store generated playlist instances
+    _playlist_objects = None
+    
+    
     def __init__(self, session, container):
         self._session = session
         self._container = container
+        self._playlist_objects = {}
         _playlistcontainer.add_ref(self._container)
     
     
@@ -89,10 +94,17 @@ class PlaylistContainer:
         return _playlistcontainer.num_playlists(self._container)
     
     
+    def _get_playlist_object(self, pos):
+        if pos not in self._playlist_objects:
+            self._playlist_objects[pos] = playlist.Playlist(
+                self._session, _playlistcontainer.playlist(self._container, pos)
+            )
+        
+        return self._playlist_objects[pos]
+    
+    
     def playlist(self, pos):
-        return playlist.Playlist(
-            self._session, _playlistcontainer.playlist(self._container, pos)
-        )
+        return self._get_playlist_object(pos)
     
     
     def __iter__(self):
