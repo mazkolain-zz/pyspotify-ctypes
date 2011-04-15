@@ -5,9 +5,54 @@ Created on 10/04/2011
 '''
 import ctypes
 
+from spotify import DuplicateCallbackError, UnknownCallbackError
+
 from _spotify import playlistcontainer as _playlistcontainer
 
 import playlist
+
+
+class ProxyPlaylistContainerCallbacks:
+    _container = None
+    _callbacks = None
+    
+    
+    def __init__(self, container, callbacks):
+        self._container = container
+        self._callbacks = callbacks
+    
+    
+    def _playlist_added(self, c_container, c_playlist, position, data):
+        self._callbacks.playlist_added(
+            self._container, self._container.playlist(position), position
+        )
+    
+    
+    def _playlist_removed(self, c_container, c_playlist, position, data):
+        self._callbacks.playlist_removed(
+            self._container, self._container.playlist(position), position
+        )
+    
+    
+    def _playlist_moved(self, c_container, c_playlist, position, new_position, data):
+        self._callbacks.playlist_moved(
+            self._container, self._container.playlist(position),
+            position, new_position
+        )
+    
+    
+    def _container_loaded(self, container, data):
+        self._callbacks.container_loaded(self._container)
+        
+    
+    def get_callback_struct(self):
+        return _playlistcontainer.callbacks(
+            _playlistcontainer.cb_playlist_added(self._playlist_added),
+            _playlistcontainer.cb_playlist_removed(self._playlist_removed),
+            _playlistcontainer.cb_playlist_moved(self._playlist_moved),
+            _playlistcontainer.cb_container_loaded(self._container_loaded),
+        )
+
 
 
 class PlaylistContainerCallbacks:
@@ -22,6 +67,7 @@ class PlaylistContainerCallbacks:
     
     def container_loaded(self, container):
         pass
+
 
 
 class PlaylistContainerIterator:
@@ -44,6 +90,7 @@ class PlaylistContainerIterator:
             raise StopIteration
         
 
+
 class PlaylistContainer:
     _session = None
     _container = None
@@ -53,7 +100,7 @@ class PlaylistContainer:
     #Just a shortcut callback to avoid subclassing PlaylistContainerCallbacks
     _onload_callback = None
     
-    #Avoid garbage collection
+    #Keep references to callbacks structs an the like
     _callbacks = None
     
     #To store generated playlist instances
@@ -64,30 +111,42 @@ class PlaylistContainer:
         self._session = session
         self._container = container
         self._playlist_objects = {}
+        self._callbacks = {}
         _playlistcontainer.add_ref(self._container)
     
     
-    def add_callbacks(self, manager):
-        self._manager = manager
-        self._callbacks = _playlistcontainer.callbacks(
-            _playlistcontainer.cb_playlist_added(self._playlist_added),
-            _playlistcontainer.cb_playlist_removed(self._playlist_removed),
-            _playlistcontainer.cb_playlist_moved(self._playlist_moved),
-            _playlistcontainer.cb_container_loaded(self._container_loaded),
-        )
-        _playlistcontainer.add_callbacks(
-            self._container,
-            ctypes.pointer(self._callbacks),
-            ctypes.c_void_p()
-        )
+    def add_callbacks(self, callbacks):
+        cb_id = id(callbacks)
+        if cb_id in self._callbacks:
+            raise DuplicateCallbackError()
+        
+        else:
+            proxy = ProxyPlaylistContainerCallbacks(self, callbacks)
+            struct = proxy.get_callback_struct()
+            ptr = ctypes.pointer(struct)
+            
+            self._callbacks[cb_id] = {
+                "struct": struct,
+                "ptr": ptr,
+                "callbacks": callbacks,
+            }
+            
+            _playlistcontainer.add_callbacks(
+                self._container, ptr, None
+            )
     
     
-    def remove_callbacks(self):
-        _playlistcontainer.remove_callbacks(
-            self._container,
-            ctypes.pointer(self._callbacks),
-            ctypes.c_void_p()
-        )
+    def remove_callbacks(self, callbacks):
+        cb_id = id(callbacks)
+        if cb_id not in self._callbacks:
+            raise UnknownCallbackError()
+        
+        else:
+            ptr = self._callbacks[cb_id]["ptr"]
+            _playlistcontainer.remove_callbacks(
+                self._container, ptr, None
+            )
+            del self._callbacks[cb_id]
     
     
     def num_playlists(self):
@@ -120,28 +179,4 @@ class PlaylistContainer:
         _playlistcontainer.release(self._container)
     
     
-    #Callback proxies
-    def _playlist_added(self, container, playlist_p, position, data):
-        po = playlist.Playlist(self._session, playlist_p)
-        if self._manager != None:
-            self._manager.playlist_added(
-                self, po, position
-            )
     
-    
-    def _playlist_removed(self, container, playlist_p, position, data):
-        po = playlist.Playlist(self._session, playlist_p)
-        self._manager.playlist_removed(
-            self, po, position
-        )
-    
-    
-    def _playlist_moved(self, container, playlist_p, position, new_position, data):
-        po = playlist.Playlist(self._session, playlist_p)
-        self._manager.playlist_moved(
-            self, po, position, new_position
-        )
-    
-    
-    def _container_loaded(self, container, data):
-        self._manager.container_loaded(self)
