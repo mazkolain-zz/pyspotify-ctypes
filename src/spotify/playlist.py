@@ -11,7 +11,7 @@ from _spotify import playlist as _playlist
 
 
 class ProxyPlaylistCallbacks:
-    _session = None
+    _c_session = None
     _playlist = None
     _callbacks = None
     
