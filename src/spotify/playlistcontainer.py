@@ -149,6 +149,11 @@ class PlaylistContainer:
             del self._callbacks[cb_id]
     
     
+    def remove_all_callbacks(self):
+        for item in self._callbacks:
+            self.remove_callbacks(item["callbacks"])
+    
+    
     def num_playlists(self):
         return _playlistcontainer.num_playlists(self._container)
     
@@ -175,7 +180,7 @@ class PlaylistContainer:
     
     
     def __del__(self):
-        self.remove_callbacks()
+        self.remove_all_callbacks()
         _playlistcontainer.release(self._container)
     
     
