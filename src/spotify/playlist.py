@@ -184,6 +184,11 @@ class Playlist:
             del self._callbacks[cb_id]
     
     
+    def remove_all_callbacks(self):
+        for item in self._callbacks:
+            self.remove_callbacks(item["callbacks"])
+    
+    
     def num_tracks(self):
         return _playlist.num_tracks(self._playlist)
     
@@ -199,3 +204,6 @@ class Playlist:
     def set_in_ram(self, in_ram):
         _playlist.set_in_ram(self._session, self._playlist, in_ram)
     
+    
+    def __del__(self):
+        self.remove_all_callbacks()
