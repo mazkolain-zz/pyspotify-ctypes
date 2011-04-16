@@ -27,6 +27,10 @@ class Session:
     _metadata_callbacks = None
     
     
+    #Playlistcontainer instance
+    _playlistcontainer = None
+    
+    
     def __init__(self, manager, cache_location="", settings_location="", app_key=None, user_agent=None):
         self._manager = manager
         self._session_lock = threading.RLock()
@@ -144,10 +148,13 @@ class Session:
     
     
     def playlistcontainer(self):
-        return playlistcontainer.PlaylistContainer(
-            self._session,
-            _session.playlistcontainer(self._session),
-        )
+        if self._playlistcontainer is None:
+            self._playlistcontainer = playlistcontainer.PlaylistContainer(
+                self._session,
+                _session.playlistcontainer(self._session),
+            )
+        
+        return self._playlistcontainer
     
     
     #Callback proxies
