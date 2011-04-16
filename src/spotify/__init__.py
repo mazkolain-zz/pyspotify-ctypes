@@ -25,20 +25,26 @@ class UnknownCallbackError(LibSpotifyError):
 
 class MainLoop:
     _event = None
+    _quit = None
     
     def __init__(self):
         self._event = threading.Event()
+        self._quit = False
     
     def loop(self, session):
         timeout = None
         
-        while True:
+        while not self._quit:
             self._event.wait(timeout)
             timeout = session.process_events()
             self._event.clear()
     
     def notify(self):
         self._event.set()
+    
+    def quit(self):
+        self._quit = True
+        self.notify()
 
 
 class CallbackItem:
