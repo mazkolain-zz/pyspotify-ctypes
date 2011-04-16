@@ -74,6 +74,42 @@ class CallbackQueueManager:
                 item.callback(*item.args)
 
 
+class BulkConditionChecker:
+    _conditions = None
+    _event = None
+    
+    def __init__(self):
+        self._conditions = []
+        self._event = threading.Event()
+    
+    def add_condition(self, condition):
+        self._conditions.append(condition)
+    
+    def check_conditions(self):
+        for item in self._conditions:
+            if item():
+                self._conditions.remove(item)
+            
+        #If list size reaches to zero all conditions have been met
+        if len(self._conditions) == 0:
+            self._complete()
+    
+    def _complete(self):
+        self._event.set()
+        self.complete()
+    
+    def complete(self):
+        pass
+    
+    def complete_wait(self, timeout = None):
+        #print "before wait"
+        self._event.wait(timeout)
+        #print "after wait"
+        self._event.clear()
+        
+        
+
+
 class SessionCallbacks:
     def logged_in(self, session, error):
         pass
