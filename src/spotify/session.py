@@ -12,12 +12,14 @@ from spotify import user, playlistcontainer
 #Threading stuff
 import threading
 
+#Decorators
+from spotify.utils.decorators import synchronized
+
 
 #classes
 class Session:
     api_version = 7
     _manager = None
-    _session_lock = None
     
     #Instance variable to avoid them getting garbage collected
     _callbacks = None
@@ -33,7 +35,6 @@ class Session:
     
     def __init__(self, manager, cache_location="", settings_location="", app_key=None, user_agent=None):
         self._manager = manager
-        self._session_lock = threading.RLock()
         
         #Callback managers
         self._user_callbacks = spotify.CallbackQueueManager()
@@ -82,71 +83,76 @@ class Session:
         spotify.handle_sp_error(err)
     
     
+    @synchronized
     def __del__(self):
-        with self._session_lock:
-            _session.release(self._session)
+        _session.release(self._session)
     
     
+    @synchronized
     def login(self, username, password):
-        with self._session_lock:
-            _session.login(self._session, username, password)
+        _session.login(self._session, username, password)
     
     
+    @synchronized
     def user(self, onload=None):
-        with self._session_lock:
-            user_obj = user.User(self._session, _session.user(self._session))
+        user_obj = user.User(self._session, _session.user(self._session))
             
-            if onload != None:
-                self._user_callbacks.add_callback(
-                    user_obj.is_loaded, onload, user_obj
-                )
+        if onload != None:
+            self._user_callbacks.add_callback(
+                user_obj.is_loaded, onload, user_obj
+            )
                 
-            return user_obj
+        return user_obj
     
     
+    @synchronized
     def logout(self):
-        with self._session_lock:
-            _session.logout(self._session)
+        _session.logout(self._session)
     
     
+    @synchronized
     def connectionstate(self):
-        with self._session_lock:
-            return _session.connectionstate(self._session)
+        return _session.connectionstate(self._session)
     
     
+    @synchronized
     def userdata(self):
-        with self._session_lock:
-            return _session.userdata(self._session)
+        return _session.userdata(self._session)
     
     
+    @synchronized
     def set_cache_size(self, size):
-        with self._session_lock:
             _session.set_cache_size(size)
     
     
+    @synchronized
     def process_events(self):
-        with self._session_lock:
-            next_timeout = ctypes.c_int(0)
-            _session.process_events(self._session, ctypes.byref(next_timeout))
-            return next_timeout.value / 1000
+        next_timeout = ctypes.c_int(0)
+        _session.process_events(self._session, ctypes.byref(next_timeout))
+        return next_timeout.value / 1000
         
     
+    @synchronized
     def player_load(self, track):
         pass
     
     
+    @synchronized
     def player_seek(self, offset):
         pass
     
     
+    @synchronized
     def player_play(self, play):
         pass
     
     
+    @synchronized
     def player_unload(self):
         pass
     
     
+    @synchronized
     def playlistcontainer(self):
         if self._playlistcontainer is None:
             self._playlistcontainer = playlistcontainer.PlaylistContainer(
@@ -158,63 +164,82 @@ class Session:
     
     
     #Callback proxies
+    @synchronized
     def _logged_in(self, session, error):
-        with self._session_lock:
-            self._manager.logged_in(self, error)
+        self._manager.logged_in(self, error)
     
+    
+    @synchronized
     def _logged_out(self, session):
-        with self._session_lock:
-            self._manager.logged_out(self)
+        self._manager.logged_out(self)
     
+    
+    @synchronized
     def _metadata_updated(self, session):
-        with self._session_lock:
-            self._manager.metadata_updated(self)
+        self._manager.metadata_updated(self)
     
+    
+    @synchronized
     def _connection_error(self, session, error):
-        with self._session_lock:
-            self._manager.connection_error(self, error)
+        self._manager.connection_error(self, error)
     
+    
+    @synchronized
     def _message_to_user(self, session, message):
-        with self._session_lock:
-            self._manager.message_to_user(self, message)
+        self._manager.message_to_user(self, message)
+    
     
     def _notify_main_thread(self, session):
-        if self._session_lock.acquire(False):
+        if synchronized.get_lock().acquire(False):
             self._manager.notify_main_thread(self)
-            self._session_lock.release()
+            synchronized.get_lock().release()
+    
+    
     
     def _music_delivery(self, session, format, frames, num_frames):
-        with self._session_lock:
+        if synchronized.get_lock().acquire(False):
             self._manager.music_delivery(self, format, frames, num_frames)
+            synchronized.get_lock().release()
+        else:
+            return 0
     
+    
+    @synchronized
     def _play_token_lost(self, session):
-        with self._session_lock:
-            self._manager.play_token_lost(self)
+        self._manager.play_token_lost(self)
     
+    
+    @synchronized
     def _log_message(self, session, data):
-        with self._session_lock:
-            self._manager.log_message(self, data)
+        self._manager.log_message(self, data)
     
+    
+    @synchronized
     def _end_of_track(self, session, error):
-        with self._session_lock:
-            self._manager.end_of_track(self, error)
+        self._manager.end_of_track(self, error)
     
+    
+    @synchronized
     def _streaming_error(self, session, error):
-        with self._session_lock:
-            self._manager.streaming_error(self, error)
+        self._manager.streaming_error(self, error)
     
+    
+    @synchronized
     def _userinfo_updated(self, session):
         self._user_callbacks.process_callbacks()
         self._manager.userinfo_updated(self)
     
+    
+    @synchronized
     def _start_playback(self, session):
-        with self._session_lock:
-            self._manager.start_playback(self)
+        self._manager.start_playback(self)
     
+    
+    @synchronized
     def _stop_playback(self, session):
-        with self._session_lock:
-            self._manager.stop_playback(self)
+        self._manager.stop_playback(self)
     
+    
+    @synchronized
     def _get_audio_buffer_stats(self, session, stats):
-        with self._session_lock:
-            self._manager.get_audio_buffer_stats(self, stats)
+        self._manager.get_audio_buffer_stats(self, stats)

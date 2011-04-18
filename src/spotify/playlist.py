@@ -9,6 +9,8 @@ from spotify import user, DuplicateCallbackError, UnknownCallbackError
 
 from _spotify import playlist as _playlist
 
+from spotify.utils.decorators import synchronized
+
 
 class ProxyPlaylistCallbacks:
     _c_session = None
@@ -141,10 +143,12 @@ class Playlist:
         self._callbacks = {}
     
     
+    @synchronized
     def is_loaded(self):
         return _playlist.is_loaded(self._playlist)
     
     
+    @synchronized
     def add_callbacks(self, callbacks):
         cb_id = id(callbacks)
         
@@ -170,6 +174,7 @@ class Playlist:
             )
     
     
+    @synchronized
     def remove_callbacks(self, callbacks):
         cb_id = id(callbacks)
         
@@ -189,18 +194,22 @@ class Playlist:
             self.remove_callbacks(item["callbacks"])
     
     
+    @synchronized
     def num_tracks(self):
         return _playlist.num_tracks(self._playlist)
     
     
+    @synchronized
     def name(self):
         return _playlist.name(self._playlist)
     
     
+    @synchronized
     def is_in_ram(self):
         return _playlist.is_in_ram(self._session, self._playlist)
     
     
+    @synchronized
     def set_in_ram(self, in_ram):
         _playlist.set_in_ram(self._session, self._playlist, in_ram)
     

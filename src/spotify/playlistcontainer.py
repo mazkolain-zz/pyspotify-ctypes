@@ -9,6 +9,8 @@ from spotify import DuplicateCallbackError, UnknownCallbackError
 
 from _spotify import playlistcontainer as _playlistcontainer
 
+from spotify.utils.decorators import synchronized
+
 import playlist
 
 
@@ -112,6 +114,7 @@ class PlaylistContainer:
     _is_loaded = None
     
     
+    @synchronized
     def __init__(self, session, container):
         self._session = session
         self._container = container
@@ -129,6 +132,7 @@ class PlaylistContainer:
         return self._is_loaded
     
     
+    @synchronized
     def add_callbacks(self, callbacks):
         cb_id = id(callbacks)
         if cb_id in self._callbacks:
@@ -150,6 +154,7 @@ class PlaylistContainer:
             )
     
     
+    @synchronized
     def remove_callbacks(self, callbacks):
         cb_id = id(callbacks)
         if cb_id not in self._callbacks:
@@ -168,10 +173,12 @@ class PlaylistContainer:
             self.remove_callbacks(item["callbacks"])
     
     
+    @synchronized
     def num_playlists(self):
         return _playlistcontainer.num_playlists(self._container)
     
     
+    @synchronized
     def _get_playlist_object(self, pos):
         if pos not in self._playlist_objects:
             self._playlist_objects[pos] = playlist.Playlist(
