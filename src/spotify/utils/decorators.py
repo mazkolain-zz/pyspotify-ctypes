@@ -13,7 +13,6 @@ class synchronized(object):
     
     
     def __init__(self, func):
-        print func
         self._func = func
     
     
