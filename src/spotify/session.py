@@ -190,10 +190,8 @@ class Session:
     
     
     def _notify_main_thread(self, session):
-        if synchronized.get_lock().acquire(False):
-            self._manager.notify_main_thread(self)
-            synchronized.get_lock().release()
-    
+        #Not synchronized, also nonblocking:
+        self._manager.notify_main_thread(self)
     
     
     def _music_delivery(self, session, format, frames, num_frames):
