@@ -4,7 +4,7 @@ Created on 07/11/2010
 @author: mikel
 '''
 from appkey import appkey
-from spotify import session, SessionCallbacks, MainLoop, playlistcontainer, playlist, handle_sp_error
+from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
 
 from spotify import BulkConditionChecker
 
@@ -32,7 +32,7 @@ class JukeboxPlaylistContainerCallbacks(playlistcontainer.PlaylistContainerCallb
         self._checker.check_conditions()
 
 
-class JukeboxCallbacks(SessionCallbacks):
+class JukeboxCallbacks(session.SessionCallbacks):
     _mainloop = None
     
     def __init__(self, mainloop):
@@ -126,17 +126,19 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         
             #Wait until the playlists are loaded
             for item in container:
+                print item
                 checker.add_condition(item.is_loaded)
                 callbacks = JukeboxPlaylistCallbacks(checker)
                 item.add_callbacks(callbacks)
                 item.set_in_ram(True)
-                checker.complete_wait()
+            
+            checker.complete_wait()
         
         
         print "%d playlists total:" % len(container)
         
-        for item in container:
-            print "playlist: %s" % item.name() 
+        for k, item in enumerate(container):
+            print "playlist #%d: %s" % (k, item.name()) 
         
         #print "list should be complete here"
     
