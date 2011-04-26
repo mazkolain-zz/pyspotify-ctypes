@@ -11,16 +11,20 @@ def handle_sp_error(errcode):
         raise LibSpotifyError(msg)
 
 
+
 class LibSpotifyError(Exception):
     pass
+
 
 
 class DuplicateCallbackError(LibSpotifyError):
     pass
 
 
+
 class UnknownCallbackError(LibSpotifyError):
     pass
+
 
 
 class MainLoop:
@@ -47,9 +51,11 @@ class MainLoop:
         self.notify()
 
 
+
 class CallbackItem:
     def __init__(self, **args):
         self.__dict__.update(args)
+
 
 
 class CallbackQueueManager:
@@ -72,6 +78,7 @@ class CallbackQueueManager:
             if item.condition():
                 self._callbacks.remove(item)
                 item.callback(*item.args)
+
 
 
 class BulkConditionChecker:
@@ -106,3 +113,54 @@ class BulkConditionChecker:
         self._event.wait(timeout)
         #print "after wait"
         self._event.clear()
+
+
+
+class CallbackManager:
+    __callbacks = None
+    
+    
+    def __init__(self):
+        self.__callbacks = {}
+    
+    
+    def _create_class(self, callback):
+        return None
+    
+    
+    def add_callbacks(self, callbacks):
+        cb_id = id(callbacks)
+        if cb_id in self.__callbacks:
+            raise DuplicateCallbackError()
+        else:
+            self.__callbacks[cb_id] = CallbackItem(
+                callbacks = callbacks,
+                custom_class = self._create_class(callbacks)
+            )
+    
+    
+    def remove_callbacks(self, callbacks):
+        cb_id = id(callbacks)
+        if cb_id not in self.__callbacks:
+            raise UnknownCallbackError()
+        else:
+            del self.__callbacks[cb_id]
+    
+    
+    def remove_all_callbacks(self):
+        for item in self.__callbacks.values():
+            self.remove_callbacks(item.callbacks)
+    
+    
+    def _call_funcs(self, name, *args, **kwargs):
+        for item in self.__callbacks.values():
+            f = getattr(item.callbacks, name)
+            f(*args, **kwargs)
+    
+    
+    def __getattr__(self, name):
+        return lambda *args, **kwargs: self._call_funcs(name, *args, **kwargs)
+        
+    
+    def __del__(self):
+        self.remove_all_callbacks()
