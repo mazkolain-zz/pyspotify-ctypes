@@ -9,7 +9,10 @@ from spotify import user, DuplicateCallbackError, UnknownCallbackError
 
 from _spotify import playlist as _playlist
 
+from spotify import track
+
 from spotify.utils.decorators import synchronized
+
 
 
 class ProxyPlaylistCallbacks:
@@ -131,6 +134,28 @@ class PlaylistCallbacks:
         pass
 
 
+
+class PlaylistIterator:
+    __playlist = None
+    __pos = None
+    
+    def __init__(self, playlist):
+        self.__playlist = playlist
+        self.__pos = 0
+    
+    def __iter__(self):
+        return self
+    
+    def next(self):
+        if self.__pos < self.__playlist.num_tracks():
+            track = self.__playlist.track(self.__pos)
+            self.__pos += 1
+            return track
+        else:
+            raise StopIteration
+
+
+
 class Playlist:
     _session = None
     _playlist = None
@@ -200,6 +225,13 @@ class Playlist:
     
     
     @synchronized
+    def track(self, index):
+        return track.Track(
+            self._session,_playlist.track(self._playlist, index)
+        )
+    
+    
+    @synchronized
     def name(self):
         return _playlist.name(self._playlist)
     
@@ -212,6 +244,10 @@ class Playlist:
     @synchronized
     def set_in_ram(self, in_ram):
         _playlist.set_in_ram(self._session, self._playlist, in_ram)
+    
+    
+    def __iter__(self):
+        return PlaylistIterator(self)
     
     
     def __del__(self):
