@@ -216,3 +216,7 @@ class Playlist:
     
     def __del__(self):
         self.remove_all_callbacks()
+    
+    
+    def get_struct(self):
+        return self._playlist

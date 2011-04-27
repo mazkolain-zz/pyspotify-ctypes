@@ -200,6 +200,10 @@ class PlaylistContainer:
         return self.num_playlists()
     
     
+    def get_struct(self):
+        return self._container
+    
+    
     def __del__(self):
         self.remove_all_callbacks()
         _playlistcontainer.release(self._container)

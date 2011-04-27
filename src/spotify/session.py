@@ -320,3 +320,7 @@ class Session:
             )
         
         return self._playlistcontainer
+    
+    
+    def get_struct(self):
+        return self._session
