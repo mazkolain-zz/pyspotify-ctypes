@@ -12,25 +12,6 @@ import cmd
 import threading
 
 
-class JukeboxPlaylistCallbacks(playlist.PlaylistCallbacks):
-    _checker = None
-    
-    def __init__(self, checker):
-        self._checker = checker
-        
-    def playlist_state_changed(self, playlist):
-        self._checker.check_conditions()
-
-
-class JukeboxPlaylistContainerCallbacks(playlistcontainer.PlaylistContainerCallbacks):
-    _checker = None
-    
-    def __init__(self, checker):
-        self._checker = checker
-    
-    def container_loaded(self, container):
-        self._checker.check_conditions()
-
 
 class JukeboxCallbacks(session.SessionCallbacks):
     _mainloop = None
@@ -79,7 +60,19 @@ def main():
     c = JukeboxCmd(s, ml)
     c.start()
     ml.loop(s)
+
+
+
+class JukeboxPlaylistContainerCallbacks(playlistcontainer.PlaylistContainerCallbacks):
+    _checker = None
     
+    def __init__(self, checker):
+        self._checker = checker
+    
+    def container_loaded(self, container):
+        self._checker.check_conditions()
+
+
 
 class JukeboxCmd(cmd.Cmd, threading.Thread):
     prompt = "jukebox>"
@@ -114,33 +107,37 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
     
     def do_list(self, line):
         container = self._session.playlistcontainer()
-    
-        checker = BulkConditionChecker()
-    
+        
         if not container.is_loaded():
+            checker = BulkConditionChecker()
             #Wait until the container is loaded
             checker.add_condition(container.is_loaded)
             callbacks = JukeboxPlaylistContainerCallbacks(checker)
             container.add_callbacks(callbacks)
             checker.complete_wait()
-        
-            #Wait until the playlists are loaded
-            for item in container:
-                print item
-                checker.add_condition(item.is_loaded)
-                callbacks = JukeboxPlaylistCallbacks(checker)
-                item.add_callbacks(callbacks)
-                item.set_in_ram(True)
             
-            checker.complete_wait()
+            for item in container:
+                item.set_in_ram(True)
         
-        
-        print "%d playlists total:" % len(container)
-        
-        for k, item in enumerate(container):
-            print "playlist #%d: %s" % (k, item.name()) 
-        
-        #print "list should be complete here"
+        if not line:
+            #Print all playlists
+            print "%d playlists:" % container.num_playlists()
+            
+            for k, item in enumerate(container):
+                if item.is_loaded():
+                    print "playlist #%d: %s" % (k, item.name()) 
+                else:
+                    print "playlist #%d: loading..." % k
+        else:
+            pos = int(line)
+            pl = container.playlist(pos)
+            print "playlist #%d, %d tracks:" % (pos, pl.num_tracks())
+            
+            for index,item in enumerate(pl):
+                if item.is_loaded():
+                    print "track #%d: %s" % (index, item.name())
+                else:
+                    print "track #%d: loading..." % index
     
     
     do_EOF = do_quit
