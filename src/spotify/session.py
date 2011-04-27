@@ -7,7 +7,7 @@ from _spotify import session as _session
 import spotify
 
 #Also import this one's siblings
-from spotify import user, playlistcontainer
+from spotify import user, playlistcontainer, playlist, handle_sp_error
 
 #Decorators
 from spotify.utils.decorators import synchronized
@@ -234,11 +234,6 @@ class Session:
         spotify.handle_sp_error(err)
     
     
-    @synchronized
-    def __del__(self):
-        _session.release(self._session)
-    
-    
     def add_callbacks(self, callbacks):
         self.__callback_manager.add_callbacks(callbacks)
     
@@ -293,22 +288,31 @@ class Session:
     
     @synchronized
     def player_load(self, track):
-        pass
+        handle_sp_error(
+            _session.player_load(self._session, track.get_struct())
+        )
     
     
     @synchronized
     def player_seek(self, offset):
-        pass
+        _session.player_seek(self._session, offset)
     
     
     @synchronized
     def player_play(self, play):
-        pass
+        _session.player_play(self._session, play)
     
     
     @synchronized
     def player_unload(self):
-        pass
+        _session.player_unload(self._session)
+    
+    
+    @synchronized
+    def player_prefetch(self, track):
+        handle_sp_error(
+            _session.player_prefetch(self, track.get_struct())
+        )
     
     
     @synchronized
@@ -322,5 +326,60 @@ class Session:
         return self._playlistcontainer
     
     
+    @synchronized
+    def inbox_create(self):
+        return playlist.Playlist(
+            self._session, _session.inbox_create(self._session)
+        )
+    
+    
+    @synchronized
+    def starred_create(self):
+        return playlist.Playlist(
+            self._session, _session.starred_create(self._session)
+        )
+    
+    
+    @synchronized
+    def starred_for_user_create(self, canonical_username):
+        return playlist.Playlist(
+            self._session, _session.starred_for_user_create(
+                self._session, canonical_username
+            )
+        )
+    
+    
+    @synchronized
+    def publishedcontainer_for_user_create(self, canonical_username):
+        return playlistcontainer.PlaylistContainer(
+            self._session, _session.publishedcontainer_for_user_create(
+                self._session, canonical_username
+            )
+        )
+    
+    
+    @synchronized
+    def preferred_bitrate(self, bitrate):
+        _session.preferred_bitrate(self._session, bitrate)
+    
+    
+    @synchronized
+    def num_friends(self):
+        return _session.num_friends(self._session)
+    
+    
+    @synchronized
+    def friend(self, index):
+        return user.User(
+            self._session, _session.friend(self._session, index)
+        )
+    
+    
+    @synchronized
     def get_struct(self):
         return self._session
+    
+    
+    @synchronized
+    def __del__(self):
+        _session.release(self._session)
