@@ -37,9 +37,9 @@ as_string = libspotify.sp_link_as_string
 as_string.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
 as_string.restype = ctypes.c_int
 
-link_type = libspotify.sp_link_type
-link_type.argtypes = [ctypes.c_void_p]
-link_type.restype = ctypes.c_int
+type = libspotify.sp_link_type
+type.argtypes = [ctypes.c_void_p]
+type.restype = ctypes.c_int
 
 as_track = libspotify.sp_link_as_track
 as_track.argtypes = [ctypes.c_void_p]
