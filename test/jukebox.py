@@ -117,7 +117,7 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
             checker.complete_wait()
             
             for item in container:
-                item.set_in_ram(True)
+                item.set_in_ram(self._session, True)
         
         if not line:
             #Print all playlists
