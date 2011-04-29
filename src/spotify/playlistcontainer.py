@@ -14,6 +14,7 @@ from spotify.utils.decorators import synchronized
 import playlist
 
 
+
 class ProxyPlaylistContainerCallbacks:
     _container = None
     _callbacks = None
@@ -96,8 +97,7 @@ class PlaylistContainerIterator:
 
 
 class PlaylistContainer:
-    _session = None
-    _container = None
+    __container_struct = None
     
     _manager = None
     
@@ -115,13 +115,12 @@ class PlaylistContainer:
     
     
     @synchronized
-    def __init__(self, session, container):
-        self._session = session
-        self._container = container
+    def __init__(self, container_struct):
+        self.__container_struct = container_struct
         self._playlist_objects = {}
         self._callbacks = {}
         self._is_loaded = False
-        _playlistcontainer.add_ref(self._container)
+        _playlistcontainer.add_ref(self.__container_struct)
     
     
     def set_loaded(self, status):
@@ -150,7 +149,7 @@ class PlaylistContainer:
             }
             
             _playlistcontainer.add_callbacks(
-                self._container, ptr, None
+                self.__container_struct, ptr, None
             )
     
     
@@ -163,7 +162,7 @@ class PlaylistContainer:
         else:
             ptr = self._callbacks[cb_id]["ptr"]
             _playlistcontainer.remove_callbacks(
-                self._container, ptr, None
+                self.__container_struct, ptr, None
             )
             del self._callbacks[cb_id]
     
@@ -175,14 +174,14 @@ class PlaylistContainer:
     
     @synchronized
     def num_playlists(self):
-        return _playlistcontainer.num_playlists(self._container)
+        return _playlistcontainer.num_playlists(self.__container_struct)
     
     
     @synchronized
     def _get_playlist_object(self, pos):
         if pos not in self._playlist_objects:
             self._playlist_objects[pos] = playlist.Playlist(
-                self._session, _playlistcontainer.playlist(self._container, pos)
+                _playlistcontainer.playlist(self.__container_struct, pos)
             )
         
         return self._playlist_objects[pos]
@@ -201,12 +200,9 @@ class PlaylistContainer:
     
     
     def get_struct(self):
-        return self._container
+        return self.__container_struct
     
     
     def __del__(self):
         self.remove_all_callbacks()
-        _playlistcontainer.release(self._container)
-    
-    
-    
+        _playlistcontainer.release(self.__container_struct)

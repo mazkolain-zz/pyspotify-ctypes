@@ -189,6 +189,8 @@ class SessionCallbacks:
 class Session:
     api_version = 7
     
+    __session = None
+    
     __proxy_callbacks = None
     __callback_manager = None
     
@@ -229,8 +231,8 @@ class Session:
             1,
         )
         
-        self._session = ctypes.c_void_p()
-        err = _session.create(ctypes.byref(config), ctypes.byref(self._session))
+        self.__session = ctypes.c_void_p()
+        err = _session.create(ctypes.byref(config), ctypes.byref(self.__session))
         spotify.handle_sp_error(err)
     
     
@@ -244,12 +246,12 @@ class Session:
     
     @synchronized
     def login(self, username, password):
-        _session.login(self._session, username, password)
+        _session.login(self.__session, username, password)
     
     
     @synchronized
     def user(self, onload=None):
-        user_obj = user.User(self._session, _session.user(self._session))
+        user_obj = user.User(self.__session, _session.user(self.__session))
             
         if onload != None:
             self._user_callbacks.add_callback(
@@ -261,17 +263,17 @@ class Session:
     
     @synchronized
     def logout(self):
-        _session.logout(self._session)
+        _session.logout(self.__session)
     
     
     @synchronized
     def connectionstate(self):
-        return _session.connectionstate(self._session)
+        return _session.connectionstate(self.__session)
     
     
     @synchronized
     def userdata(self):
-        return _session.userdata(self._session)
+        return _session.userdata(self.__session)
     
     
     @synchronized
@@ -282,36 +284,36 @@ class Session:
     @synchronized
     def process_events(self):
         next_timeout = ctypes.c_int(0)
-        _session.process_events(self._session, ctypes.byref(next_timeout))
+        _session.process_events(self.__session, ctypes.byref(next_timeout))
         return next_timeout.value / 1000
         
     
     @synchronized
     def player_load(self, track):
         handle_sp_error(
-            _session.player_load(self._session, track.get_struct())
+            _session.player_load(self.__session, track.get_struct())
         )
     
     
     @synchronized
     def player_seek(self, offset):
-        _session.player_seek(self._session, offset)
+        _session.player_seek(self.__session, offset)
     
     
     @synchronized
     def player_play(self, play):
-        _session.player_play(self._session, play)
+        _session.player_play(self.__session, play)
     
     
     @synchronized
     def player_unload(self):
-        _session.player_unload(self._session)
+        _session.player_unload(self.__session)
     
     
     @synchronized
     def player_prefetch(self, track):
         handle_sp_error(
-            _session.player_prefetch(self, track.get_struct())
+            _session.player_prefetch(self.__session, track.get_struct())
         )
     
     
@@ -319,8 +321,7 @@ class Session:
     def playlistcontainer(self):
         if self._playlistcontainer is None:
             self._playlistcontainer = playlistcontainer.PlaylistContainer(
-                self._session,
-                _session.playlistcontainer(self._session),
+                _session.playlistcontainer(self.__session),
             )
         
         return self._playlistcontainer
@@ -328,23 +329,19 @@ class Session:
     
     @synchronized
     def inbox_create(self):
-        return playlist.Playlist(
-            self._session, _session.inbox_create(self._session)
-        )
+        return playlist.Playlist(_session.inbox_create(self.__session))
     
     
     @synchronized
     def starred_create(self):
-        return playlist.Playlist(
-            self._session, _session.starred_create(self._session)
-        )
+        return playlist.Playlist(_session.starred_create(self.__session))
     
     
     @synchronized
     def starred_for_user_create(self, canonical_username):
         return playlist.Playlist(
-            self._session, _session.starred_for_user_create(
-                self._session, canonical_username
+            _session.starred_for_user_create(
+                self.__session, canonical_username
             )
         )
     
@@ -352,34 +349,34 @@ class Session:
     @synchronized
     def publishedcontainer_for_user_create(self, canonical_username):
         return playlistcontainer.PlaylistContainer(
-            self._session, _session.publishedcontainer_for_user_create(
-                self._session, canonical_username
+            _session.publishedcontainer_for_user_create(
+                self.__session, canonical_username
             )
         )
     
     
     @synchronized
     def preferred_bitrate(self, bitrate):
-        _session.preferred_bitrate(self._session, bitrate)
+        _session.preferred_bitrate(self.__session, bitrate)
     
     
     @synchronized
     def num_friends(self):
-        return _session.num_friends(self._session)
+        return _session.num_friends(self.__session)
     
     
     @synchronized
     def friend(self, index):
         return user.User(
-            self._session, _session.friend(self._session, index)
+            _session.friend(self.__session, index)
         )
     
     
     @synchronized
     def get_struct(self):
-        return self._session
+        return self.__session
     
     
     @synchronized
     def __del__(self):
-        _session.release(self._session)
+        _session.release(self.__session)

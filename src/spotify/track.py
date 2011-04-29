@@ -10,12 +10,10 @@ from spotify.utils.decorators import synchronized
 
 
 class Track:
-    __session = None
     __track_struct = None
     
     
-    def __init__(self, session, track_struct):
-        self.__session = session
+    def __init__(self, track_struct):
         self.__track_struct = track_struct
         self.add_ref()
     

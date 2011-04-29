@@ -16,12 +16,10 @@ from spotify.utils.decorators import synchronized
 
 
 class ProxyPlaylistCallbacks:
-    _c_session = None
     _playlist = None
     _callbacks = None
     
-    def __init__(self, c_session, playlist, callbacks):
-        self._c_session = c_session
+    def __init__(self, playlist, callbacks):
         self._playlist = playlist
         self._callbacks = callbacks
     
@@ -52,7 +50,7 @@ class ProxyPlaylistCallbacks:
     
     def _track_created_changed(self, playlist, position, c_user, when, userdata):
         self._callbacks.track_created_changed(
-            self._playlist, position, user.User(self._c_session, c_user), when
+            self._playlist, position, user.User(c_user), when
         )
     
     def _track_seen_changed(self, playlist, position, seen, userdata):
@@ -157,20 +155,18 @@ class PlaylistIterator:
 
 
 class Playlist:
-    _session = None
-    _playlist = None
-    _callbacks = None
+    __playlist_struct = None
+    __callbacks = None
     
     
-    def __init__(self, session, playlist):
-        self._session = session
-        self._playlist = playlist
+    def __init__(self, playlist_struct):
+        self.__playlist_struct = playlist_struct
         self._callbacks = {}
     
     
     @synchronized
     def is_loaded(self):
-        return _playlist.is_loaded(self._playlist)
+        return _playlist.is_loaded(self.__playlist_struct)
     
     
     @synchronized
@@ -195,7 +191,7 @@ class Playlist:
             }
             
             _playlist.add_callbacks(
-                self._playlist, ptr, None
+                self.__playlist_struct, ptr, None
             )
     
     
@@ -209,7 +205,7 @@ class Playlist:
         else:
             ptr = self._callbacks[cb_id]["ptr"]
             _playlist.remove_callbacks(
-                self._playlist, ptr, None
+                self.__playlist_struct, ptr, None
             )
             del self._callbacks[cb_id]
     
@@ -221,29 +217,33 @@ class Playlist:
     
     @synchronized
     def num_tracks(self):
-        return _playlist.num_tracks(self._playlist)
+        return _playlist.num_tracks(self.__playlist_struct)
     
     
     @synchronized
     def track(self, index):
         return track.Track(
-            self._session,_playlist.track(self._playlist, index)
+            _playlist.track(self.__playlist_struct, index)
         )
     
     
     @synchronized
     def name(self):
-        return _playlist.name(self._playlist)
+        return _playlist.name(self.__playlist_struct)
     
     
     @synchronized
-    def is_in_ram(self):
-        return _playlist.is_in_ram(self._session, self._playlist)
+    def is_in_ram(self, session):
+        return _playlist.is_in_ram(
+            session.get_struct(), self.__playlist_struct
+        )
     
     
     @synchronized
-    def set_in_ram(self, in_ram):
-        _playlist.set_in_ram(self._session, self._playlist, in_ram)
+    def set_in_ram(self, session, in_ram):
+        _playlist.set_in_ram(
+            session.get_struct(), self.__playlist_struct, in_ram
+        )
     
     
     def __iter__(self):
@@ -255,4 +255,4 @@ class Playlist:
     
     
     def get_struct(self):
-        return self._playlist
+        return self.__playlist_struct
