@@ -5,7 +5,7 @@ Created on 10/04/2011
 '''
 import ctypes
 
-from spotify import DuplicateCallbackError, UnknownCallbackError
+from spotify import DuplicateCallbackError, UnknownCallbackError, handle_sp_error, user
 
 from _spotify import playlistcontainer as _playlistcontainer
 
@@ -189,6 +189,90 @@ class PlaylistContainer:
     
     def playlist(self, pos):
         return self._get_playlist_object(pos)
+    
+    
+    @synchronized
+    def playlist_type(self, index):
+        return _playlistcontainer.playlist_type(self.__container_struct, index)
+    
+    
+    @synchronized
+    def playlist_folder_name(self, index):
+        buf = (ctypes.c_char() * 255)()
+        handle_sp_error(
+            _playlistcontainer.playlist_folder_name(
+                self.__container_struct, index, ctypes.byref(buf), 255
+            )
+        )
+        return buf.value
+    
+    
+    @synchronized
+    def playlist_folder_id(self, index):
+        return _playlistcontainer.playlist_folder_id(
+            self.__container_struct, index
+        )
+    
+    
+    @synchronized
+    def add_new_playlist(self, name):
+        return playlist.Playlist(
+            _playlistcontainer.add_new_playlist(self.__container_struct, name)
+        )
+    
+    
+    @synchronized
+    def add_playlist(self, link):
+        return playlist.Playlist(
+            _playlistcontainer.add_playlist(
+                self.__container_struct, link.get_struct()
+            )
+        )
+    
+    
+    @synchronized
+    def remove_playlist(self, index):
+        #FIXME: Should refresh index in _playlist_objects
+        handle_sp_error(
+            _playlistcontainer.remove_playlist(
+                self.__container_struct, index
+            )
+        )
+    
+    
+    @synchronized
+    def move_playlist(self, index, new_position, dry_run):
+        handle_sp_error(
+            _playlistcontainer.move_playlist(
+                self.__container_struct, new_position, dry_run
+            )
+        )
+    
+    
+    @synchronized
+    def add_folder(self, index, name):
+        handle_sp_error(
+            _playlistcontainer.add_folder(
+                self.__container_struct, index, name
+            )
+        )
+    
+    
+    @synchronized
+    def owner(self):
+        return user.User(
+            _playlistcontainer.owner(self.__container_struct)
+        )
+        
+    
+    @synchronized
+    def add_ref(self):
+        _playlistcontainer.add_ref()
+    
+    
+    @synchronized
+    def release(self):
+        _playlistcontainer.release()
     
     
     def __iter__(self):
