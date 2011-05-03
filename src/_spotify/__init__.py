@@ -43,7 +43,7 @@ else:
 
 #Global libspotify instance
 libspotify = library(
-    os.path.join(os.path.dirname(__file__), "../../lib", dllfile)
+    os.path.join(os.path.dirname(__file__), "../../dlls", dllfile)
 )
 
 
