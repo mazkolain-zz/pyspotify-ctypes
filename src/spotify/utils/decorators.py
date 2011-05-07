@@ -18,8 +18,12 @@ class synchronized(object):
     
     def __call__(self, *args, **kwargs):
         self._lock.acquire()
-        result = self._func(*args, **kwargs)
-        self._lock.release()
+        
+        try:
+            result = self._func(*args, **kwargs)
+        finally:
+            self._lock.release()
+        
         return result
     
     
