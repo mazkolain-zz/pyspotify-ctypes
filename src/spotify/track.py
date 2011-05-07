@@ -76,7 +76,7 @@ class Track:
     
     
     @synchronized
-    def alnum(self):
+    def album(self):
         return album.Album(_track.album(self.__track_struct))
     
     
