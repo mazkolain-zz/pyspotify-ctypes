@@ -3,6 +3,8 @@ Created on 07/11/2010
 
 @author: mikel
 '''
+import sys
+
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
 
@@ -10,6 +12,13 @@ from spotify import BulkConditionChecker
 
 import cmd
 import threading
+
+#Make cherrypy available on path
+sys.path.append("../lib/CherryPy-3.2.0-py2.4.egg")
+
+
+#Proxy http server for resources
+from spotify.utils import httpproxy
 
 
 
@@ -57,9 +66,12 @@ def main():
         cache_location="C:\\sptest\\cache",
     )
     
+    pr = httpproxy.ProxyRunner(s)
     c = JukeboxCmd(s, ml)
     c.start()
+    pr.start()
     ml.loop(s)
+    pr.stop()
 
 
 
@@ -136,6 +148,7 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
             for index,item in enumerate(pl):
                 if item.is_loaded():
                     print "track #%d: %s" % (index, item.name())
+                    #print item.album().cover()
                 else:
                     print "track #%d: loading..." % index
     
