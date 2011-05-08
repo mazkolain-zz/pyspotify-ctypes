@@ -48,7 +48,7 @@ class Album:
     def cover(self):
         res = _album.cover(self.__album_struct).contents
         if res is not None:
-            return binascii.b2a_hex(res.value)
+            return binascii.b2a_hex(buffer(res))
     
     
     @synchronized
