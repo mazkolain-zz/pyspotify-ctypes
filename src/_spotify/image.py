@@ -5,12 +5,12 @@ from _spotify import libspotify, callback
 
 
 #Callbacks
-image_loaded_cb = callback(ctypes.c_void_p, ctypes.c_void_p)
+image_loaded_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 
 
 #Function prototypes
 create = libspotify.sp_image_create
-create.argtypes = [ctypes.c_void_p, ctypes.c_byte * 20]
+create.argtypes = [ctypes.c_void_p, ctypes.c_char * 20]
 create
 
 add_load_callback = libspotify.sp_image_add_load_callback
