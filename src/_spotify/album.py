@@ -19,7 +19,7 @@ artist.restype = ctypes.c_void_p
 
 cover = libspotify.sp_album_cover
 cover.argtypes = [ctypes.c_void_p]
-cover.restype = ctypes.POINTER(ctypes.c_char * 20)
+cover.restype = ctypes.POINTER(ctypes.c_byte * 20)
 
 name = libspotify.sp_album_name
 name.argtypes = [ctypes.c_void_p]
