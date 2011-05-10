@@ -43,94 +43,76 @@ class ProxySessionCallbacks:
             _session.cb_get_audio_buffer_stats(self._get_audio_buffer_stats),
         )
     
-    @synchronized
+    
     def _logged_in(self, session, error):
         self.__callbacks.logged_in(self.__session, error)
         self.__manager.logged_in(self.__session, error)
     
     
-    @synchronized
     def _logged_out(self, session):
         self.__callbacks.logged_out(self.__session)
         self.__manager.logged_out(self.__session)
     
     
-    @synchronized
     def _metadata_updated(self, session):
         self.__callbacks.metadata_updated(self.__session)
         self.__manager.metadata_updated(self.__session)
     
     
-    @synchronized
     def _connection_error(self, session, error):
         self.__callbacks.connection_error(self.__session, error)
         self.__manager.connection_error(self.__session, error)
     
     
-    @synchronized
     def _message_to_user(self, session, message):
         self.__callbacks.message_to_user(self.__session, message)
         self.__manager.message_to_user(self.__session, message)
     
     
     def _notify_main_thread(self, session):
-        #Not synchronized, also nonblocking:
         self.__callbacks.notify_main_thread(self.__session)
         self.__manager.notify_main_thread(self.__session)
     
     
     def _music_delivery(self, session, format, frames, num_frames):
-        if synchronized.get_lock().acquire(False):
-            res = self.__callbacks.music_delivery(self.__session, format, frames, num_frames)
-            synchronized.get_lock().release()
-            return res
-        else:
-            return 0
+        return self.__callbacks.music_delivery(self.__session, format, frames, num_frames)
     
     
-    @synchronized
     def _play_token_lost(self, session):
         self.__callbacks.play_token_lost(self.__session)
         self.__manager.play_token_lost(self.__session)
     
     
-    @synchronized
     def _log_message(self, session, data):
         self.__callbacks.log_message(self.__session, data)
         self.__manager.log_message(self.__session, data)
     
     
-    @synchronized
     def _end_of_track(self, session, error):
         self.__callbacks.end_of_track(self.__session, error)
         self.__manager.end_of_track(self.__session, error)
     
     
-    @synchronized
     def _streaming_error(self, session, error):
         self.__callbacks.streaming_error(self.__session, error)
         self.__manager.streaming_error(self.__session, error)
     
     
-    @synchronized
     def _userinfo_updated(self, session):
         self.__callbacks.userinfo_updated(self.__session)
         self.__manager.userinfo_updated(self.__session)
     
     
-    @synchronized
     def _start_playback(self, session):
         self.__callbacks.start_playback(self.__session)
         self.__manager.start_playback(self.__session)
     
     
-    @synchronized
     def _stop_playback(self, session):
         self.__callbacks.stop_playback(self.__session)
         self.__manager.stop_playback(self.__session)
     
     
-    @synchronized
     def _get_audio_buffer_stats(self, session, stats):
         self.__manager.get_audio_buffer_stats(self.__session, stats)
 
