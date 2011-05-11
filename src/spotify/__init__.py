@@ -27,6 +27,11 @@ class UnknownCallbackError(LibSpotifyError):
 
 
 
+class SampleType:
+    Int16NativeEndian = 0
+
+
+
 class MainLoop:
     _event = None
     _quit = None
