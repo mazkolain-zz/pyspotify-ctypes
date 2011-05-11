@@ -4,6 +4,9 @@ __all__ = ["session", "user"]
 import _spotify
 import threading
 
+from spotify.utils.decorators import synchronized
+
+
 
 def handle_sp_error(errcode):
     if errcode != 0:
@@ -94,9 +97,13 @@ class BulkConditionChecker:
         self._conditions = []
         self._event = threading.Event()
     
+    
+    @synchronized
     def add_condition(self, condition):
         self._conditions.append(condition)
     
+    
+    @synchronized
     def check_conditions(self):
         for item in self._conditions:
             if item():
@@ -106,17 +113,20 @@ class BulkConditionChecker:
         if len(self._conditions) == 0:
             self._complete()
     
+    
     def _complete(self):
         self._event.set()
         self.complete()
     
+    
     def complete(self):
         pass
     
+    
     def complete_wait(self, timeout = None):
-        #print "before wait"
+        #Check conditions first, if there's no need to wait
+        self.check_conditions()
         self._event.wait(timeout)
-        #print "after wait"
         self._event.clear()
 
 
