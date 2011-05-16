@@ -17,13 +17,13 @@ class config(ctypes.Structure):
 cb_logged_in = callback(None, ctypes.c_void_p, ctypes.c_int)
 cb_logged_out = callback(None, ctypes.c_void_p)
 cb_metadata_updated = callback(None, ctypes.c_void_p)
-cb_connection_error = callback(None, ctypes.c_int)
-cb_message_to_user = callback(None, ctypes.c_char_p)
+cb_connection_error = callback(None, ctypes.c_void_p, ctypes.c_int)
+cb_message_to_user = callback(None, ctypes.c_void_p, ctypes.c_char_p)
 cb_notify_main_thread = callback(None, ctypes.c_void_p)
 
 cb_music_delivery = callback(
     ctypes.c_int,
-    ctypes.POINTER(_spotify.audioformat),
+    ctypes.c_void_p, ctypes.POINTER(_spotify.audioformat),
     ctypes.c_void_p, ctypes.c_int
 )
 
@@ -36,7 +36,7 @@ cb_start_playback = callback(None, ctypes.c_void_p)
 cb_stop_playback = callback(None, ctypes.c_void_p)
 
 cb_get_audio_buffer_stats = callback(
-    None, ctypes.POINTER(_spotify.audio_buffer_stats)
+    None, ctypes.c_void_p, ctypes.POINTER(_spotify.audio_buffer_stats)
 )
 
 
