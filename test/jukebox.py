@@ -18,15 +18,17 @@ sys.path.append("../lib/CherryPy-3.2.0-py2.4.egg")
 
 
 #Proxy http server for resources
-from spotify.utils import httpproxy
+from spotify.utils import httpproxy, audio
 
 
 
 class JukeboxCallbacks(session.SessionCallbacks):
     _mainloop = None
+    __buf = None
     
-    def __init__(self, mainloop):
+    def __init__(self, mainloop, buf):
         self._mainloop = mainloop
+        self.__buf = buf
     
     def logged_in(self, session, error):
         handle_sp_error(error)
@@ -40,8 +42,10 @@ class JukeboxCallbacks(session.SessionCallbacks):
         print "conn error"
         
     def log_message(self, session, data):
-        #print "log: %s" % data
-        pass
+        print "log: %s" % data
+    
+    def streaming_error(self, error):
+        print "streaming error: %d" % error
         
     def notify_main_thread(self, session):
         self._mainloop.notify()
@@ -49,6 +53,13 @@ class JukeboxCallbacks(session.SessionCallbacks):
     def metadata_updated(self, session):
         #print "metadata_updated"
         pass
+    
+    def music_delivery(self, session, data, num_samples, sample_type, sample_rate, num_channels):
+        return self.__buf.music_delivery(data, num_samples, sample_type, sample_rate, num_channels)
+    
+    def get_audio_buffer_stats(self, session):
+        return self.__buf.get_stats()
+
 
 
 def print_user(user):
@@ -57,7 +68,8 @@ def print_user(user):
 
 def main():
     ml = MainLoop()
-    cb = JukeboxCallbacks(ml)
+    buf = audio.MemoryBuffer()
+    cb = JukeboxCallbacks(ml, buf)
     s = session.Session(
         cb,
         app_key=appkey,
@@ -66,7 +78,7 @@ def main():
         cache_location="C:\\sptest\\cache",
     )
     
-    pr = httpproxy.ProxyRunner(s)
+    pr = httpproxy.ProxyRunner(s, buf)
     c = JukeboxCmd(s, ml)
     c.start()
     pr.start()
