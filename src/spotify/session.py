@@ -1,6 +1,7 @@
 import ctypes
 
 #Import low level api
+import _spotify
 from _spotify import session as _session
 
 #Import general classes from the high level module
@@ -74,8 +75,28 @@ class ProxySessionCallbacks:
         self.__manager.notify_main_thread(self.__session)
     
     
-    def _music_delivery(self, session, format, frames, num_frames):
-        return self.__callbacks.music_delivery(self.__session, format, frames, num_frames)
+    def get_frame_data_size(self, format, num_frames):
+        if format.sample_type == spotify.SampleType.Int16NativeEndian:
+            frame_size = format.channels * 2
+        
+        else:
+            frame_size = -1
+        
+        return frame_size * num_frames
+    
+    
+    def _music_delivery(self, session, format_p, frames, num_frames):
+        format = format_p.contents
+        size = self.get_frame_data_size(format, num_frames)
+        dest = ctypes.cast(frames, ctypes.POINTER(ctypes.c_char * size))
+        data = str(buffer(dest.contents))
+        
+        #print "frames_size: %d" % size
+        
+        return self.__callbacks.music_delivery(
+            self.__session, data, num_frames,
+            format.sample_type, format.sample_rate, format.channels
+        )
     
     
     def _play_token_lost(self, session):
@@ -113,9 +134,12 @@ class ProxySessionCallbacks:
         self.__manager.stop_playback(self.__session)
     
     
-    def _get_audio_buffer_stats(self, session, stats):
-        self.__manager.get_audio_buffer_stats(self.__session, stats)
-
+    def _get_audio_buffer_stats(self, session, stats_p):
+        st = stats_p.contents
+        st.samples, st.stutter = self.__callbacks.get_audio_buffer_stats(
+            self.__session
+        )
+    
     
     def get_callback_struct(self):
         return self.__struct
@@ -141,7 +165,7 @@ class SessionCallbacks:
     def notify_main_thread(self, session):
         pass
     
-    def music_delivery(self, format, frames, num_frames):
+    def music_delivery(self, session, frames, num_frames, sample_type, sample_rate, channels):
         pass
     
     def play_token_lost(self, session):
@@ -153,6 +177,9 @@ class SessionCallbacks:
     def end_of_track(self, session, error):
         pass
     
+    def streaming_error(self, session, error):
+        pass
+    
     def userinfo_updated(self, session):
         pass
     
@@ -162,7 +189,7 @@ class SessionCallbacks:
     def stop_playback(self, session):
         pass
     
-    def get_audio_buffer_stats(self, session, stats):
+    def get_audio_buffer_stats(self, session):
         pass
 
 
