@@ -59,7 +59,7 @@ class audio_buffer_stats(ctypes.Structure):
 
 
 #completion of types
-audioformat._fields = [
+audioformat._fields_ = [
     ("sample_type", ctypes.c_int),
     ("sample_rate", ctypes.c_int),
     ("channels", ctypes.c_int),
@@ -70,7 +70,7 @@ subscribers._fields_ = [
     ("subscribers", ctypes.POINTER(ctypes.c_char_p))
 ]
 
-audio_buffer_stats._fields = [
+audio_buffer_stats._fields_ = [
     ("samples", ctypes.c_int),
     ("stutter", ctypes.c_int),
 ]
