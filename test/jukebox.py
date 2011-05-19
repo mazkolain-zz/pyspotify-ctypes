@@ -46,6 +46,9 @@ class JukeboxCallbacks(session.SessionCallbacks):
     
     def streaming_error(self, error):
         print "streaming error: %d" % error
+    
+    def end_of_track(self, session):
+        self.__buf.set_track_ended()
         
     def notify_main_thread(self, session):
         self._mainloop.notify()
