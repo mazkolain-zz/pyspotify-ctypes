@@ -174,7 +174,7 @@ class SessionCallbacks:
     def log_message(self, session, message):
         pass
     
-    def end_of_track(self, session, error):
+    def end_of_track(self, session):
         pass
     
     def streaming_error(self, session, error):
