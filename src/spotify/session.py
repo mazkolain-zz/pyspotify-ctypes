@@ -109,9 +109,9 @@ class ProxySessionCallbacks:
         self.__manager.log_message(self.__session, data)
     
     
-    def _end_of_track(self, session, error):
-        self.__callbacks.end_of_track(self.__session, error)
-        self.__manager.end_of_track(self.__session, error)
+    def _end_of_track(self, session):
+        self.__callbacks.end_of_track(self.__session)
+        self.__manager.end_of_track(self.__session)
     
     
     def _streaming_error(self, session, error):
