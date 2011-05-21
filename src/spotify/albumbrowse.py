@@ -35,12 +35,18 @@ class ProxyAlbumbrowseCallbacks:
     
     
     def get_c_callback(self):
-        return self.__c_callback 
-    
+        return self.__c_callback
+
+
+
+class AlbumbrowseCallbacks:
+    def albumbrowse_complete(self, albumbrowse):
+        pass
+
 
 
 class Albumbrowse:
-    #Should we honot OOR?
+    #Should we honor OOR?
     __album = None
     __albumbrowse_struct = None
     __proxy_callbacks = None
