@@ -35,3 +35,7 @@ class Artist:
     @synchronized
     def release(self):
         _artist.release(self.__artist_struct)
+    
+    
+    def get_struct(self):
+        return self.__artist_struct

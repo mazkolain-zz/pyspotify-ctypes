@@ -74,3 +74,7 @@ class Album:
     @synchronized
     def release(self):
         _album.release(self.__album_struct)
+    
+    
+    def get_struct(self):
+        return self.__album_struct
