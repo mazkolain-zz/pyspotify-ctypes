@@ -7,7 +7,7 @@ import ctypes
 
 from _spotify import link as _link
 
-from spotify import track, playlist, user
+from spotify import track, playlist, user, artist, album
 
 from spotify.utils.decorators import synchronized
 
@@ -98,12 +98,12 @@ class Link:
     
     @synchronized
     def as_album(self):
-        pass
+        return album.Album(_link.as_album(self.__link_struct))
     
     
     @synchronized
     def as_artist(self):
-        pass
+        return artist.Artist(_link.as_artist(self.__link_struct))
     
     
     @synchronized
