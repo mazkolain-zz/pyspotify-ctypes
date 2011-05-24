@@ -8,7 +8,7 @@ import sys
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
 
-from spotify import BulkConditionChecker
+from spotify import BulkConditionChecker, link, artistbrowse
 
 import cmd
 import threading
@@ -99,9 +99,37 @@ class JukeboxPlaylistContainerCallbacks(playlistcontainer.PlaylistContainerCallb
     
     def container_loaded(self, container):
         self._checker.check_conditions()
+        
+        
+
+#Callback classes for artist loading
+class ArtistLoadCallbacks(session.SessionCallbacks):
+    __checker = None
+    
+    
+    def __init__(self, checker):
+        self.__checker = checker
+    
+    
+    def metadata_updated(self, session):
+        self.__checker.check_conditions()
 
 
 
+class ArtistbrowseLoadCallbacks(artistbrowse.ArtistbrowseCallbacks):
+    __checker = None
+    
+    
+    def __init__(self, checker):
+        self.__checker = checker
+    
+    
+    def artistbrowse_complete(self, artistbrowse):
+        self.__checker.check_conditions()    
+
+
+
+#The main jukebox command prompt
 class JukeboxCmd(cmd.Cmd, threading.Thread):
     prompt = "jukebox>"
     
@@ -131,6 +159,43 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
     def do_quit(self, line):
         self._mainloop.quit()
         return True
+    
+    
+    def _load_artist(self, id):
+        full_id = "spotify:artist:%s" % id
+        checker = BulkConditionChecker()
+        
+        #Initialize all the artist loading stuff
+        link_obj = link.create_from_string(full_id)
+        artist_obj = link_obj.as_artist()
+        checker.add_condition(artist_obj.is_loaded)
+        callbacks = ArtistLoadCallbacks(checker)
+        self._session.add_callbacks(callbacks)
+        checker.complete_wait(10)
+        self._session.remove_callbacks(callbacks)
+        
+        #Now initialize the artistbrowse load stuff
+        callbacks = ArtistbrowseLoadCallbacks(checker)
+        artistbrowse_obj = artistbrowse.Artistbrowse(
+            self._session, artist_obj, callbacks
+        )
+        checker.add_condition(artistbrowse_obj.is_loaded)
+        checker.complete_wait(10)
+        
+        return artist_obj, artistbrowse_obj
+        
+    
+    def do_artist(self, line):
+        args = line.split(' ', 2)
+        if len(args) != 1:
+            print "this command only takes one argument"
+        
+        else:
+            artist_obj, artistbrowse_obj = self._load_artist(args[0])
+            print "artist: %s" % artist_obj.name()
+            print " - Albums: %s" % artistbrowse_obj.num_albums()
+            print " - Tracks: %s" % artistbrowse_obj.num_tracks()
+            print " - Portraits: %s" % artistbrowse_obj.num_portraits()
     
     
     def do_list(self, line):
