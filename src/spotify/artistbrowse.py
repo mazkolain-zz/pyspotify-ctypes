@@ -21,7 +21,9 @@ class ProxyArtistbrowseCallbacks:
     def __init__(self, artistbrowse, callbacks):
         self.__artistbrowse = artistbrowse
         self.__callbacks = callbacks
-        self.__c_callback = _artistbrowse.callback(self.artistbrowse_complete)
+        self.__c_callback = _artistbrowse.artistbrowse_complete_cb(
+            self.artistbrowse_complete
+        )
     
     
     def artistbrowse_complete(self, artistbrowse_struct, userdata):
