@@ -8,7 +8,7 @@ import sys
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
 
-from spotify import BulkConditionChecker, link, artistbrowse
+from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse
 
 import cmd
 import threading
@@ -125,7 +125,33 @@ class ArtistbrowseLoadCallbacks(artistbrowse.ArtistbrowseCallbacks):
     
     
     def artistbrowse_complete(self, artistbrowse):
-        self.__checker.check_conditions()    
+        self.__checker.check_conditions()
+
+
+
+class AlbumLoadCallbacks(session.SessionCallbacks):
+    __checker = None
+    
+    
+    def __init__(self, checker):
+        self.__checker = checker
+    
+    
+    def metadata_updated(self, session):
+        self.__checker.check_conditions()
+
+
+
+class AlbumbrowseLoadCallbacks(albumbrowse.AlbumbrowseCallbacks):
+    __checker = None
+    
+    
+    def __init__(self, checker):
+        self.__checker = checker
+    
+    
+    def albumbrowse_complete(self, albumbrowse):
+        self.__checker.check_conditions()
 
 
 
@@ -183,7 +209,32 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         checker.complete_wait(10)
         
         return artist_obj, artistbrowse_obj
+    
+    
+    def _load_album(self, id):
+        import time
+        full_id = "spotify:album:%s" % id
+        checker = BulkConditionChecker()
         
+        #All the album loading stuff
+        link_obj = link.create_from_string(full_id)
+        album_obj = link_obj.as_album()
+        checker.add_condition(album_obj.is_loaded)
+        callbacks = AlbumLoadCallbacks(checker)
+        self._session.add_callbacks(callbacks)
+        checker.complete_wait(10)
+        self._session.remove_callbacks(callbacks)
+        
+        #Now the albumbrowse object
+        callbacks = AlbumbrowseLoadCallbacks(checker)
+        albumbrowse_obj = albumbrowse.Albumbrowse(
+            self._session, album_obj, callbacks
+        )
+        checker.add_condition(albumbrowse_obj.is_loaded)
+        checker.complete_wait(10)
+        
+        return album_obj, albumbrowse_obj
+    
     
     def do_artist(self, line):
         args = line.split(' ', 2)
@@ -193,9 +244,21 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         else:
             artist_obj, artistbrowse_obj = self._load_artist(args[0])
             print "artist: %s" % artist_obj.name()
-            print " - Albums: %s" % artistbrowse_obj.num_albums()
-            print " - Tracks: %s" % artistbrowse_obj.num_tracks()
-            print " - Portraits: %s" % artistbrowse_obj.num_portraits()
+            print " - Albums: %d" % artistbrowse_obj.num_albums()
+            print " - Tracks: %d" % artistbrowse_obj.num_tracks()
+            print " - Portraits: %d" % artistbrowse_obj.num_portraits()
+    
+    
+    def do_album(self, line):
+        args = line.split(' ', 2)
+        if len(args) != 1:
+            print "this command takes one argument"
+        
+        else:
+            album_obj, albumbrowse_obj = self._load_album(args[0])
+            print "album: %s" % album_obj.name()
+            print " - Tracks: %d" % albumbrowse_obj.num_tracks()
+            print " - Copyrights: %d" % albumbrowse_obj.num_copyrights()
     
     
     def do_list(self, line):
