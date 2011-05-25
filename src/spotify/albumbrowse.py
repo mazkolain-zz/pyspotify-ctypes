@@ -27,7 +27,9 @@ class ProxyAlbumbrowseCallbacks:
     def __init__(self, albumbrowse, callbacks):
         self.__albumbrowse = albumbrowse
         self.__callbacks = callbacks
-        self.__c_callback = _albumbrowse.callback(self.albumbrowse_complete)
+        self.__c_callback = _albumbrowse.albumbrowse_complete_cb(
+            self.albumbrowse_complete
+        )
     
     
     def albumbrowse_complete(self, albumbrowse_struct, userdata):
