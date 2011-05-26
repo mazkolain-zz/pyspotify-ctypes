@@ -8,7 +8,7 @@ import sys
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
 
-from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse
+from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search
 
 import cmd
 import threading
@@ -155,6 +155,19 @@ class AlbumbrowseLoadCallbacks(albumbrowse.AlbumbrowseCallbacks):
 
 
 
+class SearchLoadCallbacks(search.SearchCallbacks):
+    __checker = None
+    
+    
+    def __init__(self, checker):
+        self.__checker = checker
+    
+        
+    def search_complete(self, search):
+        self.__checker.check_conditions()
+
+
+
 #The main jukebox command prompt
 class JukeboxCmd(cmd.Cmd, threading.Thread):
     prompt = "jukebox>"
@@ -236,6 +249,20 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         return album_obj, albumbrowse_obj
     
     
+    def _load_search(self, query):
+        checker = BulkConditionChecker()
+        callbacks = SearchLoadCallbacks(checker)
+        search_obj = search.Search(
+            self._session, query,
+            track_count=100, album_count=100, artist_count=100,
+            callbacks=callbacks
+        )
+        checker.add_condition(search_obj.is_loaded)
+        checker.complete_wait(10)
+        
+        return search_obj
+    
+    
     def do_artist(self, line):
         args = line.split(' ', 2)
         if len(args) != 1:
@@ -259,6 +286,16 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
             print "album: %s" % album_obj.name()
             print " - Tracks: %d" % albumbrowse_obj.num_tracks()
             print " - Copyrights: %d" % albumbrowse_obj.num_copyrights()
+    
+    
+    def do_search(self, line):
+        search_obj = self._load_search(line)
+        print "total tracks: %d" % search_obj.total_tracks()
+        print "total artists: %d" % search_obj.total_artists()
+        print "total albums: %d" % search_obj.total_albums()
+        
+        if search_obj.did_you_mean() != "":
+            print "did you mean: %s" % search_obj.did_you_mean()
     
     
     def do_list(self, line):
