@@ -8,7 +8,7 @@ import sys
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
 
-from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search
+from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio
 
 import cmd
 import threading
@@ -263,6 +263,18 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         return search_obj
     
     
+    def _load_radio(self, from_year, to_year, genres):
+        checker = BulkConditionChecker()
+        callbacks = SearchLoadCallbacks(checker)
+        radio_obj = radio.RadioSearch(
+            self._session, from_year, to_year, genres, callbacks
+        )
+        checker.add_condition(radio_obj.is_loaded)
+        checker.complete_wait(10)
+        
+        return radio_obj
+        
+    
     def do_artist(self, line):
         args = line.split(' ', 2)
         if len(args) != 1:
@@ -296,6 +308,20 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         
         if search_obj.did_you_mean() != "":
             print "did you mean: %s" % search_obj.did_you_mean()
+    
+    
+    def do_radio(self, line):
+        args = line.split(' ', 4)
+        if len(args) != 3:
+            print "error: this command takes exactly three arguments"
+        
+        else:
+            radio_obj = self._load_radio(
+                int(args[0]), int(args[1]), int(args[2])
+            )
+            print "total tracks: %d" % radio_obj.total_tracks()
+            print "total artists: %d" % radio_obj.total_artists()
+            print "total albums: %d" % radio_obj.total_albums()
     
     
     def do_list(self, line):
