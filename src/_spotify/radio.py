@@ -7,9 +7,9 @@ from _spotify import libspotify
 import search as _search
 
 
-radio_create = libspotify.sp_radio_search_create
-radio_create.argtypes = [
+search_create = libspotify.sp_radio_search_create
+search_create.argtypes = [
     ctypes.c_void_p, ctypes.c_uint, ctypes.c_uint,
     ctypes.c_int, _search.search_complete_cb, ctypes.c_void_p
 ]
-radio_create.restype = ctypes.c_void_p
+search_create.restype = ctypes.c_void_p
