@@ -39,14 +39,15 @@ class SearchCallbacks:
 
 
 class Search:
-    __search_struct = None
+    #Not private, so RadioSearchh can see it
+    _search_struct = None
     __proxy_callbacks = None
     
     
     @synchronized
     def __init__(self, session, query, track_offset=0, track_count=0, album_offset=0, album_count=0, artist_offset=0, artist_count=0, callbacks=None):
         self.__proxy_callbacks = ProxySearchCallbacks(self, callbacks)
-        self.__search_struct = _search.create(
+        self._search_struct = _search.create(
             session.get_struct(), query,
             track_offset, track_count,
             album_offset, album_count,
@@ -58,77 +59,77 @@ class Search:
     
     @synchronized
     def is_loaded(self):
-        return _search.is_loaded(self.__search_struct)
+        return _search.is_loaded(self._search_struct)
     
     
     @synchronized
     def error(self):
-        return _search.error(self.__search_struct)
+        return _search.error(self._search_struct)
     
     
     @synchronized
     def num_tracks(self):
-        return _search.num_tracks(self.__search_struct)
+        return _search.num_tracks(self._search_struct)
     
     
     @synchronized
     def track(self, index):
-        return track.Track(_search.track(self.__search_struct, index))
+        return track.Track(_search.track(self._search_struct, index))
     
     
     @synchronized
     def num_albums(self):
-        return _search.num_albums(self.__search_struct)
+        return _search.num_albums(self._search_struct)
     
     
     @synchronized
     def album(self, index):
-        return album.Album(_search.album(self.__search_struct, index))
+        return album.Album(_search.album(self._search_struct, index))
     
     
     @synchronized
     def num_artists(self):
-        return _search.num_artists(self.__search_struct)
+        return _search.num_artists(self._search_struct)
     
     
     @synchronized
     def artist(self, index):
-        return artist.Artist(_search.artist(self.__search_struct, index))
+        return artist.Artist(_search.artist(self._search_struct, index))
     
     
     @synchronized
     def query(self):
-        return _search.query(self.__search_struct)
+        return _search.query(self._search_struct)
     
     
     @synchronized
     def did_you_mean(self):
-        return _search.did_you_mean(self.__search_struct)
+        return _search.did_you_mean(self._search_struct)
     
     
     @synchronized
     def total_tracks(self):
-        return _search.total_tracks(self.__search_struct)
+        return _search.total_tracks(self._search_struct)
     
     
     @synchronized
     def total_albums(self):
-        return _search.total_albums(self.__search_struct)
+        return _search.total_albums(self._search_struct)
     
     
     @synchronized
     def total_artists(self):
-        return _search.total_artists(self.__search_struct)
+        return _search.total_artists(self._search_struct)
     
     
     @synchronized
     def add_ref(self):
-        _search.add_ref(self.__search_struct)
+        _search.add_ref(self._search_struct)
     
     
     @synchronized
     def release(self):
-        _search.release(self.__search_struct)
+        _search.release(self._search_struct)
     
     
     @synchronized
