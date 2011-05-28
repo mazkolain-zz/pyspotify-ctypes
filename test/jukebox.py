@@ -8,7 +8,7 @@ import sys
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
 
-from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio
+from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio, toplistbrowse
 
 import cmd
 import threading
@@ -168,6 +168,19 @@ class SearchLoadCallbacks(search.SearchCallbacks):
 
 
 
+class ToplistbrowseLoadCallbacks(toplistbrowse.ToplistbrowseCallbacks):
+    __checker = None
+    
+    
+    def __init__(self, checker):
+        self.__checker = checker
+    
+    
+    def toplistbrowse_complete(self, toplistbrowse):
+        self.__checker.check_conditions()
+
+
+
 #The main jukebox command prompt
 class JukeboxCmd(cmd.Cmd, threading.Thread):
     prompt = "jukebox>"
@@ -273,6 +286,18 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         checker.complete_wait(10)
         
         return radio_obj
+    
+    
+    def _load_toplist(self, type, region, user):
+        checker = BulkConditionChecker()
+        callbacks = ToplistbrowseLoadCallbacks(checker)
+        toplistbrowse_obj = toplistbrowse.Toplistbrowse(
+            self._session, type, region, user, callbacks
+        )
+        checker.add_condition(toplistbrowse_obj.is_loaded)
+        checker.complete_wait(10)
+        
+        return toplistbrowse_obj
         
     
     def do_artist(self, line):
@@ -322,6 +347,43 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
             print "total tracks: %d" % radio_obj.total_tracks()
             print "total artists: %d" % radio_obj.total_artists()
             print "total albums: %d" % radio_obj.total_albums()
+    
+    
+    def do_toplist(self, line):
+        args = line.split(' ', 4)
+        if len(args) != 3:
+            print "error: this command takes exactly three arguments"
+        else:
+            #user arg first
+            user_arg = None
+        
+            #type
+            if args[0] == 'artists':
+                type_arg = toplistbrowse.ToplistType.Artists
+            elif args[0] == 'albums':
+                type_arg = toplistbrowse.ToplistType.Albums
+            elif args[0] == 'tracks':
+                type_arg = toplistbrowse.ToplistType.Tracks
+            else:
+                print "error: unrecognized toplist type: %s" % args[0]
+                return
+            
+            #region
+            if args[1] == 'everywhere':
+                region_arg = toplistbrowse.ToplistRegion.Everywhere
+            elif args[1] == 'user':
+                region_arg = toplistbrowse.ToplistRegion.User
+                user_arg = args[2]
+            else:
+                region_arg = toplistbrowse.encode_region(args[1])
+            
+            toplistbrowse_obj = self._load_toplist(
+                type_arg, region_arg, user_arg
+            )
+            
+            print "artists: %d" % toplistbrowse_obj.num_artists()
+            print "albums: %d" % toplistbrowse_obj.num_albums()
+            print "tracks: %d" % toplistbrowse_obj.num_tracks()
     
     
     def do_list(self, line):
