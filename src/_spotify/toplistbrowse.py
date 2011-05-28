@@ -5,7 +5,7 @@ from _spotify import libspotify, callback
 
 
 #Callbacks
-toplistbrowse_complete_cb = callback(ctypes.c_void_p, ctypes.c_void_p)
+toplistbrowse_complete_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 
 
 #Function prototypes
