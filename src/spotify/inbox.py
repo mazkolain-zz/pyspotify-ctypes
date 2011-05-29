@@ -49,11 +49,12 @@ class Inbox:
         track_arr = (ctypes.c_void_p * len(track_list))()
         for index, item in enumerate(track_list):
             track_arr[index] = item.get_struct()
+        return track_arr
     
     
     @synchronized
     def __init__(self, session, user, track_list, message, callbacks):
-        self.__proxy_callbacks = ProxyInboxpostCallbacks(self)
+        self.__proxy_callbacks = ProxyInboxpostCallbacks(self, callbacks)
         self.__inbox_struct = _inbox.post_tracks(
             session.get_struct(), user,
             self._build_track_array(track_list), len(track_list),
