@@ -8,7 +8,7 @@ import sys
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
 
-from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio, toplistbrowse
+from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio, toplistbrowse, inbox
 
 import cmd
 import threading
@@ -181,6 +181,19 @@ class ToplistbrowseLoadCallbacks(toplistbrowse.ToplistbrowseCallbacks):
 
 
 
+class InboxLoadCallbacks(inbox.InboxpostCallbacks):
+    __event = None
+    
+    
+    def __init__(self, event):
+        self.__event = event
+
+
+    def inboxpost_complete(self, inbox):
+        self.__event.set()
+
+
+
 #The main jukebox command prompt
 class JukeboxCmd(cmd.Cmd, threading.Thread):
     prompt = "jukebox>"
@@ -298,6 +311,15 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         checker.complete_wait(10)
         
         return toplistbrowse_obj
+    
+    
+    def _do_inboxpost(self, to_user, track_list, message):
+        ev = threading.Event()
+        callbacks = InboxLoadCallbacks(ev)
+        inbox_obj = inbox.Inbox(
+            self._session, to_user, track_list, message, callbacks
+        )
+        ev.wait(10)
         
     
     def do_artist(self, line):
@@ -384,6 +406,21 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
             print "artists: %d" % toplistbrowse_obj.num_artists()
             print "albums: %d" % toplistbrowse_obj.num_albums()
             print "tracks: %d" % toplistbrowse_obj.num_tracks()
+    
+    
+    def do_share(self, line):
+        args = line.split(' ', 2)
+        to_user = args[0]
+        track_ids = args[1].split(',')
+        message = args[2]
+        
+        track_list = []
+        for item in track_ids:
+            link_obj = link.create_from_string(item)
+            track_list.append(link_obj.as_track())
+        
+        self._do_inboxpost(to_user, track_list, message)
+        print "%d track(s) where sent successfully to '%s" % (len(track_list), to_user)
     
     
     def do_list(self, line):
