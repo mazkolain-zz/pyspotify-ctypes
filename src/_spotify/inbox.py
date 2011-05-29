@@ -5,14 +5,14 @@ from _spotify import libspotify, callback
 
 
 #Callbacks
-inboxpost_complete_cb = callback(ctypes.c_void_p, ctypes.c_void_p)
+inboxpost_complete_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 
 
 #Function prototypes
 post_tracks = libspotify.sp_inbox_post_tracks
 post_tracks.argtypes = [
-    ctypes.c_void_p, ctypes.c_void_p,
-    ctypes.POINTER(ctypes.c_void_p), ctypes.c_int,
+    ctypes.c_void_p, ctypes.c_char_p,
+    ctypes.POINTER(ctypes.c_void_p), ctypes.c_int, ctypes.c_char_p,
     inboxpost_complete_cb, ctypes.c_void_p
 ]
 post_tracks.restype = ctypes.c_void_p
