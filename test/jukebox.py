@@ -1,10 +1,11 @@
+#!/usr/bin/env python
 '''
 Created on 07/11/2010
 
 @author: mikel
 '''
 import os, os.path
-os.chdir(os.path.dirname(__file__))
+os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 #Set resource paths
 import envutils
@@ -86,8 +87,8 @@ def main():
         cb,
         app_key=appkey,
         user_agent="python ctypes bindings",
-        settings_location="C:\\sptest\\settings",
-        cache_location="C:\\sptest\\cache",
+        settings_location="../tmp/settings",
+        cache_location="../tmp/cache",
     )
     
     pr = httpproxy.ProxyRunner(s, buf)
