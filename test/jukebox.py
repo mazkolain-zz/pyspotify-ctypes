@@ -3,21 +3,29 @@ Created on 07/11/2010
 
 @author: mikel
 '''
-import sys
+import os, os.path
+os.chdir(os.path.dirname(__file__))
 
+#Set resource paths
+import envutils
+envutils.set_library_path("../dlls")
+
+#Make spotify and cherrypy available on path
+import sys
+sys.path.append("../src")
+sys.path.append("../lib/CherryPy-3.2.0-py2.4.egg")
+
+#mandatory libspotify imports
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
-
 from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio, toplistbrowse, inbox
 
+#Imports for jukebox
 import cmd
 import threading
 
-#Make cherrypy available on path
-sys.path.append("../lib/CherryPy-3.2.0-py2.4.egg")
-
-
-#Proxy http server for resources
+#Proxy http server for resources (separate import as depends on cherrypy)
+#Importing cherrypy before spotify will crash python
 from spotify.utils import httpproxy, audio
 
 
