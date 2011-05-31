@@ -20,20 +20,13 @@ voidp_size = struct.calcsize("P") * 8
 
 #Platform-specific initializations
 if os.name == "nt" and voidp_size == 32:
-    library = ctypes.WinDLL
+    loader = ctypes.windll
     callback = ctypes.WINFUNCTYPE
-    dllfile = "win32/libspotify.dll"
 
 elif os.name == "posix" and voidp_size in [32,64]:
-    library = ctypes.CDLL
+    loader = ctypes.cdll
     callback = ctypes.CFUNCTYPE
     
-    if voidp_size == 32:
-        dllfile = "linux/x86/libspotify.so"
-    
-    elif voidp_size == 64:
-        dllfile = "linux/x86_64/libspotify.so"
-
 else:
     raise OSError(
         "Cannot run in that environment (os: %s; arch: %d)" %
@@ -42,9 +35,7 @@ else:
 
 
 #Global libspotify instance
-libspotify = library(
-    os.path.join(os.path.dirname(__file__), "../../dlls", dllfile)
-)
+libspotify = loader.libspotify
 
 
 #structure definitions
