@@ -1,4 +1,9 @@
-__all__ = ["session", "user"]
+__all__ = [
+    "album", "albumbrowse", "artist", "artistbrowse",
+    "image", "inbox", "link", "localtrack",
+    "playlist", "playlistcontainer", "radio", "search",
+    "session", "toplistbrowse", "track", "user",
+]
 
 
 import _spotify
