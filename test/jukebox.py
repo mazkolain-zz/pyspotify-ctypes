@@ -412,9 +412,22 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
                 type_arg, region_arg, user_arg
             )
             
-            print "artists: %d" % toplistbrowse_obj.num_artists()
-            print "albums: %d" % toplistbrowse_obj.num_albums()
-            print "tracks: %d" % toplistbrowse_obj.num_tracks()
+            
+            if type_arg == toplistbrowse.ToplistType.Artists:
+                print "artists: %d" % toplistbrowse_obj.num_artists()
+                for idx, item in enumerate(toplistbrowse_obj.artists()):
+                    print "#%d: %s" % (idx + 1, item.name())
+            
+            elif type_arg == toplistbrowse.ToplistType.Albums:
+                print "albums: %d" % toplistbrowse_obj.num_albums()
+                for idx, item in enumerate(toplistbrowse_obj.albums()):
+                    print "#%d: %s by %s" % (idx + 1, item.name(), item.artist().name())
+                
+            elif type_arg == toplistbrowse.ToplistType.Tracks:
+                print "tracks: %d" % toplistbrowse_obj.num_tracks()
+                for idx, item in enumerate(toplistbrowse_obj.tracks()):
+                    artists = ", ".join([artist.name() for artist in item.artists()])
+                    print "#%d: %s by %s" % (idx + 1, item.name(), artists)
     
     
     def do_share(self, line):
@@ -443,14 +456,14 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
             container.add_callbacks(callbacks)
             checker.complete_wait()
             
-            for item in container:
+            for item in container.playlists():
                 item.set_in_ram(self._session, True)
         
         if not line:
             #Print all playlists
             print "%d playlists:" % container.num_playlists()
             
-            for k, item in enumerate(container):
+            for k, item in enumerate(container.playlists()):
                 if item.is_loaded():
                     print "playlist #%d: %s" % (k, item.name()) 
                 else:
@@ -460,7 +473,7 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
             pl = container.playlist(pos)
             print "playlist #%d, %d tracks:" % (pos, pl.num_tracks())
             
-            for index,item in enumerate(pl):
+            for index,item in enumerate(pl.tracks()):
                 if item.is_loaded():
                     print "track #%d: %s" % (index, item.name())
                     #print item.album().cover()
