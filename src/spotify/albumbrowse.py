@@ -7,6 +7,8 @@ from _spotify import albumbrowse as _albumbrowse
 
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.iterators import CallbackIterator
+
 from spotify import album, artist, track
 
 
@@ -93,6 +95,10 @@ class Albumbrowse:
         return _albumbrowse.copyright(self.__albumbrowse_struct, index)
     
     
+    def copyrights(self):
+        return CallbackIterator(self.num_copyrights, self.copyright)
+    
+    
     @synchronized
     def num_tracks(self):
         return _albumbrowse.num_tracks(self.__albumbrowse_struct)
@@ -103,6 +109,10 @@ class Albumbrowse:
         return track.Track(
             _albumbrowse.track(self.__albumbrowse_struct, index)
         )
+    
+
+    def tracks(self):
+        return CallbackIterator(self.num_tracks, self.track)
     
     
     @synchronized

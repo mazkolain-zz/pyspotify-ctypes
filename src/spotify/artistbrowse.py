@@ -8,6 +8,8 @@ from _spotify import artistbrowse as _artistbrowse
 
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.iterators import CallbackIterator
+
 from spotify import artist, album, track
 
 
@@ -82,6 +84,10 @@ class Artistbrowse:
         return _artistbrowse.portrait(self.__artistbrowse_struct)
     
     
+    def portraits(self):
+        return CallbackIterator(self.num_portraits, self.portrait)
+    
+    
     @synchronized
     def num_tracks(self):
         return _artistbrowse.num_tracks(self.__artistbrowse_struct)
@@ -92,6 +98,10 @@ class Artistbrowse:
         return track.Track(
             _artistbrowse.track(self.__artistbrowse_struct, index)
         )
+    
+    
+    def tracks(self):
+        return CallbackIterator(self.num_tracks, self.track)
     
     
     @synchronized
@@ -106,6 +116,10 @@ class Artistbrowse:
         )
     
     
+    def albums(self):
+        return CallbackIterator(self.num_albums, self.album)
+    
+    
     @synchronized
     def num_similar_artists(self):
         return _artistbrowse.num_similar_artists(self.__artistbrowse_struct)
@@ -116,6 +130,10 @@ class Artistbrowse:
         return artist.Artist(
             _artistbrowse.similar_artist(self.__artistbrowse_struct, index)
         )
+    
+    
+    def similar_artists(self):
+        return CallbackIterator(self.num_similar_artists, self.similar_artists)
     
     
     @synchronized

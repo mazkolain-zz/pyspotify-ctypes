@@ -9,6 +9,8 @@ from spotify import track, album, artist
 
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.iterators import CallbackIterator
+
 
 
 class ProxySearchCallbacks:
@@ -77,6 +79,10 @@ class Search:
         return track.Track(_search.track(self._search_struct, index))
     
     
+    def tracks(self):
+        return CallbackIterator(self.num_tracks, self.track)
+    
+    
     @synchronized
     def num_albums(self):
         return _search.num_albums(self._search_struct)
@@ -87,6 +93,10 @@ class Search:
         return album.Album(_search.album(self._search_struct, index))
     
     
+    def albums(self):
+        return CallbackIterator(self.num_albums, self.album)
+    
+    
     @synchronized
     def num_artists(self):
         return _search.num_artists(self._search_struct)
@@ -95,6 +105,10 @@ class Search:
     @synchronized
     def artist(self, index):
         return artist.Artist(_search.artist(self._search_struct, index))
+    
+    
+    def artists(self):
+        return CallbackIterator(self.num_artists, self.artist)
     
     
     @synchronized

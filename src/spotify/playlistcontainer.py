@@ -11,6 +11,8 @@ from _spotify import playlistcontainer as _playlistcontainer
 
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.iterators import CallbackIterator
+
 import playlist
 
 
@@ -72,27 +74,6 @@ class PlaylistContainerCallbacks:
     
     def container_loaded(self, container):
         pass
-
-
-
-class PlaylistContainerIterator:
-    _container = None
-    _pos = None
-    
-    def __init__(self, container):
-        self._container = container
-        self._pos = 0
-    
-    def __iter__(self):
-        return self
-    
-    def next(self):
-        if self._pos < self._container.num_playlists():
-            playlist = self._container.playlist(self._pos)
-            self._pos += 1
-            return playlist
-        else:
-            raise StopIteration
         
 
 
@@ -191,6 +172,10 @@ class PlaylistContainer:
         return self._get_playlist_object(pos)
     
     
+    def playlists(self):
+        return CallbackIterator(self.num_playlists, self.playlist)
+    
+    
     @synchronized
     def playlist_type(self, index):
         return _playlistcontainer.playlist_type(self.__container_struct, index)
@@ -273,10 +258,6 @@ class PlaylistContainer:
     @synchronized
     def release(self):
         _playlistcontainer.release()
-    
-    
-    def __iter__(self):
-        return PlaylistContainerIterator(self)
     
     
     def __len__(self):

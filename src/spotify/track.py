@@ -11,6 +11,8 @@ from spotify import artist, album
 
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.iterators import CallbackIterator
+
 
 
 @synchronized
@@ -73,6 +75,10 @@ class Track:
     @synchronized
     def artist(self, index):
         return artist.Artist(_track.artist(self.__track_struct, index))
+    
+    
+    def artists(self):
+        return CallbackIterator(self.num_artists, self.artist)
     
     
     @synchronized

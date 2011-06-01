@@ -13,6 +13,8 @@ from spotify import user, playlistcontainer, playlist, handle_sp_error
 #Decorators
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.iterators import CallbackIterator
+
 
 
 class ProxySessionCallbacks:
@@ -379,6 +381,10 @@ class Session:
         return user.User(
             _session.friend(self.__session, index)
         )
+    
+    
+    def friends(self):
+        return CallbackIterator(self.num_friends, self.friend)
     
     
     @synchronized

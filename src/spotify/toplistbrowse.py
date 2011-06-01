@@ -7,6 +7,8 @@ from _spotify import toplistbrowse as _toplistbrowse
 
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.iterators import CallbackIterator
+
 from spotify import artist, album, track
 
 
@@ -114,6 +116,10 @@ class Toplistbrowse:
         )
     
     
+    def artists(self):
+        return CallbackIterator(self.num_artists, self.artist)
+    
+    
     @synchronized
     def num_albums(self):
         return _toplistbrowse.num_albums(self.__toplistbrowse_struct)
@@ -126,6 +132,10 @@ class Toplistbrowse:
         )
     
     
+    def albums(self):
+        return CallbackIterator(self.num_albums, self.album)
+    
+    
     @synchronized
     def num_tracks(self):
         return _toplistbrowse.num_tracks(self.__toplistbrowse_struct)
@@ -136,3 +146,7 @@ class Toplistbrowse:
         return track.Track(
             _toplistbrowse.track(self.__toplistbrowse_struct, index)
         )
+    
+    
+    def tracks(self):
+        return CallbackIterator(self.num_tracks, self.track)

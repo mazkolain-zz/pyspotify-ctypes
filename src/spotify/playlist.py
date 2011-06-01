@@ -11,6 +11,8 @@ from _spotify import playlist as _playlist
 
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.iterators import CallbackIterator
+
 
 
 class ProxyPlaylistCallbacks:
@@ -131,27 +133,6 @@ class PlaylistCallbacks:
 
 
 
-class PlaylistIterator:
-    __playlist = None
-    __pos = None
-    
-    def __init__(self, playlist):
-        self.__playlist = playlist
-        self.__pos = 0
-    
-    def __iter__(self):
-        return self
-    
-    def next(self):
-        if self.__pos < self.__playlist.num_tracks():
-            track = self.__playlist.track(self.__pos)
-            self.__pos += 1
-            return track
-        else:
-            raise StopIteration
-
-
-
 @synchronized
 def create(session, link):
     return _playlist.create(session.get_struct(), link.get_struct())
@@ -229,6 +210,10 @@ class Playlist:
         return track.Track(
             _playlist.track(self.__playlist_struct, index)
         )
+    
+    
+    def tracks(self):
+        return CallbackIterator(self.num_tracks, self.track)
     
     
     @synchronized
@@ -376,10 +361,6 @@ class Playlist:
     
     
     #TODO: Rest of the subscribers stuff
-    
-    
-    def __iter__(self):
-        return PlaylistIterator(self)
     
     
     def __del__(self):
