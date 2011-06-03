@@ -162,9 +162,7 @@ class Playlist:
             raise DuplicateCallbackError()
         
         else:
-            proxy = ProxyPlaylistCallbacks(
-                self._session, self, callbacks
-            )
+            proxy = ProxyPlaylistCallbacks(self, callbacks)
             
             struct = proxy.get_callback_struct()
             ptr = ctypes.pointer(struct)
@@ -358,6 +356,11 @@ class Playlist:
     @synchronized
     def num_subscribers(self):
         return _playlist.num_subscribers(self.__playlist_struct)
+    
+    
+    @synchronized
+    def update_subscribers(self):
+        _playlist.update_subscribers(self.__playlist_struct)
     
     
     #TODO: Rest of the subscribers stuff
