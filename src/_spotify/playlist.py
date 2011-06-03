@@ -1,7 +1,7 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback
+from _spotify import libspotify, callback, subscribers as _subscribers
 
 
 #Structure definitions
@@ -175,10 +175,10 @@ num_subscribers.restype = ctypes.c_uint
 
 subscribers = libspotify.sp_playlist_subscribers
 subscribers.argtypes = [ctypes.c_void_p]
-subscribers.restype = ctypes.c_void_p
+subscribers.restype = ctypes.POINTER(_subscribers)
 
 subscribers_free = libspotify.sp_playlist_subscribers_free
-subscribers_free.argtypes = [ctypes.c_void_p]
+subscribers_free.argtypes = [ctypes.POINTER(_subscribers)]
 
 update_subscribers = libspotify.sp_playlist_update_subscribers
 update_subscribers.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
