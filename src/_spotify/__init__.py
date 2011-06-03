@@ -34,22 +34,23 @@ else:
 
 
 def __load_libspotify(loader, filename):
-    for path in sys.path:
-        full_path = os.path.join(path, filename)
-        if os.path.isfile(full_path):
-            return loader.LoadLibrary(full_path)
+    #Let ctypes find it
+    try:
+        return loader.libspotify
+
+    #Bad luck, let's do a quirk
+    except OSError:
+        for path in sys.path:
+            full_path = os.path.join(path, filename)
+            if os.path.isfile(full_path):
+                return loader.LoadLibrary(full_path)
     
-    raise OSError("Unable to find libspotify")
+        raise OSError("Unable to find libspotify")
 
 
 
-#Global libspotify instance, let ctypes find it
-try:
-    libspotify = loader.libspotify
-
-#Bad luck, let's do a quirk
-except OSError:
-    libspotify = __load_libspotify(loader, filename)
+#Global libspotify instance
+libspotify = __load_libspotify(loader, filename)
 
 
 
@@ -74,7 +75,7 @@ audioformat._fields_ = [
 
 subscribers._fields_ = [
     ("count", ctypes.c_uint),
-    ("subscribers", ctypes.POINTER(ctypes.c_char_p))
+    ("subscribers", ctypes.c_char_p * 1),
 ]
 
 audio_buffer_stats._fields_ = [
