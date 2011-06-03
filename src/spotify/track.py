@@ -107,6 +107,11 @@ class Track:
     
     
     @synchronized
+    def index(self):
+        return _track.index(self.__track_struct)
+    
+    
+    @synchronized
     def add_ref(self):
         return _track.add_ref(self.__track_struct)
     
