@@ -130,7 +130,7 @@ class Image:
         size = ctypes.c_size_t()
         raw = _image.data(self.__image_struct, ctypes.pointer(size))
         dest = ctypes.cast(raw, ctypes.POINTER(ctypes.c_char * size.value))
-        return buffer(dest.contents)
+        return str(buffer(dest.contents))
     
     
     def get_struct(self):
