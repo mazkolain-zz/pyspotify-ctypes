@@ -34,7 +34,7 @@ num_portraits.restype = ctypes.c_int
 
 portrait = libspotify.sp_artistbrowse_portrait
 portrait.argtypes = [ctypes.c_void_p, ctypes.c_int]
-portrait.restype = ctypes.POINTER(ctypes.c_byte)
+portrait.restype = ctypes.POINTER(ctypes.c_byte * 20)
 
 num_tracks = libspotify.sp_artistbrowse_num_tracks
 num_tracks.argtypes = [ctypes.c_void_p]

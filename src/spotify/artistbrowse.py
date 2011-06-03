@@ -12,6 +12,8 @@ from spotify.utils.iterators import CallbackIterator
 
 from spotify import artist, album, track
 
+import binascii
+
 
 
 class ProxyArtistbrowseCallbacks:
@@ -81,7 +83,9 @@ class Artistbrowse:
     
     @synchronized
     def portrait(self, index):
-        return _artistbrowse.portrait(self.__artistbrowse_struct)
+        res = _artistbrowse.portrait(self.__artistbrowse_struct, index).contents
+        if res is not None:
+            return binascii.b2a_hex(buffer(res))
     
     
     def portraits(self):
