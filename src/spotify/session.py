@@ -224,8 +224,7 @@ class Session:
         )
         
         #app key conversion
-        appkey_type = ctypes.c_byte * len(app_key)
-        appkey_c = appkey_type.from_buffer(bytearray(app_key))
+        appkey_c = (ctypes.c_byte * len(app_key))(*app_key)
         
         #initialize app config
         config = _session.config(

@@ -1,7 +1,7 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify
+from _spotify import libspotify, bool_type
 
 
 #Function prototypes
@@ -11,7 +11,7 @@ name.restype = ctypes.c_char_p
 
 is_loaded = libspotify.sp_artist_is_loaded
 is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = ctypes.c_bool
+is_loaded.restype = bool_type
 
 add_ref = libspotify.sp_artist_add_ref
 add_ref.argtypes = [ctypes.c_void_p]

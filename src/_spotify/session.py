@@ -2,7 +2,7 @@ import ctypes
 import _spotify
 
 #Import handy globals
-from _spotify import libspotify, callback
+from _spotify import libspotify, callback, bool_type
 
 
 #Structure definitions
@@ -68,9 +68,9 @@ config._fields_ = [
     ("user_agent", ctypes.c_char_p),
     ("callbacks", ctypes.POINTER(callbacks)),
     ("userdata", ctypes.c_void_p),
-    ("compress_playlists", ctypes.c_bool),
-    ("dont_save_metadata_for_playlists", ctypes.c_bool),
-    ("initially_unload_playlists", ctypes.c_bool),
+    ("compress_playlists", bool_type),
+    ("dont_save_metadata_for_playlists", bool_type),
+    ("initially_unload_playlists", bool_type),
 ]
 
 
@@ -114,7 +114,7 @@ player_seek = libspotify.sp_session_player_seek
 player_seek.argtypes = [ctypes.c_void_p, ctypes.c_int]
 
 player_play = libspotify.sp_session_player_play
-player_play.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+player_play.argtypes = [ctypes.c_void_p, bool_type]
 
 player_unload = libspotify.sp_session_player_unload
 player_unload.argtypes = [ctypes.c_void_p]

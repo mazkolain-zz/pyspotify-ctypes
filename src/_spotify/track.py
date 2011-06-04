@@ -1,12 +1,12 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify
+from _spotify import libspotify, bool_type
 
 
 is_loaded = libspotify.sp_track_is_loaded
 is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = ctypes.c_bool
+is_loaded.restype = bool_type
 
 error = libspotify.sp_track_error
 error.argtypes = [ctypes.c_void_p]
@@ -14,24 +14,24 @@ error.restype = ctypes.c_int
 
 is_available = libspotify.sp_track_is_available
 is_available.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-is_available.restype = ctypes.c_bool
+is_available.restype = bool_type
 
 is_local = libspotify.sp_track_is_local
 is_local.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-is_local.restype = ctypes.c_bool
+is_local.restype = bool_type
 
 is_autolinked = libspotify.sp_track_is_autolinked
 is_autolinked.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-is_autolinked.restype = ctypes.c_bool
+is_autolinked.restype = bool_type
 
 is_starred = libspotify.sp_track_is_starred
 is_starred.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-is_starred.restype = ctypes.c_bool
+is_starred.restype = bool_type
 
 set_starred = libspotify.sp_track_set_starred
 set_starred.argtypes = [
     ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p),
-    ctypes.c_int, ctypes.c_bool
+    ctypes.c_int, bool_type
 ]
 
 num_artists = libspotify.sp_track_num_artists

@@ -1,7 +1,7 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback
+from _spotify import libspotify, callback, bool_type
 
 
 #Structure definitions
@@ -80,7 +80,7 @@ remove_playlist.argtypes = [ctypes.c_void_p, ctypes.c_int]
 remove_playlist.restype = ctypes.c_int
 
 move_playlist = libspotify.sp_playlistcontainer_move_playlist
-move_playlist.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_bool]
+move_playlist.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, bool_type]
 move_playlist.restype = ctypes.c_int
 
 add_folder = libspotify.sp_playlistcontainer_add_folder

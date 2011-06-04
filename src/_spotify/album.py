@@ -1,17 +1,17 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify
+from _spotify import libspotify, bool_type
 
 
 #Function prototypes
 is_loaded = libspotify.sp_album_is_loaded
 is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = ctypes.c_bool
+is_loaded.restype = bool_type
 
 is_available = libspotify.sp_album_is_available
 is_available.argtypes = [ctypes.c_void_p]
-is_available.restype = ctypes.c_bool
+is_available.restype = bool_type
 
 artist = libspotify.sp_album_artist
 artist.argtypes = [ctypes.c_void_p]

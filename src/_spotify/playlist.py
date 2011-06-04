@@ -1,7 +1,7 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback, subscribers as _subscribers
+from _spotify import libspotify, callback, subscribers as _subscribers, bool_type
 
 
 #Structure definitions
@@ -32,7 +32,7 @@ cb_playlist_renamed = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 cb_playlist_state_changed = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 
 cb_playlist_update_in_progress = callback(
-    None, ctypes.c_void_p, ctypes.c_bool, ctypes.c_void_p
+    None, ctypes.c_void_p, bool_type, ctypes.c_void_p
 )
 
 cb_playlist_metadata_updated = callback(None, ctypes.c_void_p, ctypes.c_void_p)
@@ -44,7 +44,7 @@ cb_track_created_changed = callback(
 )
 
 cb_track_seen_changed = callback(
-    None, ctypes.c_void_p, ctypes.c_int, ctypes.c_bool, ctypes.c_void_p
+    None, ctypes.c_void_p, ctypes.c_int, bool_type, ctypes.c_void_p
 )
 
 cb_description_changed = callback(
@@ -83,7 +83,7 @@ callbacks._fields_ = [
 #Function prototypes
 is_loaded = libspotify.sp_playlist_is_loaded
 is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = ctypes.c_bool
+is_loaded.restype = bool_type
 
 add_callbacks = libspotify.sp_playlist_add_callbacks
 add_callbacks.argtypes = [
@@ -113,10 +113,10 @@ track_creator.restype = ctypes.c_void_p
 
 track_seen = libspotify.sp_playlist_track_seen 
 track_seen.argtypes = [ctypes.c_void_p, ctypes.c_int]
-track_seen.restype = ctypes.c_bool
+track_seen.restype = bool_type
 
 track_set_seen = libspotify.sp_playlist_track_set_seen
-track_set_seen.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_bool]
+track_set_seen.argtypes = [ctypes.c_void_p, ctypes.c_int, bool_type]
 track_set_seen.restype = ctypes.c_int
 
 track_message = libspotify.sp_playlist_track_message
@@ -137,13 +137,13 @@ owner.restype = ctypes.c_void_p
 
 is_collaborative = libspotify.sp_playlist_is_collaborative
 is_collaborative.argtypes = [ctypes.c_void_p]
-is_collaborative.restype = ctypes.c_bool
+is_collaborative.restype = bool_type
 
 set_collaborative = libspotify.sp_playlist_set_collaborative
-set_collaborative.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+set_collaborative.argtypes = [ctypes.c_void_p, bool_type]
 
 set_autolink_tracks = libspotify.sp_playlist_set_autolink_tracks
-set_autolink_tracks.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+set_autolink_tracks.argtypes = [ctypes.c_void_p, bool_type]
 
 get_description = libspotify.sp_playlist_get_description
 get_description.argtypes = [ctypes.c_void_p]
@@ -151,11 +151,11 @@ get_description.restype = ctypes.c_char_p
 
 get_image = libspotify.sp_playlist_get_image
 get_image.argtypes = [ctypes.c_void_p, ctypes.c_byte * 20]
-get_image.restype = ctypes.c_bool
+get_image.restype = bool_type
 
 has_pending_changes = libspotify.sp_playlist_has_pending_changes
 has_pending_changes.argtypes = [ctypes.c_void_p]
-has_pending_changes.restype = ctypes.c_bool
+has_pending_changes.restype = bool_type
 
 add_tracks = libspotify.sp_playlist_add_tracks
 add_tracks.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p), ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
@@ -185,10 +185,10 @@ update_subscribers.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
 
 is_in_ram = libspotify.sp_playlist_is_in_ram
 is_in_ram.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-is_in_ram.restype = ctypes.c_bool
+is_in_ram.restype = bool_type
 
 set_in_ram = libspotify.sp_playlist_set_in_ram
-set_in_ram.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_bool]
+set_in_ram.argtypes = [ctypes.c_void_p, ctypes.c_void_p, bool_type]
 
 create = libspotify.sp_playlist_create
 create.argtypes = [ctypes.c_void_p, ctypes.c_void_p]

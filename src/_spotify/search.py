@@ -1,7 +1,7 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback
+from _spotify import libspotify, callback, bool_type
 
 
 #Callbacks
@@ -20,7 +20,7 @@ create.restype = ctypes.c_void_p
 
 is_loaded = libspotify.sp_search_is_loaded
 is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = ctypes.c_bool
+is_loaded.restype = bool_type
 
 error = libspotify.sp_search_error
 error.argtypes = [ctypes.c_void_p]

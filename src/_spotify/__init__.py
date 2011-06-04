@@ -10,6 +10,13 @@ __all__ = [
 ]
 
 
+#Some fallbacks for python 2.4
+if hasattr(ctypes, "c_bool"):
+    bool_type = ctypes.c_bool
+else:
+    bool_type = ctypes.c_ubyte
+
+
 #Calculate void pointer size, 32 or 64
 voidp_size = struct.calcsize("P") * 8
 
