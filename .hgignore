@@ -1,4 +1,5 @@
 
 syntax: regexp
 ^test/appkey\.py$
-^tmp$
+syntax: glob
+tmp/*
