@@ -81,7 +81,7 @@ def print_user(user):
 def main():
     print "uses SPOTIFY(R) CORE"
     ml = MainLoop()
-    buf = audio.MemoryBuffer()
+    buf = audio.BufferManager()
     cb = JukeboxCallbacks(ml, buf)
     s = session.Session(
         cb,
