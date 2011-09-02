@@ -75,7 +75,7 @@ class Link:
         buf = (ctypes.c_char * 255)()
         
         #Should check return value?
-        _link.as_string(self.__link_struct, ctypes.byref(buf), 255)
+        _link.as_string(self.__link_struct, buf, 255)
         
         return buf.value
     
