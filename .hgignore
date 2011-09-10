@@ -1,5 +1,7 @@
-
 syntax: regexp
 ^test/appkey\.py$
 syntax: glob
 tmp/*
+*.egg-info
+dist
+build
