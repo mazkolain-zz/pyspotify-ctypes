@@ -10,6 +10,6 @@ setup(
     author_email='azkotoki@gmail.com',
     url='http://forge.azkotoki.org/pyspotify-ctypes',
     package_dir = {'': 'src'},
-    packages=['_spotify', 'spotify'],
+    packages=['_spotify', 'spotify', 'spotify.utils'],
     zip_safe=False,
 )
