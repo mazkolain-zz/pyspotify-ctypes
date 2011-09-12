@@ -96,3 +96,7 @@ audio_buffer_stats._fields_ = [
 error_message = libspotify.sp_error_message
 error_message.argtypes = [ctypes.c_int]
 error_message.restype = ctypes.c_char_p
+
+build_id = libspotify.sp_build_id
+build_id.argtypes = []
+build_id.restype = ctypes.c_char_p

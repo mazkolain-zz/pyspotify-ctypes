@@ -194,6 +194,17 @@ create = libspotify.sp_playlist_create
 create.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
 create.restype = ctypes.c_void_p
 
+set_offline_mode = libspotify.sp_playlist_set_offline_mode
+set_offline_mode.argtypes = [ctypes.c_void_p, ctypes.c_void_p, bool_type]
+
+get_offline_status = libspotify.sp_playlist_get_offline_status
+get_offline_status.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+get_offline_status.restype = ctypes.c_int
+
+get_offline_download_completed = libspotify.sp_playlist_get_offline_download_completed
+get_offline_download_completed.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+get_offline_download_completed.restype = ctypes.c_int
+
 add_ref = libspotify.sp_playlist_add_ref
 add_ref.argtypes = [ctypes.c_void_p]
 

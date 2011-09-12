@@ -17,9 +17,21 @@ create_from_album = libspotify.sp_link_create_from_album
 create_from_album.argtypes = [ctypes.c_void_p]
 create_from_album.restype = ctypes.c_void_p
 
+create_from_album_cover = libspotify.sp_link_create_from_album_cover
+create_from_album_cover.argtypes = [ctypes.c_void_p]
+create_from_album_cover.restype = ctypes.c_void_p
+
 create_from_artist = libspotify.sp_link_create_from_artist
 create_from_artist.argtypes = [ctypes.c_void_p]
 create_from_artist.restype = ctypes.c_void_p
+
+create_from_artist_portrait = libspotify.sp_link_create_from_artist_portrait
+create_from_artist_portrait.argtypes = [ctypes.c_void_p]
+create_from_artist_portrait.restype = ctypes.c_void_p
+
+create_from_artistbrowse_portrait = libspotify.sp_link_create_from_artistbrowse_portrait
+create_from_artistbrowse_portrait.argtypes = [ctypes.c_void_p]
+create_from_artistbrowse_portrait.restype = ctypes.c_void_p
 
 create_from_search = libspotify.sp_link_create_from_search
 create_from_search.argtypes = [ctypes.c_void_p]
@@ -32,6 +44,10 @@ create_from_playlist.restype = ctypes.c_void_p
 create_from_user = libspotify.sp_link_create_from_user
 create_from_user.argtypes = [ctypes.c_void_p]
 create_from_user.restype = ctypes.c_void_p
+
+create_from_image = libspotify.sp_link_create_from_image
+create_from_image.argtypes = [ctypes.c_void_p]
+create_from_image.restype = ctypes.c_void_p
 
 as_string = libspotify.sp_link_as_string
 as_string.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]

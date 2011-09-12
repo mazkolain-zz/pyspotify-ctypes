@@ -11,7 +11,11 @@ image_loaded_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 #Function prototypes
 create = libspotify.sp_image_create
 create.argtypes = [ctypes.c_void_p, ctypes.c_char * 20]
-create
+create.restype = ctypes.c_void_p
+
+create_from_link = libspotify.sp_image_create_from_link
+create_from_link.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+create_from_link.restype = ctypes.c_void_p
 
 add_load_callback = libspotify.sp_image_add_load_callback
 add_load_callback.argtypes = [

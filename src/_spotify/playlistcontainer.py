@@ -49,6 +49,10 @@ num_playlists = libspotify.sp_playlistcontainer_num_playlists
 num_playlists.argtypes = [ctypes.c_void_p]
 num_playlists.restype = ctypes.c_int
 
+is_loaded = libspotify.sp_playlistcontainer_is_loaded
+is_loaded.argtypes = [ctypes.c_void_p]
+is_loaded.restype = bool_type
+
 playlist = libspotify.sp_playlistcontainer_playlist
 playlist.argtypes = [ctypes.c_void_p, ctypes.c_int]
 playlist.restype = ctypes.c_void_p

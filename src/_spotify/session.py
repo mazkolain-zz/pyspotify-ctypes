@@ -12,6 +12,9 @@ class callbacks(ctypes.Structure):
 class config(ctypes.Structure):
     pass
 
+class offline_sync_status(ctypes.Structure):
+    pass
+
 
 #Callbacks
 cb_logged_in = callback(None, ctypes.c_void_p, ctypes.c_int)
@@ -39,6 +42,8 @@ cb_get_audio_buffer_stats = callback(
     None, ctypes.c_void_p, ctypes.POINTER(_spotify.audio_buffer_stats)
 )
 
+cb_offline_status_updated = callback(None, ctypes.c_void_p)
+
 
 #Completion of structure defs
 callbacks._fields_ = [
@@ -57,6 +62,7 @@ callbacks._fields_ = [
     ("start_playback", cb_start_playback),
     ("stop_playback", cb_stop_playback),
     ("get_audio_buffer_stats", cb_get_audio_buffer_stats),
+    ("offline_status_updated", cb_offline_status_updated)
 ]
 
 config._fields_ = [
@@ -73,6 +79,15 @@ config._fields_ = [
     ("initially_unload_playlists", bool_type),
 ]
 
+offline_sync_status._fields_ = [
+    ("queued_tracks", ctypes.c_int),
+    ("done_tracks", ctypes.c_int),
+    ("copied_tracks", ctypes.c_int),
+    ("willnotcopy_tracks", ctypes.c_int),
+    ("error_tracks", ctypes.c_int),
+    ("syncing", bool_type)
+]
+
 
 #Function declarations
 create = _spotify.libspotify.sp_session_create
@@ -83,7 +98,18 @@ release = libspotify.sp_session_release
 release.argtypes = [ctypes.c_void_p]
 
 login = libspotify.sp_session_login
-login.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+login.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, bool_type]
+
+relogin = libspotify.sp_session_relogin
+relogin.argtypes = [ctypes.c_void_p]
+relogin.restype = ctypes.c_int
+
+remembered_user = libspotify.sp_session_remembered_user
+remembered_user.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
+remembered_user.restype = ctypes.c_int
+
+forget_me = libspotify.sp_session_forget_me
+forget_me.argtypes = [ctypes.c_void_p]
 
 user = libspotify.sp_session_user
 user.argtypes = [ctypes.c_void_p]
@@ -150,6 +176,9 @@ publishedcontainer_for_user_create.restype = ctypes.c_void_p
 preferred_bitrate = libspotify.sp_session_preferred_bitrate
 preferred_bitrate.argtypes = [ctypes.c_void_p, ctypes.c_int]
 
+preferred_offline_bitrate = libspotify.sp_session_preferred_offline_bitrate
+preferred_offline_bitrate.argtypes = [ctypes.c_void_p, ctypes.c_int, bool_type]
+
 num_friends = libspotify.sp_session_num_friends
 num_friends.argtypes = [ctypes.c_void_p]
 num_friends.restype = ctypes.c_int
@@ -157,3 +186,30 @@ num_friends.restype = ctypes.c_int
 friend = libspotify.sp_session_friend
 friend.argtypes = [ctypes.c_void_p, ctypes.c_int]
 friend.restype = ctypes.c_void_p
+
+set_connection_type = libspotify.sp_session_set_connection_type
+set_connection_type.argtypes = [ctypes.c_void_p, ctypes.c_int]
+
+set_connection_rules = libspotify.sp_session_set_connection_rules
+set_connection_rules.argtypes = [ctypes.c_void_p, ctypes.c_int]
+
+#Mmmm, shouldn't these ones be sp_session_offline*
+offline_tracks_to_sync = libspotify.sp_offline_tracks_to_sync
+offline_tracks_to_sync.argtypes = [ctypes.c_void_p]
+offline_tracks_to_sync.restype = ctypes.c_int
+
+offline_num_playlists = libspotify.sp_offline_num_playlists
+offline_num_playlists.argtypes = [ctypes.c_void_p]
+offline_num_playlists.restype = ctypes.c_int
+
+offline_sync_get_status = libspotify.sp_offline_sync_get_status
+offline_sync_get_status.argtypes = [ctypes.c_void_p, ctypes.POINTER(offline_sync_status)]
+offline_sync_get_status.restype = bool_type
+
+offline_time_left = libspotify.sp_offline_time_left
+offline_time_left.argtypes = [ctypes.c_void_p]
+offline_time_left.restype = ctypes.c_int
+
+user_country = libspotify.sp_session_user_country
+user_country.argtypes = [ctypes.c_void_p]
+user_country.restype = ctypes.c_int
