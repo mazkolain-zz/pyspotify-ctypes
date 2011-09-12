@@ -143,6 +143,11 @@ class ProxySessionCallbacks:
         )
     
     
+    def _offline_status_updated(self, session):
+        self.__callbacks.offline_status_updated(self.__session)
+        self.__manager._offline_status_updated(self.__session)
+    
+    
     def get_callback_struct(self):
         return self.__struct
 
@@ -193,12 +198,15 @@ class SessionCallbacks:
     
     def get_audio_buffer_stats(self, session):
         pass
+    
+    def offline_status_updated(self, session):
+        pass
 
 
 
 #classes
 class Session:
-    api_version = 7
+    api_version = 9
     
     __session = None
     
@@ -255,9 +263,29 @@ class Session:
     
     
     @synchronized
-    def login(self, username, password):
-        _session.login(self.__session, username, password)
+    def login(self, username, password, remember_me=False):
+        _session.login(self.__session, username, password, remember_me)
     
+    
+    @synchronized
+    def relogin(self):
+        handle_sp_error(
+            _session.relogin(self.__session)
+        )
+    
+    
+    @synchronized
+    def remembered_user(self):
+        buf = (ctypes.c_char * 255)()
+        res = _session.remembered_user(self.__session, ctypes.byref(buf), ctypes.sizeof(buf))
+        if res != -1:
+            return buf.value
+    
+    
+    @synchronized
+    def forget_me(self):
+        _session.forget_me(self.__session)
+        
     
     @synchronized
     def user(self, onload=None):

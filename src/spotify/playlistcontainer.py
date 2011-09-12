@@ -47,8 +47,6 @@ class ProxyPlaylistContainerCallbacks:
     
     
     def _container_loaded(self, container, data):
-        #Also set the container's flag
-        self._container.set_loaded(True)
         self._callbacks.container_loaded(self._container)
         
     
@@ -91,25 +89,18 @@ class PlaylistContainer:
     #To store generated playlist instances
     _playlist_objects = None
     
-    #Is loaded check, not provided by libspotify
-    _is_loaded = None
-    
     
     @synchronized
     def __init__(self, container_struct):
         self.__container_struct = container_struct
         self._playlist_objects = {}
         self._callbacks = {}
-        self._is_loaded = False
         _playlistcontainer.add_ref(self.__container_struct)
     
     
-    def set_loaded(self, status):
-        self._is_loaded = status
-    
-    
+    @synchronized
     def is_loaded(self):
-        return self._is_loaded
+        return _playlistcontainer.is_loaded(self.__container_struct)
     
     
     @synchronized
