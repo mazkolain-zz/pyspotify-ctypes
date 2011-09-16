@@ -420,5 +420,10 @@ class Session:
     
     
     @synchronized
-    def __del__(self):
+    def release(self):
         _session.release(self.__session)
+        print "destroy called"
+    
+    
+    def __del__(self):
+        self.release()
