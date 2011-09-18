@@ -220,7 +220,7 @@ class Session:
     _playlistcontainer = None
     
     
-    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None):
+    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False):
         #Callback managers
         self._user_callbacks = spotify.CallbackQueueManager()
         self._metadata_callbacks = spotify.CallbackQueueManager()
@@ -244,9 +244,9 @@ class Session:
             user_agent,
             ctypes.pointer(self.__callbacks.get_callback_struct()),
             ctypes.c_void_p(),
-            1,
-            0,
-            1,
+            compress_playlists,
+            dont_save_metadata_for_playlists,
+            initially_unload_playlists,
         )
         
         self.__session = ctypes.c_void_p()
@@ -412,6 +412,16 @@ class Session:
     
     def friends(self):
         return CallbackIterator(self.num_friends, self.friend)
+    
+    
+    @synchronized
+    def set_connection_rules(self, type):
+        _session.set_connection_rules(self.__session, type)
+    
+    
+    @synchronized
+    def set_connection_type(self, type):
+        _session.set_connection_type(self.__session, type)
     
     
     @synchronized

@@ -40,6 +40,24 @@ class SampleType:
 
 
 
+class ConnectionRules:
+    Network = 0x1
+    NetworkIfRoaming = 0x2
+    AllowSyncOverMobile = 0x4
+    AllowSyncOverWifi = 0x8
+
+
+
+class ConnectionType:
+    Unknown = 0
+    Disconnected = 1
+    Mobile = 2
+    MobileRoaming = 3
+    Wifi = 4
+    Wired = 5
+
+
+
 class MainLoop:
     _event = None
     _quit = None
