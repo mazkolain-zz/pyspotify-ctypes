@@ -5,7 +5,7 @@ Created on 29/04/2011
 '''
 import ctypes
 
-from _spotify import link as _link
+from _spotify import link as _link, track as _track, user as _user, artist as _artist, album as _album
 
 from spotify import track, user, artist, album
 
@@ -97,43 +97,54 @@ class Link:
     
     @synchronized
     def as_track(self):
-        return track.Track(self.__link_interface.as_track(self.__link_struct)) 
+        track_struct = self.__link_interface.as_track(self.__link_struct)
+        ti = _track.TrackInterface()
+        ti.add_ref(track_struct)
+        return track.Track(track_struct) 
     
     
     @synchronized
     def as_track_and_offset(self):
         offset = ctypes.c_int
-        track = track.Track(self.__link_interface.as_track_and_offset)
-        return track, offset.value
+        track_struct = self.__link_interface.as_track_and_offset
+        ti = _track.TrackInterface()
+        ti.add_ref(track_struct)
+        return track.Track(track_struct), offset.value
     
     @synchronized
     def as_album(self):
-        return album.Album(self.__link_interface.as_album(self.__link_struct))
+        album_struct = self.__link_interface.as_album(self.__link_struct)
+        ai = _album.AlbumInterface()
+        ai.add_ref(album_struct)
+        return album.Album(album_struct)
     
     
     @synchronized
     def as_artist(self):
-        return artist.Artist(self.__link_interface.as_artist(self.__link_struct))
+        #Increment reference count so it's not stolen from us
+        artist_struct = self.__link_interface.as_artist(self.__link_struct)
+        ai = _artist.ArtistInterface()
+        ai.add_ref(artist_struct)
+        return artist.Artist(artist_struct)
     
     
     @synchronized
     def as_user(self):
-        return user.User(self.__link_interface.as_user(self.__link_struct))
+        #Increment reference count so it's not stolen from us
+        user_struct = self.__link_interface.as_user(self.__link_struct)
+        ui = _user.UserInterface()
+        ui.add_ref(user_struct)
+        return user.User(user_struct)
     
     
     @synchronized
-    def add_ref(self):
-        self.__link_interface.add_ref(self.__link_struct)
-    
-    
+    def __del__(self):
+        self.__link_interface.release(self.__link_struct)
+        
+        
     def get_struct(self):
         return self.__link_struct
     
     
     def __str__(self):
         return self.as_string()
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__link_interface.release(self.__link_struct)
