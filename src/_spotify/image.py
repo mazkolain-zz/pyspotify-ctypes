@@ -1,54 +1,91 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback, bool_type
+from _spotify import LibSpotifyInterface, callback, bool_type
 
 
 #Callbacks
 image_loaded_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 
 
-#Function prototypes
-create = libspotify.sp_image_create
-create.argtypes = [ctypes.c_void_p, ctypes.c_char * 20]
-create.restype = ctypes.c_void_p
 
-create_from_link = libspotify.sp_image_create_from_link
-create_from_link.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-create_from_link.restype = ctypes.c_void_p
+class ImageInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
+        
+        self._register_func(
+            'create',
+            'sp_image_create',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_char * 20
+        )
 
-add_load_callback = libspotify.sp_image_add_load_callback
-add_load_callback.argtypes = [
-    ctypes.c_void_p, image_loaded_cb, ctypes.c_void_p
-]
+        self._register_func(
+            'create_from_link',
+            'sp_image_create_from_link',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_void_p
+        )
 
-remove_load_callback = libspotify.sp_image_remove_load_callback
-remove_load_callback.argtypes = [
-    ctypes.c_void_p, image_loaded_cb, ctypes.c_void_p
-]
+        self._register_func(
+            'add_load_callback',
+            'sp_image_add_load_callback',
+            None,
+            ctypes.c_void_p, image_loaded_cb, ctypes.c_void_p
+        )
 
-is_loaded = libspotify.sp_image_is_loaded
-is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = bool_type
+        self._register_func(
+            'remove_load_callback',
+            'sp_image_remove_load_callback',
+            None,
+            ctypes.c_void_p, image_loaded_cb, ctypes.c_void_p
+        )
 
-error = libspotify.sp_image_error
-error.argtypes = [ctypes.c_void_p]
-error.restype = ctypes.c_int
+        self._register_func(
+            'is_loaded',
+            'sp_image_is_loaded',
+            bool_type,
+            ctypes.c_void_p
+        )
 
-format = libspotify.sp_image_format
-format.argtypes = [ctypes.c_void_p]
-format.restype = ctypes.c_int
+        self._register_func(
+            'error',
+            'sp_image_error',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
 
-data = libspotify.sp_image_data
-data.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
-data.restype = ctypes.c_void_p
+        self._register_func(
+            'format',
+            'sp_image_format',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
 
-image_id = libspotify.sp_image_image_id
-image_id.argtypes = [ctypes.c_void_p]
-image_id.restype = ctypes.POINTER(ctypes.c_byte)
+        self._register_func(
+            'data',
+            'sp_image_data',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)
+        )
 
-add_ref = libspotify.sp_image_add_ref
-add_ref.argtypes = [ctypes.c_void_p]
+        self._register_func(
+            'image_id',
+            'sp_image_image_id',
+            ctypes.POINTER(ctypes.c_byte),
+            ctypes.c_void_p
+        )
 
-release = libspotify.sp_image_release
-release.argtypes = [ctypes.c_void_p]
+        self._register_func(
+            'add_ref',
+            'sp_image_add_ref',
+            None,
+            ctypes.c_void_p
+        )
+
+        self._register_func(
+            'release',
+            'sp_image_release',
+            None,
+            ctypes.c_void_p
+        )

@@ -15,7 +15,8 @@ from spotify.utils.decorators import synchronized
 
 def handle_sp_error(errcode):
     if errcode != 0:
-        msg = _spotify.error_message(errcode)
+        iface = _spotify.SpotifyInterface()
+        msg = iface.error_message(errcode)
         raise LibSpotifyError(msg)
 
 

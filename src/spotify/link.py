@@ -7,7 +7,7 @@ import ctypes
 
 from _spotify import link as _link
 
-from spotify import track, playlist, user, artist, album
+from spotify import track, user, artist, album
 
 from spotify.utils.decorators import synchronized
 
@@ -15,37 +15,44 @@ from spotify.utils.decorators import synchronized
 
 @synchronized
 def create_from_string(string):
-    return Link(_link.create_from_string(string))
+    li = _link.LinkInterface()
+    return Link(li.create_from_string(string))
 
 
 @synchronized
 def create_from_track(track, offset = 0):
-    return Link(_link.create_from_track(track.get_struct(), offset))
+    li = _link.LinkInterface()
+    return Link(li.create_from_track(track.get_struct(), offset))
 
 
 @synchronized
 def create_from_artist(artist):
-    return Link(_link.create_from_artist(artist.get_struct()))
+    li = _link.LinkInterface()
+    return Link(li.create_from_artist(artist.get_struct()))
 
 
 @synchronized
 def create_from_album(album):
-    return Link(_link.create_from_album(album.get_struct()))
+    li = _link.LinkInterface()
+    return Link(li.create_from_album(album.get_struct()))
 
 
 @synchronized
 def create_from_search(search):
-    return Link(_link.create_from_search(search.get_struct()))
+    li = _link.LinkInterface()
+    return Link(li.create_from_search(search.get_struct()))
 
 
 @synchronized
 def create_from_playlist(playlist):
-    return Link(_link.create_from_playlist(playlist.get_struct()))
+    li = _link.LinkInterface()
+    return Link(li.create_from_playlist(playlist.get_struct()))
 
 
 @synchronized
 def create_from_user(user):
-    return Link(_link.create_from_user(user.get_struct()))
+    li = _link.LinkInterface()
+    return Link(li.create_from_user(user.get_struct()))
 
 
 
@@ -59,15 +66,18 @@ class LinkType:
     Profile = 6
     Starred = 7
     Localtrack = 8
+    Image = 9
 
 
 
 class Link:
     __link_struct = None
+    __link_interface = None
     
     
     def __init__(self, link_struct):
         self.__link_struct = link_struct
+        self.__link_interface = _link.LinkInterface()
     
     
     @synchronized
@@ -75,50 +85,45 @@ class Link:
         buf = (ctypes.c_char * 255)()
         
         #Should check return value?
-        _link.as_string(self.__link_struct, buf, 255)
+        self.__link_interface.as_string(self.__link_struct, buf, 255)
         
         return buf.value
     
     
     @synchronized
     def type(self):
-        return _link.type(self.__link_struct)
+        return self.__link_interface.type(self.__link_struct)
     
     
     @synchronized
     def as_track(self):
-        return track.Track(_link.as_track(self.__link_struct)) 
+        return track.Track(self.__link_interface.as_track(self.__link_struct)) 
     
     
     @synchronized
     def as_track_and_offset(self):
         offset = ctypes.c_int
-        track = track.Track(_link.as_track_and_offset)
+        track = track.Track(self.__link_interface.as_track_and_offset)
         return track, offset.value
     
     @synchronized
     def as_album(self):
-        return album.Album(_link.as_album(self.__link_struct))
+        return album.Album(self.__link_interface.as_album(self.__link_struct))
     
     
     @synchronized
     def as_artist(self):
-        return artist.Artist(_link.as_artist(self.__link_struct))
+        return artist.Artist(self.__link_interface.as_artist(self.__link_struct))
     
     
     @synchronized
     def as_user(self):
-        return user.User(_link.as_user(self.__link_struct))
+        return user.User(self.__link_interface.as_user(self.__link_struct))
     
     
     @synchronized
     def add_ref(self):
-        _link.add_ref(self.__link_struct)
-    
-    
-    @synchronized
-    def release(self):
-        _link.release(self.__link_struct)
+        self.__link_interface.add_ref(self.__link_struct)
     
     
     def get_struct(self):
@@ -129,5 +134,6 @@ class Link:
         return self.as_string()
     
     
+    @synchronized
     def __del__(self):
-        self.release()
+        self.__link_interface.release(self.__link_struct)

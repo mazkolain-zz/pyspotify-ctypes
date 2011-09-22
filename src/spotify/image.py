@@ -13,6 +13,7 @@ from spotify.utils.decorators import synchronized
 
 import binascii
 
+import weakref
 
 
 @synchronized
@@ -20,8 +21,11 @@ def create(session, image_id):
     buf = (ctypes.c_char * 20)()
     buf.value = binascii.a2b_hex(image_id)
     
+    #FIXME: mmm, too bad if we only need one call from the interface
+    ii = _image.ImageInterface()
+    
     return Image(
-        _image.create(session.get_struct(), buf)
+        ii.create(session.get_struct(), buf)
     )
 
 
@@ -33,7 +37,7 @@ class ProxyImageCallbacks:
     
     
     def __init__(self, image, callbacks):
-        self.__image = image
+        self.__image = weakref.proxy(image)
         self.__callbacks = callbacks
         self.__c_callback = _image.image_loaded_cb(self.image_loaded)
     
@@ -59,11 +63,13 @@ class ImageFormat:
 
 class Image:
     __image_struct = None
+    __image_interface = None
     __callbacks = None
     
     
     def __init__(self, image_struct):
         self.__image_struct = image_struct
+        self.__image_interface = _image.ImageInterface()
         self.__callbacks = {}
     
     
@@ -84,7 +90,7 @@ class Image:
                 "proxy": proxy,
             }
             
-            _image.add_load_callback(
+            self.__image_interface.add_load_callback(
                 self.__image_struct, proxy.get_c_callback(), None
             )
     
@@ -98,7 +104,7 @@ class Image:
         
         else:
             c_callback = self.__callbacks[cb_id]["proxy"].get_c_callback()
-            _image.remove_load_callback(
+            self.__image_interface.remove_load_callback(
                 self.__image_struct, ctypes.byref(c_callback), None
             )
             del self.__callbacks[cb_id]
@@ -112,30 +118,32 @@ class Image:
     
     @synchronized
     def is_loaded(self):
-        return _image.is_loaded(self.__image_struct)
+        return self.__image_interface.is_loaded(self.__image_struct)
     
     
     @synchronized
     def error(self):
-        return _image.error(self.__image_struct)
+        return self.__image_interface.error(self.__image_struct)
     
     
     @synchronized
     def format(self):
-        return _image.format(self.__image_struct)
+        return self.__image_interface.format(self.__image_struct)
     
     
     @synchronized
     def data(self):
         size = ctypes.c_size_t()
-        raw = _image.data(self.__image_struct, ctypes.pointer(size))
+        raw = self.__image_interface.data(self.__image_struct, ctypes.pointer(size))
         dest = ctypes.cast(raw, ctypes.POINTER(ctypes.c_char * size.value))
         return str(buffer(dest.contents))
     
     
-    def get_struct(self):
-        return self.__image_struct
-    
-    
+    @synchronized
     def __del__(self):
         self.remove_all_load_callbacks()
+        self.__image_interface.release()
+    
+    
+    def get_struct(self):
+        return self.__image_struct

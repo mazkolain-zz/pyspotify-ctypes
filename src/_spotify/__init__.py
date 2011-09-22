@@ -40,24 +40,79 @@ else:
 
 
 
-def __load_libspotify(loader, filename):
-    #Let ctypes find it
-    try:
-        return loader.libspotify
-
-    #Bad luck, let's do a quirk
-    except OSError:
-        for path in sys.path:
-            full_path = os.path.join(path, filename)
-            if os.path.isfile(full_path):
-                return loader.LoadLibrary(full_path)
+class ModuleInterface(object):
+    __registered_funcs = None
     
-        raise OSError("Unable to find libspotify")
+    
+    def __init__(self):
+        self.__registered_funcs = {}
+    
+    
+    def get_library(self):
+        pass
+    
+    
+    def __getattr__(self, name):
+        if name not in self.__registered_funcs:
+            raise AttributeError
+        
+        else:
+            def func_caller(*args):
+                func = self.__registered_funcs[name]
+                return func(*args)
+            
+            return func_caller
+    
+    
+    def _register_func(self, name, orig_name, restype, *argtypes):
+        lib = self.get_library()
+        func = getattr(lib, orig_name)
+        func.argtypes = argtypes
+        func.restype = restype
+        self.__registered_funcs[name] = func
 
 
 
-#Global libspotify instance
-libspotify = __load_libspotify(loader, filename)
+class LibSpotifyInterface(ModuleInterface):
+    def __init__(self):
+        ModuleInterface.__init__(self)
+    
+    
+    def get_library(self):
+        #Let ctypes find it
+        try:
+            return loader.libspotify
+    
+        #Bad luck, let's do a quirk
+        except OSError:
+            for path in sys.path:
+                full_path = os.path.join(path, filename)
+                if os.path.isfile(full_path):
+                    return loader.LoadLibrary(full_path)
+        
+            raise OSError("Unable to find libspotify")
+
+
+
+def unload_library():
+    li = LibSpotifyInterface()
+    handle = li.get_library()._handle
+    print dir(li.get_library())
+    del li
+    
+    import os
+    
+    if os.name == "nt":
+        from _ctypes import FreeLibrary
+        FreeLibrary(handle)
+        print "dll unloaded"
+    print handle
+    
+    #FreeLibrary = ctypes.cdll.kernel32.FreeLibrary
+    #FreeLibrary.argtypes = [ctypes.c_void_p]
+    #FreeLibrary.restype = ctypes.wintypes.BOOL
+    
+    
 
 
 
@@ -92,11 +147,20 @@ audio_buffer_stats._fields_ = [
 
 
 
-#Function declarations
-error_message = libspotify.sp_error_message
-error_message.argtypes = [ctypes.c_int]
-error_message.restype = ctypes.c_char_p
-
-build_id = libspotify.sp_build_id
-build_id.argtypes = []
-build_id.restype = ctypes.c_char_p
+#Low level declaration interface
+class SpotifyInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
+        
+        self._register_func(
+            'error_message',
+            'sp_error_message',
+            ctypes.c_char_p,
+            ctypes.c_int
+        )
+        
+        self._register_func(
+            'build_id',
+            'sp_build_id',
+            ctypes.c_char_p
+        )

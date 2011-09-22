@@ -1,40 +1,73 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, bool_type
+from _spotify import LibSpotifyInterface, bool_type
 
 
-#Function prototypes
-is_loaded = libspotify.sp_album_is_loaded
-is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = bool_type
 
-is_available = libspotify.sp_album_is_available
-is_available.argtypes = [ctypes.c_void_p]
-is_available.restype = bool_type
+class AlbumInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
+        
+        self._register_func(
+            'is_loaded',
+            'sp_album_is_loaded',
+            bool_type,
+            ctypes.c_void_p
+        )
 
-artist = libspotify.sp_album_artist
-artist.argtypes = [ctypes.c_void_p]
-artist.restype = ctypes.c_void_p
+        self._register_func(
+            'is_available',
+            'sp_album_is_available',
+            bool_type,
+            ctypes.c_void_p
+        )
 
-cover = libspotify.sp_album_cover
-cover.argtypes = [ctypes.c_void_p]
-cover.restype = ctypes.POINTER(ctypes.c_byte * 20)
+        self._register_func(
+            'artist',
+            'sp_album_artist',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'cover',
+            'sp_album_cover',
+            ctypes.POINTER(ctypes.c_byte * 20),
+            ctypes.c_void_p
+        )
 
-name = libspotify.sp_album_name
-name.argtypes = [ctypes.c_void_p]
-name.restype = ctypes.c_char_p
+        self._register_func(
+            'name',
+            'sp_album_name',
+            ctypes.c_char_p,
+            ctypes.c_void_p
+        )
 
-year = libspotify.sp_album_year
-year.argtypes = [ctypes.c_void_p]
-year.restype = ctypes.c_int
+        self._register_func(
+            'year',
+            'sp_album_year',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
 
-type = libspotify.sp_album_type
-type.argtypes = [ctypes.c_void_p]
-type.restype = ctypes.c_int
+        self._register_func(
+            'type',
+            'sp_album_type',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
 
-add_ref = libspotify.sp_album_add_ref
-add_ref.argtypes = [ctypes.c_void_p]
+        self._register_func(
+            'add_ref',
+            'sp_album_add_ref',
+            None,
+            ctypes.c_void_p,
+        )
 
-release = libspotify.sp_album_release
-release.argtypes = [ctypes.c_void_p]
+        self._register_func(
+            'release',
+            'sp_album_release',
+            None,
+            ctypes.c_void_p
+        )

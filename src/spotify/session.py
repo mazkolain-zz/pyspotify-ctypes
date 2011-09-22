@@ -1,19 +1,20 @@
 import ctypes
 
 #Import low level api
-import _spotify
 from _spotify import session as _session
 
 #Import general classes from the high level module
 import spotify
 
 #Also import this one's siblings
-from spotify import user, playlistcontainer, playlist, handle_sp_error
+from spotify import user, handle_sp_error #playlistcontainer, playlist,
 
 #Decorators
 from spotify.utils.decorators import synchronized
 
 from spotify.utils.iterators import CallbackIterator
+
+import weakref
 
 
 
@@ -25,7 +26,7 @@ class ProxySessionCallbacks:
     
     
     def __init__(self, session, callbacks, manager):
-        self.__session = session
+        self.__session = weakref.proxy(session)
         self.__callbacks = callbacks
         self.__manager = manager
         self.__struct = _session.callbacks(
@@ -208,7 +209,8 @@ class SessionCallbacks:
 class Session:
     api_version = 9
     
-    __session = None
+    __session_struct = None
+    __session_interface = None
     
     __proxy_callbacks = None
     __callback_manager = None
@@ -221,6 +223,9 @@ class Session:
     
     
     def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False):
+        #Low level interface
+        self.__session_interface = _session.SessionInterface()
+        
         #Callback managers
         self._user_callbacks = spotify.CallbackQueueManager()
         self._metadata_callbacks = spotify.CallbackQueueManager()
@@ -249,8 +254,8 @@ class Session:
             initially_unload_playlists,
         )
         
-        self.__session = ctypes.c_void_p()
-        err = _session.create(ctypes.byref(config), ctypes.byref(self.__session))
+        self.__session_struct = ctypes.c_void_p()
+        err = self.__session_interface.create(ctypes.byref(config), ctypes.byref(self.__session_struct))
         spotify.handle_sp_error(err)
     
     
@@ -264,32 +269,32 @@ class Session:
     
     @synchronized
     def login(self, username, password, remember_me=False):
-        _session.login(self.__session, username, password, remember_me)
+        self.__session_interface.login(self.__session_struct, username, password, remember_me)
     
     
     @synchronized
     def relogin(self):
         handle_sp_error(
-            _session.relogin(self.__session)
+            self.__session_interface.relogin(self.__session_struct)
         )
     
     
     @synchronized
     def remembered_user(self):
         buf = (ctypes.c_char * 255)()
-        res = _session.remembered_user(self.__session, ctypes.byref(buf), ctypes.sizeof(buf))
+        res = self.__session_interface.remembered_user(self.__session_struct, ctypes.byref(buf), ctypes.sizeof(buf))
         if res != -1:
             return buf.value
     
     
     @synchronized
     def forget_me(self):
-        _session.forget_me(self.__session)
+        self.__session_interface.forget_me(self.__session_struct)
         
     
     @synchronized
     def user(self, onload=None):
-        user_obj = user.User(self.__session, _session.user(self.__session))
+        user_obj = user.User(self.__session_struct, self.__session_interface.user(self.__session_struct))
             
         if onload != None:
             self._user_callbacks.add_callback(
@@ -301,57 +306,57 @@ class Session:
     
     @synchronized
     def logout(self):
-        _session.logout(self.__session)
+        self.__session_interface.logout(self.__session_struct)
     
     
     @synchronized
     def connectionstate(self):
-        return _session.connectionstate(self.__session)
+        return self.__session_interface.connectionstate(self.__session_struct)
     
     
     @synchronized
     def userdata(self):
-        return _session.userdata(self.__session)
+        return self.__session_interface.userdata(self.__session_struct)
     
     
     @synchronized
     def set_cache_size(self, size):
-        _session.set_cache_size(size)
+        self.__session_interface.set_cache_size(size)
     
     
     @synchronized
     def process_events(self):
         next_timeout = ctypes.c_int(0)
-        _session.process_events(self.__session, ctypes.byref(next_timeout))
+        self.__session_interface.process_events(self.__session_struct, ctypes.byref(next_timeout))
         return next_timeout.value / 1000
         
     
     @synchronized
     def player_load(self, track):
         handle_sp_error(
-            _session.player_load(self.__session, track.get_struct())
+            self.__session_interface.player_load(self.__session_struct, track.get_struct())
         )
     
     
     @synchronized
     def player_seek(self, offset):
-        _session.player_seek(self.__session, offset)
+        self.__session_interface.player_seek(self.__session_struct, offset)
     
     
     @synchronized
     def player_play(self, play):
-        _session.player_play(self.__session, play)
+        self.__session_interface.player_play(self.__session_struct, play)
     
     
     @synchronized
     def player_unload(self):
-        _session.player_unload(self.__session)
+        self.__session_interface.player_unload(self.__session_struct)
     
     
     @synchronized
     def player_prefetch(self, track):
         handle_sp_error(
-            _session.player_prefetch(self.__session, track.get_struct())
+            self.__session_interface.player_prefetch(self.__session_struct, track.get_struct())
         )
     
     
@@ -359,7 +364,7 @@ class Session:
     def playlistcontainer(self):
         if self._playlistcontainer is None:
             self._playlistcontainer = playlistcontainer.PlaylistContainer(
-                _session.playlistcontainer(self.__session),
+                self.__session_interface.playlistcontainer(self.__session_struct),
             )
         
         return self._playlistcontainer
@@ -367,19 +372,19 @@ class Session:
     
     @synchronized
     def inbox_create(self):
-        return playlist.Playlist(_session.inbox_create(self.__session))
+        return playlist.Playlist(self.__session_interface.inbox_create(self.__session_struct))
     
     
     @synchronized
     def starred_create(self):
-        return playlist.Playlist(_session.starred_create(self.__session))
+        return playlist.Playlist(self.__session_interface.starred_create(self.__session_struct))
     
     
     @synchronized
     def starred_for_user_create(self, canonical_username):
         return playlist.Playlist(
-            _session.starred_for_user_create(
-                self.__session, canonical_username
+            self.__session_interface.starred_for_user_create(
+                self.__session_struct, canonical_username
             )
         )
     
@@ -387,26 +392,26 @@ class Session:
     @synchronized
     def publishedcontainer_for_user_create(self, canonical_username):
         return playlistcontainer.PlaylistContainer(
-            _session.publishedcontainer_for_user_create(
-                self.__session, canonical_username
+            self.__session_interface.publishedcontainer_for_user_create(
+                self.__session_struct, canonical_username
             )
         )
     
     
     @synchronized
     def preferred_bitrate(self, bitrate):
-        _session.preferred_bitrate(self.__session, bitrate)
+        self.__session_interface.preferred_bitrate(self.__session_struct, bitrate)
     
     
     @synchronized
     def num_friends(self):
-        return _session.num_friends(self.__session)
+        return self.__session_interface.num_friends(self.__session_struct)
     
     
     @synchronized
     def friend(self, index):
         return user.User(
-            _session.friend(self.__session, index)
+            self.__session_interface.friend(self.__session_struct, index)
         )
     
     
@@ -416,24 +421,20 @@ class Session:
     
     @synchronized
     def set_connection_rules(self, type):
-        _session.set_connection_rules(self.__session, type)
+        self.__session_interface.set_connection_rules(self.__session_struct, type)
     
     
     @synchronized
     def set_connection_type(self, type):
-        _session.set_connection_type(self.__session, type)
+        self.__session_interface.set_connection_type(self.__session_struct, type)
     
     
     @synchronized
     def get_struct(self):
-        return self.__session
+        return self.__session_struct
     
     
     @synchronized
-    def release(self):
-        _session.release(self.__session)
-        print "destroy called"
-    
-    
     def __del__(self):
-        self.release()
+        self.__session_interface.release(self.__session_struct)
+        print "session __del__ called"

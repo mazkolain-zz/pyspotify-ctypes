@@ -6,50 +6,52 @@ from spotify.utils.decorators import synchronized
 
 class User:
     __user_struct = None
+    __user_interface = None
     
     
     @synchronized
     def __init__(self, user_struct):
         self.__user_struct = user_struct
+        self.__user_interface = _user.UserInterface()
         
         #Ref counting
-        _user.add_ref(self.__user_struct)
+        self.__user_interface.add_ref(self.__user_struct)
     
     
     @synchronized
     def canonical_name(self):
-        return _user.canonical_name(self.__user_struct)
+        return self.__user_interface.canonical_name(self.__user_struct)
     
     
     @synchronized
     def display_name(self):
-        return _user.display_name(self.__user_struct)
+        return self.__user_interface.display_name(self.__user_struct)
     
     
     @synchronized
     def full_name(self):
-        return _user.full_name(self.__user_struct)
+        return self.__user_interface.full_name(self.__user_struct)
     
     
     @synchronized
     def is_loaded(self):
-        return _user.is_loaded(self.__user_struct)
+        return self.__user_interface.is_loaded(self.__user_struct)
     
     
     @synchronized
     def picture(self):
-        return _user.picture(self.__user_struct)
+        return self.__user_interface.picture(self.__user_struct)
     
     
     @synchronized
     def relation_type(self, session):
-        return _user.relation_type(session.get_struct(), self.__user_struct)
-    
-    
-    def get_struct(self):
-        return self.__user_struct
+        return self.__user_interface.relation_type(session.get_struct(), self.__user_struct)
     
     
     @synchronized
     def __del__(self):
-        _user.release(self.__user_struct)
+        self.__user_interface.release(self.__user_struct)
+    
+    
+    def get_struct(self):
+        return self.__user_struct

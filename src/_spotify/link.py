@@ -1,84 +1,150 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify
+from _spotify import LibSpotifyInterface
 
 
-#Function protoypes
-create_from_string = libspotify.sp_link_create_from_string
-create_from_string.argtypes = [ctypes.c_char_p]
-create_from_string.restype = ctypes.c_void_p
 
-create_from_track = libspotify.sp_link_create_from_track
-create_from_track.argtypes = [ctypes.c_void_p, ctypes.c_int]
-create_from_track.restype = ctypes.c_void_p
+class LinkInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
+        
+        self._register_func(
+            'create_from_string',
+            'sp_link_create_from_string',
+            ctypes.c_void_p,
+            ctypes.c_char_p
+        )
 
-create_from_album = libspotify.sp_link_create_from_album
-create_from_album.argtypes = [ctypes.c_void_p]
-create_from_album.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_track',
+            'sp_link_create_from_track',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )
 
-create_from_album_cover = libspotify.sp_link_create_from_album_cover
-create_from_album_cover.argtypes = [ctypes.c_void_p]
-create_from_album_cover.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_album',
+            'sp_link_create_from_album',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-create_from_artist = libspotify.sp_link_create_from_artist
-create_from_artist.argtypes = [ctypes.c_void_p]
-create_from_artist.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_album_cover',
+            'sp_link_create_from_album_cover',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-create_from_artist_portrait = libspotify.sp_link_create_from_artist_portrait
-create_from_artist_portrait.argtypes = [ctypes.c_void_p]
-create_from_artist_portrait.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_artist',
+            'sp_link_create_from_artist',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-create_from_artistbrowse_portrait = libspotify.sp_link_create_from_artistbrowse_portrait
-create_from_artistbrowse_portrait.argtypes = [ctypes.c_void_p]
-create_from_artistbrowse_portrait.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_artist_portrait',
+            'sp_link_create_from_artist_portrait',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-create_from_search = libspotify.sp_link_create_from_search
-create_from_search.argtypes = [ctypes.c_void_p]
-create_from_search.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_artistbrowse_portrait',
+            'sp_link_create_from_artistbrowse_portrait',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-create_from_playlist = libspotify.sp_link_create_from_playlist
-create_from_playlist.argtypes = [ctypes.c_void_p]
-create_from_playlist.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_search',
+            'sp_link_create_from_search',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-create_from_user = libspotify.sp_link_create_from_user
-create_from_user.argtypes = [ctypes.c_void_p]
-create_from_user.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_playlist',
+            'sp_link_create_from_playlist',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-create_from_image = libspotify.sp_link_create_from_image
-create_from_image.argtypes = [ctypes.c_void_p]
-create_from_image.restype = ctypes.c_void_p
+        self._register_func(
+            'create_from_user',
+            'sp_link_create_from_user',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-as_string = libspotify.sp_link_as_string
-as_string.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
-as_string.restype = ctypes.c_int
+        self._register_func(
+            'create_from_image',
+            'sp_link_create_from_image',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-type = libspotify.sp_link_type
-type.argtypes = [ctypes.c_void_p]
-type.restype = ctypes.c_int
+        self._register_func(
+            'as_string',
+            'sp_link_as_string',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int
+        )
 
-as_track = libspotify.sp_link_as_track
-as_track.argtypes = [ctypes.c_void_p]
-as_track.restype = ctypes.c_void_p
+        self._register_func(
+            'type',
+            'sp_link_type',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
 
-as_track_and_offset = libspotify.sp_link_as_track_and_offset
-as_track_and_offset.argtypes = [ctypes.c_void_p, ctypes.c_int]
-as_track_and_offset.restype = ctypes.c_void_p
+        self._register_func(
+            'as_track',
+            'sp_link_as_track',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-as_album = libspotify.sp_link_as_album
-as_album.argtypes = [ctypes.c_void_p]
-as_album.restype = ctypes.c_void_p
+        self._register_func(
+            'as_track_and_offset',
+            'sp_link_as_track_and_offset',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )
 
-as_artist = libspotify.sp_link_as_artist
-as_artist.argtypes = [ctypes.c_void_p]
-as_artist.restype = ctypes.c_void_p
+        self._register_func(
+            'as_album',
+            'sp_link_as_album',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-as_user = libspotify.sp_link_as_user
-as_user.argtypes = [ctypes.c_void_p]
-as_user.restype = ctypes.c_void_p
+        self._register_func(
+            'as_artist',
+            'sp_link_as_artist',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-add_ref = libspotify.sp_link_add_ref
-add_ref.argtypes = [ctypes.c_void_p]
+        self._register_func(
+            'as_user',
+            'sp_link_as_user',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
 
-release = libspotify.sp_link_release
-release.argtypes = [ctypes.c_void_p]
+        self._register_func(
+            'add_ref',
+            'sp_link_add_ref',
+            None,
+            ctypes.c_void_p
+        )
+
+        self._register_func(
+            'release',
+            'sp_link_release',
+            None,
+            ctypes.c_void_p
+        )

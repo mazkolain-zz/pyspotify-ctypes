@@ -2,7 +2,7 @@ import ctypes
 import _spotify
 
 #Import handy globals
-from _spotify import libspotify, callback, bool_type
+from _spotify import LibSpotifyInterface, callback, bool_type
 
 
 #Structure definitions
@@ -89,127 +89,240 @@ offline_sync_status._fields_ = [
 ]
 
 
-#Function declarations
-create = _spotify.libspotify.sp_session_create
-create.argtypes = [ctypes.POINTER(config), ctypes.POINTER(ctypes.c_void_p)]
-create.restype = ctypes.c_int
 
-release = libspotify.sp_session_release
-release.argtypes = [ctypes.c_void_p]
-
-login = libspotify.sp_session_login
-login.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, bool_type]
-
-relogin = libspotify.sp_session_relogin
-relogin.argtypes = [ctypes.c_void_p]
-relogin.restype = ctypes.c_int
-
-remembered_user = libspotify.sp_session_remembered_user
-remembered_user.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
-remembered_user.restype = ctypes.c_int
-
-forget_me = libspotify.sp_session_forget_me
-forget_me.argtypes = [ctypes.c_void_p]
-
-user = libspotify.sp_session_user
-user.argtypes = [ctypes.c_void_p]
-user.restype = ctypes.c_void_p
-
-logout = libspotify.sp_session_logout
-logout.argtypes = [ctypes.c_void_p]
-
-connectionstate = libspotify.sp_session_connectionstate
-connectionstate.argtypes = [ctypes.c_void_p]
-connectionstate.restype = ctypes.c_int
-
-userdata = libspotify.sp_session_userdata
-userdata.argtypes = [ctypes.c_void_p]
-userdata.restype = ctypes.c_void_p
-
-set_cache_size = libspotify.sp_session_set_cache_size
-set_cache_size.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
-
-process_events = libspotify.sp_session_process_events
-process_events.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int)]
-
-player_load = libspotify.sp_session_player_load
-player_load.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-player_load.restype = ctypes.c_int
-
-player_seek = libspotify.sp_session_player_seek
-player_seek.argtypes = [ctypes.c_void_p, ctypes.c_int]
-
-player_play = libspotify.sp_session_player_play
-player_play.argtypes = [ctypes.c_void_p, bool_type]
-
-player_unload = libspotify.sp_session_player_unload
-player_unload.argtypes = [ctypes.c_void_p]
-
-player_prefetch = libspotify.sp_session_player_prefetch
-player_prefetch.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-player_prefetch.restype = ctypes.c_int
-
-playlistcontainer = libspotify.sp_session_playlistcontainer
-playlistcontainer.argtypes = [ctypes.c_void_p]
-playlistcontainer.restype = ctypes.c_void_p
-
-inbox_create = libspotify.sp_session_inbox_create
-inbox_create.argtypes = [ctypes.c_void_p]
-inbox_create.restype = ctypes.c_void_p
-
-starred_create = libspotify.sp_session_starred_create
-starred_create.argtypes = [ctypes.c_void_p]
-starred_create.restype = ctypes.c_void_p
-
-starred_for_user_create = libspotify.sp_session_starred_for_user_create
-starred_for_user_create.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-starred_for_user_create.restype = ctypes.c_void_p
-
-publishedcontainer_for_user_create = libspotify.sp_session_publishedcontainer_for_user_create
-publishedcontainer_for_user_create.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-publishedcontainer_for_user_create.restype = ctypes.c_void_p
-
-#Gone since 0.6?
-#publishedcontainer_for_user_release = libspotify.sp_session_publishedcontainer_for_user_release
-#publishedcontainer_for_user_release.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-
-preferred_bitrate = libspotify.sp_session_preferred_bitrate
-preferred_bitrate.argtypes = [ctypes.c_void_p, ctypes.c_int]
-
-preferred_offline_bitrate = libspotify.sp_session_preferred_offline_bitrate
-preferred_offline_bitrate.argtypes = [ctypes.c_void_p, ctypes.c_int, bool_type]
-
-num_friends = libspotify.sp_session_num_friends
-num_friends.argtypes = [ctypes.c_void_p]
-num_friends.restype = ctypes.c_int
-
-friend = libspotify.sp_session_friend
-friend.argtypes = [ctypes.c_void_p, ctypes.c_int]
-friend.restype = ctypes.c_void_p
-
-set_connection_type = libspotify.sp_session_set_connection_type
-set_connection_type.argtypes = [ctypes.c_void_p, ctypes.c_int]
-
-set_connection_rules = libspotify.sp_session_set_connection_rules
-set_connection_rules.argtypes = [ctypes.c_void_p, ctypes.c_int]
-
-#Mmmm, shouldn't these ones be sp_session_offline*
-offline_tracks_to_sync = libspotify.sp_offline_tracks_to_sync
-offline_tracks_to_sync.argtypes = [ctypes.c_void_p]
-offline_tracks_to_sync.restype = ctypes.c_int
-
-offline_num_playlists = libspotify.sp_offline_num_playlists
-offline_num_playlists.argtypes = [ctypes.c_void_p]
-offline_num_playlists.restype = ctypes.c_int
-
-offline_sync_get_status = libspotify.sp_offline_sync_get_status
-offline_sync_get_status.argtypes = [ctypes.c_void_p, ctypes.POINTER(offline_sync_status)]
-offline_sync_get_status.restype = bool_type
-
-offline_time_left = libspotify.sp_offline_time_left
-offline_time_left.argtypes = [ctypes.c_void_p]
-offline_time_left.restype = ctypes.c_int
-
-user_country = libspotify.sp_session_user_country
-user_country.argtypes = [ctypes.c_void_p]
-user_country.restype = ctypes.c_int
+#Low level function interface
+class SessionInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
+        
+        self._register_func(
+            'create',
+            'sp_session_create',
+            ctypes.c_int,
+            ctypes.POINTER(config), ctypes.POINTER(ctypes.c_void_p)
+        )
+        
+        self._register_func(
+            'release',
+            'sp_session_release',
+            None,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'login',
+            "sp_session_login",
+            None,
+            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, bool_type
+        )
+        
+        self._register_func(
+            'relogin',
+            "sp_session_relogin",
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'remembered_user',
+            'sp_session_remembered_user',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int
+        )
+        
+        self._register_func(
+            'forget_me',
+            'sp_session_forget_me',
+            None,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'user',
+            'sp_session_user',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'logout',
+            "sp_session_logout",
+            None,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'connectionstate',
+            'sp_session_connectionstate',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'userdata',
+            'sp_session_userdata',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'set_cache_size',
+            'sp_session_set_cache_size',
+            None,
+            ctypes.c_void_p, ctypes.c_size_t
+        )
+        
+        self._register_func(
+            'process_events',
+            'sp_session_process_events',
+            None,
+            ctypes.c_void_p, ctypes.POINTER(ctypes.c_int)
+        )
+        
+        self._register_func(
+            'player_load',
+            'sp_session_player_load',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'player_seek',
+            'sp_session_player_seek',
+            None,
+            ctypes.c_void_p, ctypes.c_int
+        )
+        
+        self._register_func(
+            'player_play',
+            'sp_session_player_play',
+            None,
+            ctypes.c_void_p, bool_type
+        )
+        
+        self._register_func(
+            'player_unload',
+            'sp_session_player_unload',
+            None,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'player_prefetch',
+            'sp_session_player_prefetch',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'playlistcontainer',
+            'sp_session_playlistcontainer',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'inbox_create',
+            'sp_session_inbox_create',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'starred_create',
+            'sp_session_starred_create',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'starred_for_user_create',
+            'sp_session_starred_for_user_create',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_char_p
+        )
+        
+        self._register_func(
+            'publishedcontainer_for_user_create',
+            'sp_session_publishedcontainer_for_user_create',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_char_p
+        )
+        
+        self._register_func(
+            'preferred_bitrate',
+            'sp_session_preferred_bitrate',
+            None,
+            ctypes.c_void_p, ctypes.c_int
+        )
+        
+        self._register_func(
+            'preferred_offline_bitrate',
+            'sp_session_preferred_offline_bitrate',
+            None,
+            ctypes.c_void_p, ctypes.c_int, bool_type
+        )
+        
+        self._register_func(
+            'num_friends',
+            'sp_session_num_friends',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'friend',
+            'sp_session_friend',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )
+        
+        self._register_func(
+            'set_connection_type',
+            'sp_session_set_connection_type',
+            None,
+            ctypes.c_void_p, ctypes.c_int
+        )
+        
+        self._register_func(
+            'set_connection_rules',
+            'sp_session_set_connection_rules',
+            None,
+            ctypes.c_void_p, ctypes.c_int
+        )
+        
+        #Mmmm, shouldn't these ones be sp_session_offline*
+        self._register_func(
+            'offline_tracks_to_sync',
+            'sp_offline_tracks_to_sync',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'offline_num_playlists',
+            'sp_offline_num_playlists',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'offline_sync_get_status',
+            'sp_offline_sync_get_status',
+            bool_type,
+            ctypes.c_void_p, ctypes.POINTER(offline_sync_status)
+        )
+        
+        self._register_func(
+            'offline_time_left',
+            'sp_offline_time_left',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )
+        
+        self._register_func(
+            'user_country',
+            'sp_session_user_country',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )

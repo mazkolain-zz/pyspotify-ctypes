@@ -1,36 +1,66 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, bool_type
+from _spotify import LibSpotifyInterface, bool_type
 
 
-#Function prototypes
-canonical_name = libspotify.sp_user_canonical_name
-canonical_name.argtypes = [ctypes.c_void_p]
-canonical_name.restype = ctypes.c_char_p
 
-display_name = libspotify.sp_user_display_name
-display_name.argtypes = [ctypes.c_void_p]
-display_name.restype = ctypes.c_char_p
+class UserInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
+        
+        self._register_func(
+            'canonical_name',
+            'sp_user_canonical_name',
+            ctypes.c_char_p,
+            ctypes.c_void_p
+        )
 
-is_loaded = libspotify.sp_user_is_loaded
-is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = bool_type
+        self._register_func(
+            'display_name',
+            'sp_user_display_name',
+            ctypes.c_char_p,
+            ctypes.c_void_p
+        )
 
-full_name = libspotify.sp_user_full_name
-full_name.argtypes = [ctypes.c_void_p]
-full_name.restype = ctypes.c_char_p
+        self._register_func(
+            'is_loaded',
+            'sp_user_is_loaded',
+            bool_type,
+            ctypes.c_void_p
+        )
 
-picture = libspotify.sp_user_picture
-picture.argtypes = [ctypes.c_void_p]
-picture.restype = ctypes.c_char_p
+        self._register_func(
+            'full_name',
+            'sp_user_full_name',
+            ctypes.c_char_p,
+            ctypes.c_void_p
+        )
 
-relation_type = libspotify.sp_user_relation_type
-relation_type.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-relation_type.restype = ctypes.c_int
+        self._register_func(
+            'picture',
+            'sp_user_picture',
+            ctypes.c_char_p,
+            ctypes.c_void_p
+        )
 
-add_ref = libspotify.sp_user_add_ref
-add_ref.argtypes = [ctypes.c_void_p]
+        self._register_func(
+            'relation_type',
+            'sp_user_relation_type',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_void_p
+        )
 
-release = libspotify.sp_user_release
-release.argtypes = [ctypes.c_void_p]
+        self._register_func(
+            'add_ref',
+            'sp_user_add_ref',
+            None,
+            ctypes.c_void_p
+        )
+
+        self._register_func(
+            'release',
+            'sp_user_release',
+            None,
+            ctypes.c_void_p
+        )
