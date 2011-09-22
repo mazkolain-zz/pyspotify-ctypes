@@ -43,12 +43,10 @@ class Album:
     
     @synchronized
     def artist(self):
+        #Increment the refcount so it doesn't get stolen from us
         artist_struct = self.__album_interface.artist(self.__album_struct)
-        
-        #This reference is borrowed, preincrement it
         ai = _artist.ArtistInterface()
         ai.add_ref(artist_struct)
-        
         return artist.Artist(artist_struct)
     
     
@@ -72,11 +70,6 @@ class Album:
     @synchronized
     def type(self):
         return self.__album_interface.type(self.__album_struct)
-    
-    
-    @synchronized
-    def add_ref(self):
-        self.__album_interface.add_ref(self.__album_struct)
     
     
     @synchronized

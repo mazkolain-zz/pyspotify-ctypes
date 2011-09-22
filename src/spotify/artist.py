@@ -30,11 +30,6 @@ class Artist:
     
     
     @synchronized
-    def add_ref(self):
-        self.__artist_interface.add_ref(self.__artist_struct)
-    
-    
-    @synchronized
     def __del__(self):
         self.__artist_interface.release(self.__artist_struct)
     

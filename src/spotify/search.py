@@ -3,8 +3,7 @@ Created on 25/05/2011
 
 @author: mazkolain
 '''
-from _spotify import search as _search
-
+from _spotify import search as _search, track as _track, album as _album, artist as _artist
 from spotify import track, album, artist
 
 from spotify.utils.decorators import synchronized
@@ -63,7 +62,6 @@ class Search:
         )
         
     
-    
     @synchronized
     def is_loaded(self):
         return self.__search_interface.is_loaded(self._search_struct)
@@ -81,7 +79,11 @@ class Search:
     
     @synchronized
     def track(self, index):
-        return track.Track(self.__search_interface.track(self._search_struct, index))
+        #Increment the refcount so it doesn't get stolen from us
+        track_struct = self.__search_interface.track(self._search_struct, index)
+        ti = _track.TrackInterface()
+        ti.add_ref(track_struct)
+        return track.Track(track_struct)
     
     
     def tracks(self):
@@ -95,7 +97,11 @@ class Search:
     
     @synchronized
     def album(self, index):
-        return album.Album(self.__search_interface.album(self._search_struct, index))
+        #Increment the refcount so it doesn't get stolen from us
+        album_struct = self.__search_interface.album(self._search_struct, index)
+        ai = _album.AlbumInterface()
+        ai.add_ref(album_struct)
+        return album.Album(album_struct)
     
     
     def albums(self):
@@ -109,7 +115,11 @@ class Search:
     
     @synchronized
     def artist(self, index):
-        return artist.Artist(self.__search_interface.artist(self._search_struct, index))
+        #Increment the refcount so it doesn't get stolen from us
+        artist_struct = self.__search_interface.artist(self._search_struct, index)
+        ai = _artist.ArtistInterface()
+        ai.add_ref(artist_struct)
+        return artist.Artist(artist_struct)
     
     
     def artists(self):
