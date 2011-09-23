@@ -37,7 +37,6 @@ class Track:
     def __init__(self, track_struct):
         self.__track_struct = track_struct
         self.__track_interface = _track.TrackInterface()
-        self.add_ref()
     
     
     @synchronized
