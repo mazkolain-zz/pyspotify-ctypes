@@ -115,11 +115,6 @@ class Track:
     
     
     @synchronized
-    def add_ref(self):
-        return self.__track_interface.add_ref(self.__track_struct)
-    
-    
-    @synchronized
     def __del__(self):
         self.__track_interface.release(self.__track_struct)
     
