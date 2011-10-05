@@ -72,12 +72,23 @@ class ModuleInterface(object):
             return func_caller
     
     
+    def _get_func2(self, name, orig_name, restype, *argtypes):
+        if name not in self.__registered_funcs:
+            lib = self.get_library()
+            func = getattr(lib, orig_name)
+            func.argtypes = argtypes
+            func.restype = restype
+            self.__registered_funcs[name] = func
+        
+        return self.__registered_funcs[name]
+    
+    
+    def _get_func(self, name, restype, *argtypes):
+        return self._get_func2(name, name, restype, *argtypes)
+    
+    
     def _register_func(self, name, orig_name, restype, *argtypes):
-        lib = self.get_library()
-        func = getattr(lib, orig_name)
-        func.argtypes = argtypes
-        func.restype = restype
-        self.__registered_funcs[name] = func
+        return self._get_func2(name, orig_name, restype, *argtypes)
 
 
 
