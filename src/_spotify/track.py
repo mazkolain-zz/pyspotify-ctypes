@@ -8,123 +8,140 @@ from _spotify import LibSpotifyInterface, bool_type
 class TrackInterface(LibSpotifyInterface):
     def __init__(self):
         LibSpotifyInterface.__init__(self)
-        
-        self._register_func(
-            'is_loaded',
+    
+    
+    def is_loaded(self, *args):
+        return self._get_func(
             'sp_track_is_loaded',
             bool_type,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'error',
+
+    def error(self, *args):
+        return self._get_func(
             'sp_track_error',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'is_available',
+        )(*args)
+
+
+    def is_available(self, *args):
+        return self._get_func(
             'sp_track_is_available',
             bool_type,
             ctypes.c_void_p, ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'is_local',
+
+    def is_local(self, *args):
+        return self._get_func(
             'sp_track_is_local',
             bool_type,
             ctypes.c_void_p, ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'is_autolinked',
+
+    def is_autolinked(self, *args):
+        return self._get_func(
             'sp_track_is_autolinked',
             bool_type,
             ctypes.c_void_p, ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'is_starred',
+
+    def is_starred(self, *args):
+        return self._get_func(
             'sp_track_is_starred',
             bool_type,
             ctypes.c_void_p, ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'set_starred',
+
+    def set_starred(self, *args):
+        return self._get_func(
             'sp_track_set_starred',
             None,
             ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p),
             ctypes.c_int, bool_type
-        )
+        )(*args)
 
-        self._register_func(
-            'num_artists',
+
+    def num_artists(self, *args):
+        return self._get_func(
             'sp_track_num_artists',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'artist',
+
+    def artist(self, *args):
+        return self._get_func(
             'sp_track_artist',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_int
-        )
+        )(*args)
 
-        self._register_func(
-            'album',
+
+    def album(self, *args):
+        return self._get_func(
             'sp_track_album',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'name',
+
+    def name(self, *args):
+        return self._get_func(
             'sp_track_name',
             ctypes.c_char_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'duration',
+
+    def duration(self, *args):
+        return self._get_func(
             'sp_track_duration',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'popularity',
+
+    def popularity(self, *args):
+        return self._get_func(
             'sp_track_popularity',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'disc',
+
+    def disc(self, *args):
+        return self._get_func(
             'sp_track_disc',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'index',
+
+    def index(self, *args):
+        return self._get_func(
             'sp_track_index',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'add_ref',
+
+    def add_ref(self, *args):
+        return self._get_func(
             'sp_track_add_ref',
             None,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'release',
+
+    def release(self, *args):
+        return self._get_func(
             'sp_track_release',
             None,
             ctypes.c_void_p
-        )
+        )(*args)
