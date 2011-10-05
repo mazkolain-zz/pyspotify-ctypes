@@ -42,14 +42,22 @@ else:
 
 class ModuleInterface(object):
     __registered_funcs = None
+    __library = None
     
     
     def __init__(self):
         self.__registered_funcs = {}
     
     
-    def get_library(self):
+    def _load_library(self):
         pass
+    
+    
+    def get_library(self):
+        if self.__library is None:
+            self.__library = self._load_library()
+        
+        return self.__library
     
     
     def __getattr__(self, name):
@@ -78,7 +86,7 @@ class LibSpotifyInterface(ModuleInterface):
         ModuleInterface.__init__(self)
     
     
-    def get_library(self):
+    def _load_library(self):
         #Let ctypes find it
         try:
             return loader.libspotify
