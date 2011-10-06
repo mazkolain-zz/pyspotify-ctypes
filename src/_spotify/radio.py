@@ -1,15 +1,22 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify
+from _spotify import LibSpotifyInterface
 
 #Import low level search api
 import search as _search
 
 
-search_create = libspotify.sp_radio_search_create
-search_create.argtypes = [
-    ctypes.c_void_p, ctypes.c_uint, ctypes.c_uint,
-    ctypes.c_int, _search.search_complete_cb, ctypes.c_void_p
-]
-search_create.restype = ctypes.c_void_p
+
+class RadioInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
+
+
+    def search_create(self, *args):
+        return self._get_func(
+            'sp_radio_search_create',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_uint, ctypes.c_uint,
+            ctypes.c_int, _search.search_complete_cb, ctypes.c_void_p
+        )(*args)

@@ -1,55 +1,103 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback, bool_type
+from _spotify import LibSpotifyInterface, callback, bool_type
 
 
 #Callbacks
 toplistbrowse_complete_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 
 
-#Function prototypes
-create = libspotify.sp_toplistbrowse_create
-create.argtypes = [
-    ctypes.c_void_p, ctypes.c_int, ctypes.c_int,
-    ctypes.c_char_p, toplistbrowse_complete_cb, ctypes.c_void_p
-]
-create.restype = ctypes.c_void_p
 
-is_loaded = libspotify.sp_toplistbrowse_is_loaded
-is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = bool_type
+class ToplistBrowseInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
 
-error = libspotify.sp_toplistbrowse_error
-error.argtypes = [ctypes.c_void_p]
-error.restype = ctypes.c_int
 
-add_ref = libspotify.sp_toplistbrowse_add_ref
-add_ref.argtypes = [ctypes.c_void_p]
+    def create(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_create',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int, ctypes.c_int,
+            ctypes.c_char_p, toplistbrowse_complete_cb, ctypes.c_void_p
+        )(*args)
 
-release = libspotify.sp_toplistbrowse_release
-release.argtypes = [ctypes.c_void_p]
 
-num_artists = libspotify.sp_toplistbrowse_num_artists
-num_artists.argtypes = [ctypes.c_void_p]
-num_artists.restype = ctypes.c_int
+    def is_loaded(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_is_loaded',
+            bool_type,
+            ctypes.c_void_p
+        )(*args)
 
-artist = libspotify.sp_toplistbrowse_artist
-artist.argtypes = [ctypes.c_void_p, ctypes.c_int]
-artist.restype = ctypes.c_void_p
 
-num_albums = libspotify.sp_toplistbrowse_num_albums
-num_albums.argtypes = [ctypes.c_void_p]
-num_albums.restype = ctypes.c_int
+    def error(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_error',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
 
-album = libspotify.sp_toplistbrowse_album
-album.argtypes = [ctypes.c_void_p, ctypes.c_int]
-album.restype = ctypes.c_void_p
 
-num_tracks = libspotify.sp_toplistbrowse_num_tracks
-num_tracks.argtypes = [ctypes.c_void_p]
-num_tracks.restype = ctypes.c_int
+    def add_ref(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_add_ref',
+            None,
+            ctypes.c_void_p
+        )(*args)
 
-track = libspotify.sp_toplistbrowse_track
-track.argtypes = [ctypes.c_void_p, ctypes.c_int]
-track.restype = ctypes.c_void_p
+
+    def release(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_release',
+            None,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def num_artists(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_num_artists',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def artist(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_artist',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
+
+
+    def num_albums(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_num_albums',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def album(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_album',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
+
+
+    def num_tracks(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_num_tracks',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def track(self, *args):
+        return self._get_func(
+            'sp_toplistbrowse_track',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)

@@ -1,28 +1,48 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback
+from _spotify import LibSpotifyInterface, callback
 
 
 #Callbacks
 inboxpost_complete_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 
 
-#Function prototypes
-post_tracks = libspotify.sp_inbox_post_tracks
-post_tracks.argtypes = [
-    ctypes.c_void_p, ctypes.c_char_p,
-    ctypes.POINTER(ctypes.c_void_p), ctypes.c_int, ctypes.c_char_p,
-    inboxpost_complete_cb, ctypes.c_void_p
-]
-post_tracks.restype = ctypes.c_void_p
 
-error = libspotify.sp_inbox_error
-error.argtypes = [ctypes.c_void_p]
-error.restype = ctypes.c_int
+class InboxInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
 
-add_ref = libspotify.sp_inbox_add_ref
-add_ref.argtypes = [ctypes.c_void_p]
 
-release = libspotify.sp_inbox_release
-release.argtypes = [ctypes.c_void_p]
+    def post_tracks(self, *args):
+        return self._get_func(
+            'sp_inbox_post_tracks',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_char_p,
+            ctypes.POINTER(ctypes.c_void_p), ctypes.c_int, ctypes.c_char_p,
+            inboxpost_complete_cb, ctypes.c_void_p
+        )(*args)
+
+
+    def error(self, *args):
+        return self._get_func(
+            'sp_inbox_error',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def add_ref(self, *args):
+        return self._get_func(
+            'sp_inbox_add_ref',
+            None,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def release(self, *args):
+        return self._get_func(
+            'sp_inbox_release',
+            None,
+            ctypes.c_void_p
+        )(*args)

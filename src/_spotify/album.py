@@ -8,66 +8,75 @@ from _spotify import LibSpotifyInterface, bool_type
 class AlbumInterface(LibSpotifyInterface):
     def __init__(self):
         LibSpotifyInterface.__init__(self)
-        
-        self._register_func(
-            'is_loaded',
+
+
+    def is_loaded(self, *args):
+        return self._get_func(
             'sp_album_is_loaded',
             bool_type,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'is_available',
+
+    def is_available(self, *args):
+        return self._get_func(
             'sp_album_is_available',
             bool_type,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'artist',
+
+    def artist(self, *args):
+        return self._get_func(
             'sp_album_artist',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'cover',
+        )(*args)
+
+
+    def cover(self, *args):
+        return self._get_func(
             'sp_album_cover',
             ctypes.POINTER(ctypes.c_byte * 20),
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'name',
+
+    def name(self, *args):
+        return self._get_func(
             'sp_album_name',
             ctypes.c_char_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'year',
+
+    def year(self, *args):
+        return self._get_func(
             'sp_album_year',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'type',
+
+    def type(self, *args):
+        return self._get_func(
             'sp_album_type',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'add_ref',
+
+    def add_ref(self, *args):
+        return self._get_func(
             'sp_album_add_ref',
             None,
             ctypes.c_void_p,
-        )
+        )(*args)
 
-        self._register_func(
-            'release',
+
+    def release(self, *args):
+        return self._get_func(
             'sp_album_release',
             None,
             ctypes.c_void_p
-        )
+        )(*args)

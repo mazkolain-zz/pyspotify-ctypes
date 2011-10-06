@@ -1,7 +1,7 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback, bool_type
+from _spotify import LibSpotifyInterface, callback, bool_type
 
 
 #Structure definitions
@@ -39,64 +39,136 @@ callbacks._fields_ = [
 ]
 
 
-add_callbacks = libspotify.sp_playlistcontainer_add_callbacks
-add_callbacks.argtypes = [ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p]
 
-remove_callbacks = libspotify.sp_playlistcontainer_remove_callbacks
-remove_callbacks.argtypes = [ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p]
 
-num_playlists = libspotify.sp_playlistcontainer_num_playlists
-num_playlists.argtypes = [ctypes.c_void_p]
-num_playlists.restype = ctypes.c_int
+class PlaylistContainerInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
 
-is_loaded = libspotify.sp_playlistcontainer_is_loaded
-is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = bool_type
 
-playlist = libspotify.sp_playlistcontainer_playlist
-playlist.argtypes = [ctypes.c_void_p, ctypes.c_int]
-playlist.restype = ctypes.c_void_p
+    def add_callbacks(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_add_callbacks',
+            None,
+            ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
+        )(*args)
 
-playlist_type = libspotify.sp_playlistcontainer_playlist_type
-playlist_type.argtypes = [ctypes.c_void_p, ctypes.c_int]
-playlist_type.restype = ctypes.c_int
 
-playlist_folder_name = libspotify.sp_playlistcontainer_playlist_folder_name
-playlist_folder_name.argtypes = [
-    ctypes.c_void_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int
-]
-playlist_folder_name.restype = ctypes.c_int
+    def remove_callbacks(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_remove_callbacks',
+            None,
+            ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
+        )(*args)
 
-playlist_folder_id = libspotify.sp_playlistcontainer_playlist_folder_id
-playlist_folder_id.argtypes = [ctypes.c_void_p, ctypes.c_int]
-playlist_folder_id.restype = ctypes.c_uint64
 
-add_new_playlist = libspotify.sp_playlistcontainer_add_new_playlist
-add_new_playlist.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-add_new_playlist.restype = ctypes.c_void_p
+    def num_playlists(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_num_playlists',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
 
-add_playlist = libspotify.sp_playlistcontainer_add_playlist
-add_playlist.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-add_playlist.restype = ctypes.c_void_p
 
-remove_playlist = libspotify.sp_playlistcontainer_remove_playlist
-remove_playlist.argtypes = [ctypes.c_void_p, ctypes.c_int]
-remove_playlist.restype = ctypes.c_int
+    def is_loaded(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_is_loaded',
+            bool_type,
+            ctypes.c_void_p
+        )(*args)
 
-move_playlist = libspotify.sp_playlistcontainer_move_playlist
-move_playlist.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, bool_type]
-move_playlist.restype = ctypes.c_int
 
-add_folder = libspotify.sp_playlistcontainer_add_folder
-add_folder.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_char_p]
-add_folder.restype = ctypes.c_int
+    def playlist(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_playlist',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
 
-owner = libspotify.sp_playlistcontainer_owner
-owner.argtypes = [ctypes.c_void_p]
-owner.restype = ctypes.c_void_p
 
-add_ref = libspotify.sp_playlistcontainer_add_ref
-add_ref.argtypes = [ctypes.c_void_p]
+    def playlist_type(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_playlist_type',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
 
-release = libspotify.sp_playlistcontainer_release
-release.argtypes = [ctypes.c_void_p]
+
+    def playlist_folder_name(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_playlist_folder_name',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_int
+        )(*args)
+
+
+    def playlist_folder_id(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_playlist_folder_id',
+            ctypes.c_uint64,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
+
+
+    def add_new_playlist(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_add_new_playlist',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_char_p
+        )(*args)
+
+
+    def add_playlist(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_add_playlist',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_void_p
+        )(*args)
+
+
+    def remove_playlist(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_remove_playlist',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
+
+
+    def move_playlist(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_move_playlist',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int, ctypes.c_int, bool_type
+        )(*args)
+
+
+    def add_folder(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_add_folder',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int, ctypes.c_char_p
+        )(*args)
+
+
+    def owner(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_owner',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def add_ref(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_add_ref',
+            None,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def release(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_release',
+            None,
+            ctypes.c_void_p
+        )(*args)

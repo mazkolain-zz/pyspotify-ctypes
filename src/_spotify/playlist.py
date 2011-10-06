@@ -1,7 +1,7 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify, callback, subscribers as _subscribers, bool_type
+from _spotify import LibSpotifyInterface, callback, subscribers as _subscribers, bool_type
 
 
 #Structure definitions
@@ -60,8 +60,8 @@ cb_track_message_changed = callback(
 )
 
 cb_subscribers_changed = callback(None, ctypes.c_void_p, ctypes.c_void_p)
-
-
+        
+        
 #Completion of structure defs
 callbacks._fields_ = [
    ("tracks_added", cb_tracks_added),
@@ -80,133 +80,280 @@ callbacks._fields_ = [
 ]
 
 
-#Function prototypes
-is_loaded = libspotify.sp_playlist_is_loaded
-is_loaded.argtypes = [ctypes.c_void_p]
-is_loaded.restype = bool_type
 
-add_callbacks = libspotify.sp_playlist_add_callbacks
-add_callbacks.argtypes = [
-    ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
-]
+class PlaylistInterface(LibSpotifyInterface):
+    def _init__(self):
+        LibSpotifyInterface.__init__(self)
 
-remove_callbacks = libspotify.sp_playlist_remove_callbacks
-remove_callbacks.argtypes = [
-    ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
-]
 
-num_tracks = libspotify.sp_playlist_num_tracks
-num_tracks.argtypes = [ctypes.c_void_p]
-num_tracks.restype = ctypes.c_int
+    def is_loaded(self, *args):
+        return self._get_func(
+            'sp_playlist_is_loaded',
+            bool_type,
+            ctypes.c_void_p
+        )(*args)
 
-track = libspotify.sp_playlist_track
-track.argtypes = [ctypes.c_void_p, ctypes.c_int]
-track.restype = ctypes.c_void_p
 
-track_create_time = libspotify.sp_playlist_track_create_time
-track_create_time.argtypes = [ctypes.c_void_p, ctypes.c_int]
-track_create_time.restype = ctypes.c_int
+    def add_callbacks(self, *args):
+        return self._get_func(
+            'sp_playlist_add_callbacks',
+            None,
+            ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
+        )(*args)
 
-track_creator = libspotify.sp_playlist_track_creator
-track_creator.argtypes = [ctypes.c_void_p, ctypes.c_int]
-track_creator.restype = ctypes.c_void_p
 
-track_seen = libspotify.sp_playlist_track_seen 
-track_seen.argtypes = [ctypes.c_void_p, ctypes.c_int]
-track_seen.restype = bool_type
+    def remove_callbacks(self, *args):
+        return self._get_func(
+            'sp_playlist_remove_callbacks',
+            None,
+            ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
+        )(*args)
 
-track_set_seen = libspotify.sp_playlist_track_set_seen
-track_set_seen.argtypes = [ctypes.c_void_p, ctypes.c_int, bool_type]
-track_set_seen.restype = ctypes.c_int
 
-track_message = libspotify.sp_playlist_track_message
-track_message.argtypes = [ctypes.c_void_p, ctypes.c_int]
-track_message.restype = ctypes.c_char_p
+    def num_tracks(self, *args):
+        return self._get_func(
+            'sp_playlist_num_tracks',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
 
-name = libspotify.sp_playlist_name
-name.argtypes = [ctypes.c_void_p]
-name.restype = ctypes.c_char_p
 
-rename = libspotify.sp_playlist_rename
-rename.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-rename.restype = ctypes.c_int
+    def track(self, *args):
+        return self._get_func(
+            'sp_playlist_track',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
 
-owner = libspotify.sp_playlist_owner
-owner.argtypes = [ctypes.c_void_p]
-owner.restype = ctypes.c_void_p
 
-is_collaborative = libspotify.sp_playlist_is_collaborative
-is_collaborative.argtypes = [ctypes.c_void_p]
-is_collaborative.restype = bool_type
+    def track_create_time(self, *args):
+        return self._get_func(
+            'sp_playlist_track_create_time',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
 
-set_collaborative = libspotify.sp_playlist_set_collaborative
-set_collaborative.argtypes = [ctypes.c_void_p, bool_type]
 
-set_autolink_tracks = libspotify.sp_playlist_set_autolink_tracks
-set_autolink_tracks.argtypes = [ctypes.c_void_p, bool_type]
+    def track_creator(self, *args):
+        return self._get_func(
+            'sp_playlist_track_creator',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
 
-get_description = libspotify.sp_playlist_get_description
-get_description.argtypes = [ctypes.c_void_p]
-get_description.restype = ctypes.c_char_p
 
-get_image = libspotify.sp_playlist_get_image
-get_image.argtypes = [ctypes.c_void_p, ctypes.c_byte * 20]
-get_image.restype = bool_type
+    def track_seen(self, *args):
+        return self._get_func(
+            'sp_playlist_track_seen',
+            bool_type,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
 
-has_pending_changes = libspotify.sp_playlist_has_pending_changes
-has_pending_changes.argtypes = [ctypes.c_void_p]
-has_pending_changes.restype = bool_type
 
-add_tracks = libspotify.sp_playlist_add_tracks
-add_tracks.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p), ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
-add_tracks.restype = ctypes.c_int
+    def track_set_seen(self, *args):
+        return self._get_func(
+            'sp_playlist_track_set_seen',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int, bool_type
+        )(*args)
 
-remove_tracks = libspotify.sp_playlist_remove_tracks
-remove_tracks.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int), ctypes.c_int]
-remove_tracks.restype = ctypes.c_int
 
-reorder_tracks = libspotify.sp_playlist_reorder_tracks
-reorder_tracks.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int), ctypes.c_int, ctypes.c_int]
-reorder_tracks.restype = ctypes.c_int
+    def track_message(self, *args):
+        return self._get_func(
+            'sp_playlist_track_message',
+            ctypes.c_char_p,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
 
-num_subscribers = libspotify.sp_playlist_num_subscribers
-num_subscribers.argtypes = [ctypes.c_void_p]
-num_subscribers.restype = ctypes.c_uint
 
-subscribers = libspotify.sp_playlist_subscribers
-subscribers.argtypes = [ctypes.c_void_p]
-subscribers.restype = ctypes.POINTER(_subscribers)
+    def name(self, *args):
+        return self._get_func(
+            'sp_playlist_name',
+            ctypes.c_char_p,
+            ctypes.c_void_p
+        )(*args)
 
-subscribers_free = libspotify.sp_playlist_subscribers_free
-subscribers_free.argtypes = [ctypes.POINTER(_subscribers)]
 
-update_subscribers = libspotify.sp_playlist_update_subscribers
-update_subscribers.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+    def rename(self, *args):
+        return self._get_func(
+            'sp_playlist_rename',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_char_p
+        )(*args)
 
-is_in_ram = libspotify.sp_playlist_is_in_ram
-is_in_ram.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-is_in_ram.restype = bool_type
 
-set_in_ram = libspotify.sp_playlist_set_in_ram
-set_in_ram.argtypes = [ctypes.c_void_p, ctypes.c_void_p, bool_type]
+    def owner(self, *args):
+        return self._get_func(
+            'sp_playlist_owner',
+            ctypes.c_void_p,
+            ctypes.c_void_p
+        )(*args)
 
-create = libspotify.sp_playlist_create
-create.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-create.restype = ctypes.c_void_p
 
-set_offline_mode = libspotify.sp_playlist_set_offline_mode
-set_offline_mode.argtypes = [ctypes.c_void_p, ctypes.c_void_p, bool_type]
+    def is_collaborative(self, *args):
+        return self._get_func(
+            'sp_playlist_is_collaborative',
+            bool_type,
+            ctypes.c_void_p
+        )(*args)
 
-get_offline_status = libspotify.sp_playlist_get_offline_status
-get_offline_status.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-get_offline_status.restype = ctypes.c_int
 
-get_offline_download_completed = libspotify.sp_playlist_get_offline_download_completed
-get_offline_download_completed.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-get_offline_download_completed.restype = ctypes.c_int
+    def set_collaborative(self, *args):
+        return self._get_func(
+            'sp_playlist_set_collaborative',
+            None,
+            ctypes.c_void_p, bool_type
+        )(*args)
 
-add_ref = libspotify.sp_playlist_add_ref
-add_ref.argtypes = [ctypes.c_void_p]
 
-release = libspotify.sp_playlist_release
-release.argtypes = [ctypes.c_void_p]
+    def set_autolink_tracks(self, *args):
+        return self._get_func(
+            'sp_playlist_set_autolink_tracks',
+            None,
+            ctypes.c_void_p, bool_type
+        )(*args)
+
+
+    def get_description(self, *args):
+        return self._get_func(
+            'sp_playlist_get_description',
+            ctypes.c_char_p,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def get_image(self, *args):
+        return self._get_func(
+            'sp_playlist_get_image',
+            bool_type,
+            ctypes.c_void_p, ctypes.c_byte * 20
+        )(*args)
+
+
+    def has_pending_changes(self, *args):
+        return self._get_func(
+            'sp_playlist_has_pending_changes',
+            bool_type,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def add_tracks(self, *args):
+        return self._get_func(
+            'sp_playlist_add_tracks',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p),
+            ctypes.c_int, ctypes.c_int, ctypes.c_void_p
+        )(*args)
+
+
+    def remove_tracks(self, *args):
+        return self._get_func(
+            'sp_playlist_remove_tracks',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.POINTER(ctypes.c_int), ctypes.c_int
+        )(*args)
+
+
+    def reorder_tracks(self, *args):
+        return self._get_func(
+            'sp_playlist_reorder_tracks',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.POINTER(ctypes.c_int), ctypes.c_int, ctypes.c_int
+        )(*args)
+
+
+    def num_subscribers(self, *args):
+        return self._get_func(
+            'sp_playlist_num_subscribers',
+            ctypes.c_uint,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def subscribers(self, *args):
+        return self._get_func(
+            'sp_playlist_subscribers',
+            ctypes.POINTER(_subscribers),
+            ctypes.c_void_p
+        )(*args)
+
+
+    def subscribers_free(self, *args):
+        return self._get_func(
+            'sp_playlist_subscribers_free',
+            None,
+            ctypes.POINTER(_subscribers)
+        )(*args)
+
+
+    def update_subscribers(self, *args):
+        return self._get_func(
+            'sp_playlist_update_subscribers',
+            None,
+            ctypes.c_void_p, ctypes.c_void_p
+        )(*args)
+
+
+    def is_in_ram(self, *args):
+        return self._get_func(
+            'sp_playlist_is_in_ram',
+            bool_type,
+            ctypes.c_void_p, ctypes.c_void_p
+        )(*args)
+
+
+    def set_in_ram(self, *args):
+        return self._get_func(
+            'sp_playlist_set_in_ram',
+            None,
+            ctypes.c_void_p, ctypes.c_void_p, bool_type
+        )(*args)
+
+
+    def create(self, *args):
+        return self._get_func(
+            'sp_playlist_create',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_void_p
+        )(*args)
+
+
+    def set_offline_mode(self, *args):
+        return self._get_func(
+            'sp_playlist_set_offline_mode',
+            None,
+            ctypes.c_void_p, ctypes.c_void_p, bool_type
+        )(*args)
+
+
+    def get_offline_status(self, *args):
+        return self._get_func(
+            'sp_playlist_get_offline_status',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_void_p
+        )(*args)
+
+
+    def get_offline_download_completed(self, *args):
+        return self._get_func(
+            'sp_playlist_get_offline_download_completed',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_void_p
+        )(*args)
+
+
+    def add_ref(self, *args):
+        return self._get_func(
+            'sp_playlist_add_ref',
+            None,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def release(self, *args):
+        return self._get_func(
+            'sp_playlist_release',
+            None,
+            ctypes.c_void_p
+        )(*args)

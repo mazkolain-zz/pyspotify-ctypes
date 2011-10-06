@@ -12,87 +12,99 @@ albumbrowse_complete_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 class AlbumBrowseInterface(LibSpotifyInterface):
     def __init__(self):
         LibSpotifyInterface.__init__(self)
-        
-        self._register_func(
-            'create',
+
+
+    def create(self, *args):
+        return self._get_func(
             'sp_albumbrowse_create',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_void_p, albumbrowse_complete_cb, ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'is_loaded',
+        )(*args)
+
+
+    def is_loaded(self, *args):
+        return self._get_func(
             'sp_albumbrowse_is_loaded',
             bool_type,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'error',
+        )(*args)
+
+
+    def error(self, *args):
+        return self._get_func(
             'sp_albumbrowse_error',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'album',
+        )(*args)
+
+
+    def album(self, *args):
+        return self._get_func(
             'sp_albumbrowse_album',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'artist',
+        )(*args)
+
+
+    def artist(self, *args):
+        return self._get_func(
             'sp_albumbrowse_artist',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'num_copyrights',
+        )(*args)
+
+
+    def num_copyrights(self, *args):
+        return self._get_func(
             'sp_albumbrowse_num_copyrights',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'copyright',
+        )(*args)
+
+
+    def copyright(self, *args):
+        return self._get_func(
             'sp_albumbrowse_copyright',
             ctypes.c_char_p,
             ctypes.c_void_p, ctypes.c_int
-        )
-            
-        self._register_func(
-            'num_tracks',
+        )(*args)
+
+
+    def num_tracks(self, *args):
+        return self._get_func(
             'sp_albumbrowse_num_tracks',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-            
-        self._register_func(
-            'track',
+        )(*args)
+
+
+    def track(self, *args):
+        return self._get_func(
             'sp_albumbrowse_track',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_int
-        )
-            
-        self._register_func(
-            'review',
+        )(*args)
+
+
+    def review(self, *args):
+        return self._get_func(
             'sp_albumbrowse_review',
             ctypes.c_char_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'add_ref',
+        )(*args)
+
+
+    def add_ref(self, *args):
+        return self._get_func(
             'sp_albumbrowse_add_ref',
             None,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'release',
+        )(*args)
+
+
+    def release(self, *args):
+        return self._get_func(
             'sp_albumbrowse_release',
             None,
             ctypes.c_void_p
-        )
+        )(*args)

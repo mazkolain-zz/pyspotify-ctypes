@@ -12,80 +12,91 @@ image_loaded_cb = callback(None, ctypes.c_void_p, ctypes.c_void_p)
 class ImageInterface(LibSpotifyInterface):
     def __init__(self):
         LibSpotifyInterface.__init__(self)
-        
-        self._register_func(
-            'create',
+
+
+    def create(self, *args):
+        return self._get_func(
             'sp_image_create',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_char * 20
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_link',
+
+    def create_from_link(self, *args):
+        return self._get_func(
             'sp_image_create_from_link',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'add_load_callback',
+
+    def add_load_callback(self, *args):
+        return self._get_func(
             'sp_image_add_load_callback',
             None,
             ctypes.c_void_p, image_loaded_cb, ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'remove_load_callback',
+
+    def remove_load_callback(self, *args):
+        return self._get_func(
             'sp_image_remove_load_callback',
             None,
             ctypes.c_void_p, image_loaded_cb, ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'is_loaded',
+
+    def is_loaded(self, *args):
+        return self._get_func(
             'sp_image_is_loaded',
             bool_type,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'error',
+
+    def error(self, *args):
+        return self._get_func(
             'sp_image_error',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'format',
+
+    def format(self, *args):
+        return self._get_func(
             'sp_image_format',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'data',
+
+    def data(self, *args):
+        return self._get_func(
             'sp_image_data',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)
-        )
+        )(*args)
 
-        self._register_func(
-            'image_id',
+
+    def image_id(self, *args):
+        return self._get_func(
             'sp_image_image_id',
             ctypes.POINTER(ctypes.c_byte),
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'add_ref',
+
+    def add_ref(self, *args):
+        return self._get_func(
             'sp_image_add_ref',
             None,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'release',
+
+    def release(self, *args):
+        return self._get_func(
             'sp_image_release',
             None,
             ctypes.c_void_p
-        )
+        )(*args)

@@ -1,12 +1,18 @@
 import ctypes
 
 #Import handy globals
-from _spotify import libspotify
+from _spotify import LibSpotifyInterface
 
 
-create = libspotify.sp_localtrack_create
-create.argtypes = [
-    ctypes.c_char_p, ctypes.c_char_p,
-    ctypes.c_char_p, ctypes.c_int
-]
-create.restype = ctypes.c_void_p
+
+class LocalTrackInterface(LibSpotifyInterface):
+    def __init__(self):
+        LibSpotifyInterface.__init__(self)
+
+
+    def create(self, *args):
+        return self._get_func(
+            'sp_localtrack_create',
+            ctypes.c_void_p,
+            ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int
+        )(*args)

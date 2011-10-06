@@ -8,143 +8,163 @@ from _spotify import LibSpotifyInterface
 class LinkInterface(LibSpotifyInterface):
     def __init__(self):
         LibSpotifyInterface.__init__(self)
-        
-        self._register_func(
-            'create_from_string',
+
+
+    def create_from_string(self, *args):
+        return self._get_func(
             'sp_link_create_from_string',
             ctypes.c_void_p,
             ctypes.c_char_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_track',
+
+    def create_from_track(self, *args):
+        return self._get_func(
             'sp_link_create_from_track',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_int
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_album',
+
+    def create_from_album(self, *args):
+        return self._get_func(
             'sp_link_create_from_album',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_album_cover',
+
+    def create_from_album_cover(self, *args):
+        return self._get_func(
             'sp_link_create_from_album_cover',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_artist',
+
+    def create_from_artist(self, *args):
+        return self._get_func(
             'sp_link_create_from_artist',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_artist_portrait',
+
+    def create_from_artist_portrait(self, *args):
+        return self._get_func(
             'sp_link_create_from_artist_portrait',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_artistbrowse_portrait',
+
+    def create_from_artistbrowse_portrait(self, *args):
+        return self._get_func(
             'sp_link_create_from_artistbrowse_portrait',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_search',
+
+    def create_from_search(self, *args):
+        return self._get_func(
             'sp_link_create_from_search',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_playlist',
+
+    def create_from_playlist(self, *args):
+        return self._get_func(
             'sp_link_create_from_playlist',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_user',
+
+    def create_from_user(self, *args):
+        return self._get_func(
             'sp_link_create_from_user',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'create_from_image',
+
+    def create_from_image(self, *args):
+        return self._get_func(
             'sp_link_create_from_image',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'as_string',
+
+    def as_string(self, *args):
+        return self._get_func(
             'sp_link_as_string',
             ctypes.c_int,
             ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int
-        )
+        )(*args)
 
-        self._register_func(
-            'type',
+
+    def type(self, *args):
+        return self._get_func(
             'sp_link_type',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'as_track',
+
+    def as_track(self, *args):
+        return self._get_func(
             'sp_link_as_track',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'as_track_and_offset',
+
+    def as_track_and_offset(self, *args):
+        return self._get_func(
             'sp_link_as_track_and_offset',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_int
-        )
+        )(*args)
 
-        self._register_func(
-            'as_album',
+
+    def as_album(self, *args):
+        return self._get_func(
             'sp_link_as_album',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'as_artist',
+
+    def as_artist(self, *args):
+        return self._get_func(
             'sp_link_as_artist',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'as_user',
+
+    def as_user(self, *args):
+        return self._get_func(
             'sp_link_as_user',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'add_ref',
+
+    def add_ref(self, *args):
+        return self._get_func(
             'sp_link_add_ref',
             None,
             ctypes.c_void_p
-        )
+        )(*args)
 
-        self._register_func(
-            'release',
+
+    def release(self, *args):
+        return self._get_func(
             'sp_link_release',
             None,
             ctypes.c_void_p
-        )
+        )(*args)

@@ -94,235 +94,267 @@ offline_sync_status._fields_ = [
 class SessionInterface(LibSpotifyInterface):
     def __init__(self):
         LibSpotifyInterface.__init__(self)
-        
-        self._register_func(
-            'create',
+
+
+    def create(self, *args):
+        return self._get_func(
             'sp_session_create',
             ctypes.c_int,
             ctypes.POINTER(config), ctypes.POINTER(ctypes.c_void_p)
-        )
-        
-        self._register_func(
-            'release',
+        )(*args)
+
+
+    def release(self, *args):
+        return self._get_func(
             'sp_session_release',
             None,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'login',
+        )(*args)
+
+
+    def login(self, *args):
+        return self._get_func(
             "sp_session_login",
             None,
             ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, bool_type
-        )
-        
-        self._register_func(
-            'relogin',
+        )(*args)
+
+
+    def relogin(self, *args):
+        return self._get_func(
             "sp_session_relogin",
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'remembered_user',
+        )(*args)
+
+
+    def remembered_user(self, *args):
+        return self._get_func(
             'sp_session_remembered_user',
             ctypes.c_int,
             ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int
-        )
-        
-        self._register_func(
-            'forget_me',
+        )(*args)
+
+
+    def forget_me(self, *args):
+        return self._get_func(
             'sp_session_forget_me',
             None,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'user',
+        )(*args)
+
+
+    def user(self, *args):
+        return self._get_func(
             'sp_session_user',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'logout',
+        )(*args)
+
+
+    def logout(self, *args):
+        return self._get_func(
             "sp_session_logout",
             None,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'connectionstate',
+        )(*args)
+
+
+    def connectionstate(self, *args):
+        return self._get_func(
             'sp_session_connectionstate',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'userdata',
+        )(*args)
+
+
+    def userdata(self, *args):
+        return self._get_func(
             'sp_session_userdata',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'set_cache_size',
+        )(*args)
+
+
+    def set_cache_size(self, *args):
+        return self._get_func(
             'sp_session_set_cache_size',
             None,
             ctypes.c_void_p, ctypes.c_size_t
-        )
-        
-        self._register_func(
-            'process_events',
+        )(*args)
+
+
+    def process_events(self, *args):
+        return self._get_func(
             'sp_session_process_events',
             None,
             ctypes.c_void_p, ctypes.POINTER(ctypes.c_int)
-        )
-        
-        self._register_func(
-            'player_load',
+        )(*args)
+
+
+    def player_load(self, *args):
+        return self._get_func(
             'sp_session_player_load',
             ctypes.c_int,
             ctypes.c_void_p, ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'player_seek',
+        )(*args)
+
+
+    def player_seek(self, *args):
+        return self._get_func(
             'sp_session_player_seek',
             None,
             ctypes.c_void_p, ctypes.c_int
-        )
-        
-        self._register_func(
-            'player_play',
+        )(*args)
+
+
+    def player_play(self, *args):
+        return self._get_func(
             'sp_session_player_play',
             None,
             ctypes.c_void_p, bool_type
-        )
-        
-        self._register_func(
-            'player_unload',
+        )(*args)
+
+
+    def player_unload(self, *args):
+        return self._get_func(
             'sp_session_player_unload',
             None,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'player_prefetch',
+        )(*args)
+
+
+    def player_prefetch(self, *args):
+        return self._get_func(
             'sp_session_player_prefetch',
             ctypes.c_int,
             ctypes.c_void_p, ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'playlistcontainer',
+        )(*args)
+
+
+    def playlistcontainer(self, *args):
+        return self._get_func(
             'sp_session_playlistcontainer',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'inbox_create',
+        )(*args)
+
+
+    def inbox_create(self, *args):
+        return self._get_func(
             'sp_session_inbox_create',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'starred_create',
+        )(*args)
+
+
+    def starred_create(self, *args):
+        return self._get_func(
             'sp_session_starred_create',
             ctypes.c_void_p,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'starred_for_user_create',
+        )(*args)
+
+
+    def starred_for_user_create(self, *args):
+        return self._get_func(
             'sp_session_starred_for_user_create',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_char_p
-        )
-        
-        self._register_func(
-            'publishedcontainer_for_user_create',
+        )(*args)
+
+
+    def publishedcontainer_for_user_create(self, *args):
+        return self._get_func(
             'sp_session_publishedcontainer_for_user_create',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_char_p
-        )
-        
-        self._register_func(
-            'preferred_bitrate',
+        )(*args)
+
+
+    def preferred_bitrate(self, *args):
+        return self._get_func(
             'sp_session_preferred_bitrate',
             None,
             ctypes.c_void_p, ctypes.c_int
-        )
-        
-        self._register_func(
-            'preferred_offline_bitrate',
+        )(*args)
+
+
+    def preferred_offline_bitrate(self, *args):
+        return self._get_func(
             'sp_session_preferred_offline_bitrate',
             None,
             ctypes.c_void_p, ctypes.c_int, bool_type
-        )
-        
-        self._register_func(
-            'num_friends',
+        )(*args)
+
+
+    def num_friends(self, *args):
+        return self._get_func(
             'sp_session_num_friends',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'friend',
+        )(*args)
+
+
+    def friend(self, *args):
+        return self._get_func(
             'sp_session_friend',
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_int
-        )
-        
-        self._register_func(
-            'set_connection_type',
+        )(*args)
+
+
+    def set_connection_type(self, *args):
+        return self._get_func(
             'sp_session_set_connection_type',
             None,
             ctypes.c_void_p, ctypes.c_int
-        )
-        
-        self._register_func(
-            'set_connection_rules',
+        )(*args)
+
+
+    def set_connection_rules(self, *args):
+        return self._get_func(
             'sp_session_set_connection_rules',
             None,
             ctypes.c_void_p, ctypes.c_int
-        )
-        
-        #Mmmm, shouldn't these ones be sp_session_offline*
-        self._register_func(
-            'offline_tracks_to_sync',
+        )(*args)
+
+
+    def offline_tracks_to_sync(self, *args):
+        return self._get_func(
             'sp_offline_tracks_to_sync',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'offline_num_playlists',
+        )(*args)
+
+
+    def offline_num_playlists(self, *args):
+        return self._get_func(
             'sp_offline_num_playlists',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'offline_sync_get_status',
+        )(*args)
+
+
+    def offline_sync_get_status(self, *args):
+        return self._get_func(
             'sp_offline_sync_get_status',
             bool_type,
             ctypes.c_void_p, ctypes.POINTER(offline_sync_status)
-        )
-        
-        self._register_func(
-            'offline_time_left',
+        )(*args)
+
+
+    def offline_time_left(self, *args):
+        return self._get_func(
             'sp_offline_time_left',
             ctypes.c_int,
             ctypes.c_void_p
-        )
-        
-        self._register_func(
-            'user_country',
+        )(*args)
+
+
+    def user_country(self, *args):
+        return self._get_func(
             'sp_session_user_country',
             ctypes.c_int,
             ctypes.c_void_p
-        )
+        )(*args)
