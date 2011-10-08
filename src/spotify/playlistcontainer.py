@@ -7,7 +7,7 @@ import ctypes
 
 from spotify import DuplicateCallbackError, UnknownCallbackError, handle_sp_error, user
 
-from _spotify import playlistcontainer as _playlistcontainer
+from _spotify import playlistcontainer as _playlistcontainer, playlist as _playlist, user as _user
 
 from spotify.utils.decorators import synchronized
 
@@ -77,6 +77,7 @@ class PlaylistContainerCallbacks:
 
 class PlaylistContainer:
     __container_struct = None
+    __container_interface = None
     
     _manager = None
     
@@ -93,14 +94,14 @@ class PlaylistContainer:
     @synchronized
     def __init__(self, container_struct):
         self.__container_struct = container_struct
+        self.__container_interface = _playlistcontainer.PlaylistContainerInterface()
         self._playlist_objects = {}
         self._callbacks = {}
-        _playlistcontainer.add_ref(self.__container_struct)
     
     
     @synchronized
     def is_loaded(self):
-        return _playlistcontainer.is_loaded(self.__container_struct)
+        return self.__container_interface.is_loaded(self.__container_struct)
     
     
     @synchronized
@@ -120,7 +121,7 @@ class PlaylistContainer:
                 "callbacks": callbacks,
             }
             
-            _playlistcontainer.add_callbacks(
+            self.__container_interface.add_callbacks(
                 self.__container_struct, ptr, None
             )
     
@@ -133,7 +134,7 @@ class PlaylistContainer:
         
         else:
             ptr = self._callbacks[cb_id]["ptr"]
-            _playlistcontainer.remove_callbacks(
+            self.__container_interface.remove_callbacks(
                 self.__container_struct, ptr, None
             )
             del self._callbacks[cb_id]
@@ -146,15 +147,21 @@ class PlaylistContainer:
     
     @synchronized
     def num_playlists(self):
-        return _playlistcontainer.num_playlists(self.__container_struct)
+        return self.__container_interface.num_playlists(
+            self.__container_struct
+        )
     
     
     @synchronized
     def _get_playlist_object(self, pos):
         if pos not in self._playlist_objects:
-            self._playlist_objects[pos] = playlist.Playlist(
-                _playlistcontainer.playlist(self.__container_struct, pos)
+            pi = _playlist.PlaylistInterface()
+            playlist_struct = self.__container_interface.playlist(
+                self.__container_struct, pos
             )
+            pi.add_ref(playlist_struct)
+            
+            self._playlist_objects[pos] = playlist.Playlist(playlist_struct)
         
         return self._playlist_objects[pos]
     
@@ -169,14 +176,14 @@ class PlaylistContainer:
     
     @synchronized
     def playlist_type(self, index):
-        return _playlistcontainer.playlist_type(self.__container_struct, index)
+        return self.__container_interface.playlist_type(self.__container_struct, index)
     
     
     @synchronized
     def playlist_folder_name(self, index):
         buf = (ctypes.c_char() * 255)()
         handle_sp_error(
-            _playlistcontainer.playlist_folder_name(
+            self.__container_interface.playlist_folder_name(
                 self.__container_struct, index, ctypes.byref(buf), 255
             )
         )
@@ -185,7 +192,7 @@ class PlaylistContainer:
     
     @synchronized
     def playlist_folder_id(self, index):
-        return _playlistcontainer.playlist_folder_id(
+        return self.__container_interface.playlist_folder_id(
             self.__container_struct, index
         )
     
@@ -193,14 +200,16 @@ class PlaylistContainer:
     @synchronized
     def add_new_playlist(self, name):
         return playlist.Playlist(
-            _playlistcontainer.add_new_playlist(self.__container_struct, name)
+            self.__container_interface.add_new_playlist(
+                self.__container_struct, name
+            )
         )
     
     
     @synchronized
     def add_playlist(self, link):
         return playlist.Playlist(
-            _playlistcontainer.add_playlist(
+            self.__container_interface.add_playlist(
                 self.__container_struct, link.get_struct()
             )
         )
@@ -210,7 +219,7 @@ class PlaylistContainer:
     def remove_playlist(self, index):
         #FIXME: Should refresh index in _playlist_objects
         handle_sp_error(
-            _playlistcontainer.remove_playlist(
+            self.__container_interface.remove_playlist(
                 self.__container_struct, index
             )
         )
@@ -219,7 +228,7 @@ class PlaylistContainer:
     @synchronized
     def move_playlist(self, index, new_position, dry_run):
         handle_sp_error(
-            _playlistcontainer.move_playlist(
+            self.__container_interface.move_playlist(
                 self.__container_struct, new_position, dry_run
             )
         )
@@ -228,7 +237,7 @@ class PlaylistContainer:
     @synchronized
     def add_folder(self, index, name):
         handle_sp_error(
-            _playlistcontainer.add_folder(
+            self.__container_interface.add_folder(
                 self.__container_struct, index, name
             )
         )
@@ -236,19 +245,19 @@ class PlaylistContainer:
     
     @synchronized
     def owner(self):
-        return user.User(
-            _playlistcontainer.owner(self.__container_struct)
+        ui = _user.UserInterface()
+        user_struct = self.__container_interface.owner(
+            self.__container_struct
         )
+        ui.add_ref(user_struct)
         
-    
-    @synchronized
-    def add_ref(self):
-        _playlistcontainer.add_ref()
+        return user.User(user_struct)
     
     
     @synchronized
-    def release(self):
-        _playlistcontainer.release()
+    def __del__(self):
+        self.remove_all_callbacks()
+        self.__container_interface.release(self.__container_struct)
     
     
     def __len__(self):
@@ -257,8 +266,3 @@ class PlaylistContainer:
     
     def get_struct(self):
         return self.__container_struct
-    
-    
-    def __del__(self):
-        self.remove_all_callbacks()
-        _playlistcontainer.release(self.__container_struct)

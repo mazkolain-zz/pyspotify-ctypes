@@ -9,6 +9,7 @@ from spotify import track
 
 
 def create(artist, title, album, length):
+    lti = _localtrack.LocalTrackInterface()
     return track.Track(
-        _localtrack.create(artist, title, album, length)
+        lti.create(artist, title, album, length)
     )

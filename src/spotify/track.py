@@ -5,7 +5,7 @@ Created on 07/11/2010
 '''
 import ctypes
 
-from _spotify import track as _track
+from _spotify import track as _track, album as _album, artist as _artist
 
 from spotify import artist, album
 
@@ -76,7 +76,13 @@ class Track:
     
     @synchronized
     def artist(self, index):
-        return artist.Artist(self.__track_interface.artist(self.__track_struct, index))
+        ai = _artist.ArtistInterface()
+        artist_struct = self.__track_interface.artist(
+            self.__track_struct, index
+        )
+        ai.add_ref(artist_struct)
+        
+        return artist.Artist(artist_struct)
     
     
     def artists(self):
@@ -85,7 +91,11 @@ class Track:
     
     @synchronized
     def album(self):
-        return album.Album(self.__track_interface.album(self.__track_struct))
+        ai = _album.AlbumInterface()
+        album_struct = self.__track_interface.album(self.__track_struct)
+        ai.add_ref(album_struct)
+        
+        return album.Album(album_struct)
     
     
     @synchronized

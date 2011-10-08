@@ -4,7 +4,7 @@ Created on 21/05/2011
 @author: mikel
 '''
 
-from _spotify import artistbrowse as _artistbrowse
+from _spotify import artistbrowse as _artistbrowse, track as _track, artist as _artist, album as _album
 
 from spotify.utils.decorators import synchronized
 
@@ -49,6 +49,7 @@ class Artistbrowse:
     #The same as on albumbrowse, should honor OOR?
     __artist = None
     __artistbrowse_struct = None
+    __artistbrowse_interface = None
     __proxy_callbacks = None
     
     
@@ -56,7 +57,8 @@ class Artistbrowse:
     def __init__(self, session, artist, callbacks):
         self.__artist = artist
         self.__proxy_callbacks = ProxyArtistbrowseCallbacks(self, callbacks)
-        self.__artistbrowse_struct = _artistbrowse.create(
+        self.__artistbrowse_interface = _artistbrowse.ArtistBrowseInterface()
+        self.__artistbrowse_struct = self.__artistbrowse_interface.create(
             session.get_struct(), artist.get_struct(),
             self.__proxy_callbacks.get_c_callback(), None
         )
@@ -64,12 +66,14 @@ class Artistbrowse:
     
     @synchronized
     def is_loaded(self):
-        return _artistbrowse.is_loaded(self.__artistbrowse_struct)
+        return self.__artistbrowse_interface.is_loaded(
+            self.__artistbrowse_struct
+        )
     
     
     @synchronized
     def error(self):
-        return _artistbrowse.error(self.__artistbrowse_struct)
+        return self.__artistbrowse_interface.error(self.__artistbrowse_struct)
     
     
     def artist(self):
@@ -78,12 +82,17 @@ class Artistbrowse:
     
     @synchronized
     def num_portraits(self):
-        return _artistbrowse.num_portraits(self.__artistbrowse_struct)
+        return self.__artistbrowse_interface.num_portraits(
+            self.__artistbrowse_struct
+        )
     
     
     @synchronized
     def portrait(self, index):
-        res = _artistbrowse.portrait(self.__artistbrowse_struct, index).contents
+        res = self.__artistbrowse_interface.portrait(
+            self.__artistbrowse_struct, index
+        ).contents
+        
         if res is not None:
             return binascii.b2a_hex(buffer(res))
     
@@ -94,14 +103,20 @@ class Artistbrowse:
     
     @synchronized
     def num_tracks(self):
-        return _artistbrowse.num_tracks(self.__artistbrowse_struct)
+        return self.__artistbrowse_interface.num_tracks(
+            self.__artistbrowse_struct
+        )
     
     
     @synchronized
     def track(self, index):
-        return track.Track(
-            _artistbrowse.track(self.__artistbrowse_struct, index)
+        ti = _track.TrackInterface()
+        track_struct = self.__artistbrowse_interface.track(
+            self.__artistbrowse_struct, index
         )
+        ti.add_ref(track_struct)
+        
+        return track.Track(track_struct)
     
     
     def tracks(self):
@@ -110,14 +125,19 @@ class Artistbrowse:
     
     @synchronized
     def num_albums(self):
-        return _artistbrowse.num_albums(self.__artistbrowse_struct)
+        return self.__artistbrowse_interface.num_albums(
+            self.__artistbrowse_struct
+        )
     
     
     @synchronized
     def album(self, index):
-        return album.Album(
-            _artistbrowse.album(self.__artistbrowse_struct, index)
+        ai = _album.AlbumInterface()
+        album_struct = self.__artistbrowse_interface.album(
+            self.__artistbrowse_struct, index
         )
+        ai.add_ref(album_struct)
+        return album.Album(album_struct)
     
     
     def albums(self):
@@ -126,14 +146,20 @@ class Artistbrowse:
     
     @synchronized
     def num_similar_artists(self):
-        return _artistbrowse.num_similar_artists(self.__artistbrowse_struct)
+        return self.__artistbrowse_interface.num_similar_artists(
+            self.__artistbrowse_struct
+        )
     
     
     @synchronized
     def similar_artist(self, index):
-        return artist.Artist(
-            _artistbrowse.similar_artist(self.__artistbrowse_struct, index)
+        ai = _artist.ArtistInterface()
+        artist_struct = self.__artistbrowse_interface.similar_artist(
+            self.__artistbrowse_struct, index
         )
+        ai.add_ref(artist_struct)
+        
+        return artist.Artist(artist_struct)
     
     
     def similar_artists(self):
@@ -142,18 +168,11 @@ class Artistbrowse:
     
     @synchronized
     def biography(self):
-        return _artistbrowse.biography(self.__artistbrowse_struct)
+        return self.__artistbrowse_interface.biography(
+            self.__artistbrowse_struct
+        )
     
     
     @synchronized
-    def add_ref(self):
-        _artistbrowse.add_ref(self.__artistbrowse_struct)
-    
-    
-    @synchronized
-    def release(self):
-        _artistbrowse.release(self.__artistbrowse_struct)
-    
-    
     def __del__(self):
-        self.release()
+        self.__artistbrowse_interface.release(self.__artistbrowse_struct)

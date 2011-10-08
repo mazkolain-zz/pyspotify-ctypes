@@ -42,6 +42,7 @@ class InboxpostCallbacks:
 
 class Inbox:
     __inbox_struct = None
+    __inbox_interface = None
     __proxy_callbacks = None
     
     
@@ -55,7 +56,8 @@ class Inbox:
     @synchronized
     def __init__(self, session, user, track_list, message, callbacks):
         self.__proxy_callbacks = ProxyInboxpostCallbacks(self, callbacks)
-        self.__inbox_struct = _inbox.post_tracks(
+        self.__inbox_interface = _inbox.InboxInterface()
+        self.__inbox_struct = self.__inbox_interface.post_tracks(
             session.get_struct(), user,
             self._build_track_array(track_list), len(track_list),
             message, self.__proxy_callbacks.get_c_callback(), None
@@ -64,18 +66,9 @@ class Inbox:
     
     @synchronized
     def error(self):
-        return _inbox.error(self.__inbox_struct)
+        return self.__inbox_interface.error(self.__inbox_struct)
     
     
     @synchronized
-    def add_ref(self):
-        _inbox.add_ref(self.__inbox_struct)
-    
-    
-    @synchronized
-    def release(self):
-        _inbox.release(self.__inbox_struct)
-    
-    
     def __del__(self):
-        self.release()
+        self.__inbox_interface.release(self.__inbox_struct)

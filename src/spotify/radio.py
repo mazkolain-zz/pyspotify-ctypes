@@ -44,7 +44,8 @@ class RadioSearch(search.Search):
         else:
             c_callback = None
         
-        self._search_struct = _radio.search_create(
+        self.__search_interface = _radio.RadioInterface()
+        self._search_struct = self.__radio_interface.search_create(
             session.get_struct(),
             from_year, to_year, genres,
             c_callback, None

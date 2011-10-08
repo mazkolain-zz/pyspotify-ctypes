@@ -7,7 +7,9 @@ from _spotify import session as _session
 import spotify
 
 #Also import this one's siblings
-from spotify import user, handle_sp_error #playlistcontainer, playlist,
+from spotify import user, handle_sp_error, playlistcontainer, playlist
+
+from _spotify import playlistcontainer as _playlistcontainer, playlist as _playlist, user as _user
 
 #Decorators
 from spotify.utils.decorators import synchronized
@@ -294,7 +296,10 @@ class Session:
     
     @synchronized
     def user(self, onload=None):
-        user_obj = user.User(self.__session_struct, self.__session_interface.user(self.__session_struct))
+        ui = _user.UserInterface()
+        user_struct = self.__session_interface.user(self.__session_struct)
+        ui.add_ref(user_struct)
+        user_obj = user.User(user_struct)
             
         if onload != None:
             self._user_callbacks.add_callback(
@@ -327,14 +332,18 @@ class Session:
     @synchronized
     def process_events(self):
         next_timeout = ctypes.c_int(0)
-        self.__session_interface.process_events(self.__session_struct, ctypes.byref(next_timeout))
+        self.__session_interface.process_events(
+            self.__session_struct, ctypes.byref(next_timeout)
+        )
         return next_timeout.value / 1000
         
     
     @synchronized
     def player_load(self, track):
         handle_sp_error(
-            self.__session_interface.player_load(self.__session_struct, track.get_struct())
+            self.__session_interface.player_load(
+                self.__session_struct, track.get_struct()
+            )
         )
     
     
@@ -356,15 +365,23 @@ class Session:
     @synchronized
     def player_prefetch(self, track):
         handle_sp_error(
-            self.__session_interface.player_prefetch(self.__session_struct, track.get_struct())
+            self.__session_interface.player_prefetch(
+                self.__session_struct, track.get_struct()
+            )
         )
     
     
     @synchronized
     def playlistcontainer(self):
         if self._playlistcontainer is None:
+            pi = _playlistcontainer.PlaylistContainerInterface()
+            container_struct = self.__session_interface.playlistcontainer(
+                self.__session_struct
+            )
+            pi.add_ref(container_struct)
+            
             self._playlistcontainer = playlistcontainer.PlaylistContainer(
-                self.__session_interface.playlistcontainer(self.__session_struct),
+                container_struct
             )
         
         return self._playlistcontainer
@@ -372,12 +389,16 @@ class Session:
     
     @synchronized
     def inbox_create(self):
-        return playlist.Playlist(self.__session_interface.inbox_create(self.__session_struct))
+        return playlist.Playlist(
+            self.__session_interface.inbox_create(self.__session_struct)
+        )
     
     
     @synchronized
     def starred_create(self):
-        return playlist.Playlist(self.__session_interface.starred_create(self.__session_struct))
+        return playlist.Playlist(
+            self.__session_interface.starred_create(self.__session_struct)
+        )
     
     
     @synchronized
@@ -400,7 +421,9 @@ class Session:
     
     @synchronized
     def preferred_bitrate(self, bitrate):
-        self.__session_interface.preferred_bitrate(self.__session_struct, bitrate)
+        self.__session_interface.preferred_bitrate(
+            self.__session_struct, bitrate
+        )
     
     
     @synchronized
@@ -410,9 +433,13 @@ class Session:
     
     @synchronized
     def friend(self, index):
-        return user.User(
-            self.__session_interface.friend(self.__session_struct, index)
+        ui = _user.UserInterface()
+        user_struct = self.__session_interface.friend(
+            self.__session_struct, index
         )
+        ui.add_ref(user_struct)
+        
+        return user.User(user_struct)
     
     
     def friends(self):

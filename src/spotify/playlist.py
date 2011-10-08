@@ -7,7 +7,7 @@ import ctypes
 
 from spotify import track, user, DuplicateCallbackError, UnknownCallbackError, handle_sp_error
 
-from _spotify import playlist as _playlist
+from _spotify import playlist as _playlist, track as _track, user as _user
 
 from spotify.utils.decorators import synchronized
 
@@ -74,7 +74,7 @@ class ProxyPlaylistCallbacks:
     
     #Build up the struct
     def get_callback_struct(self):
-        return _playlist.callbacks(
+        return self.__playlist_interface.callbacks(
             _playlist.cb_tracks_added(self._tracks_added),
             _playlist.cb_tracks_removed(self._tracks_removed),
             _playlist.cb_tracks_moved(self._tracks_moved),
@@ -135,23 +135,26 @@ class PlaylistCallbacks:
 
 @synchronized
 def create(session, link):
-    return _playlist.create(session.get_struct(), link.get_struct())
+    pi = _playlist.PlaylistInterface()
+    return pi.create(session.get_struct(), link.get_struct())
 
 
 
 class Playlist:
     __playlist_struct = None
+    __playlist_interface = None
     __callbacks = None
     
     
     def __init__(self, playlist_struct):
         self.__playlist_struct = playlist_struct
+        self.__playlist_interface = _playlist.PlaylistInterface()
         self._callbacks = {}
     
     
     @synchronized
     def is_loaded(self):
-        return _playlist.is_loaded(self.__playlist_struct)
+        return self.__playlist_interface.is_loaded(self.__playlist_struct)
     
     
     @synchronized
@@ -173,7 +176,7 @@ class Playlist:
                 "callbacks": callbacks,
             }
             
-            _playlist.add_callbacks(
+            self.__playlist_interface.add_callbacks(
                 self.__playlist_struct, ptr, None
             )
     
@@ -187,7 +190,7 @@ class Playlist:
         
         else:
             ptr = self._callbacks[cb_id]["ptr"]
-            _playlist.remove_callbacks(
+            self.__playlist_interface.remove_callbacks(
                 self.__playlist_struct, ptr, None
             )
             del self._callbacks[cb_id]
@@ -200,14 +203,18 @@ class Playlist:
     
     @synchronized
     def num_tracks(self):
-        return _playlist.num_tracks(self.__playlist_struct)
+        return self.__playlist_interface.num_tracks(self.__playlist_struct)
     
     
     @synchronized
     def track(self, index):
-        return track.Track(
-            _playlist.track(self.__playlist_struct, index)
+        ti = _track.TrackInterface()
+        track_struct = self.__playlist_interface.track(
+            self.__playlist_struct, index
         )
+        ti.add_ref(track_struct)
+        
+        return track.Track(track_struct)
     
     
     def tracks(self):
@@ -216,94 +223,119 @@ class Playlist:
     
     @synchronized
     def track_create_time(self, index):
-        return _playlist.track_create_time(
+        return self.__playlist_interface.track_create_time(
             self.__playlist_struct, index
         )
     
     
     @synchronized
     def track_creator(self, index):
-        return user.User(
-            _playlist.track_creator(self.__playlist_struct, index)
+        ui = _user.UserInterface()
+        user_struct = self.__playlist_interface.track_creator(
+            self.__playlist_struct, index
         )
+        ui.add_ref(user_struct)
+        
+        return user.User(user_struct)
     
     
     @synchronized
     def track_seen(self, index):
-        return _playlist.track_seen(self.__playlist_struct, index)
+        return self.__playlist_interface.track_seen(
+            self.__playlist_struct, index
+        )
     
     
     @synchronized
     def track_set_seen(self, index, seen):
-        #FIXME: Check if throwing exceptions causes a deadlock
         handle_sp_error(
-            _playlist.track_set_seen(self.__playlist_struct, index, seen)
+            self.__playlist_interface.track_set_seen(
+                self.__playlist_struct, index, seen
+            )
         )
     
     
     @synchronized
     def track_message(self, index):
-        return _playlist.track_message(self.__playlist_struct, index)
+        return self.__playlist_interface.track_message(
+            self.__playlist_struct, index
+        )
     
     
     @synchronized
     def name(self):
-        return _playlist.name(self.__playlist_struct)
+        return self.__playlist_interface.name(self.__playlist_struct)
     
     
     @synchronized
     def rename(self, new_name):
-        handle_sp_error(_playlist.rename(self.__playlist_struct, new_name))
+        handle_sp_error(
+            self.__playlist_interface.rename(self.__playlist_struct, new_name)
+        )
     
     
     @synchronized
     def owner(self):
-        return user.User(_playlist.owner(self.__playlist_struct))
+        ui = _user.UserInterface()
+        user_struct = self.__playlist_interface.owner(self.__playlist_struct)
+        ui.add_ref(user_struct)
+        
+        return user.User(user_struct)
     
     
     @synchronized
     def is_collaborative(self):
-        return _playlist.is_collaborative(self.__playlist_struct)
+        return self.__playlist_interface.is_collaborative(
+            self.__playlist_struct
+        )
     
     
     @synchronized
     def set_collaborative(self, collaborative):
-        _playlist.set_collaborative(self.__playlist_struct, collaborative)
+        self.__playlist_interface.set_collaborative(
+            self.__playlist_struct, collaborative
+        )
     
     
     @synchronized
     def set_autolink_tracks(self, link):
-        _playlist.set_autolink_tracks(self.__playlist_struct, link)
+        self.__playlist_interface.set_autolink_tracks(
+            self.__playlist_struct, link
+        )
     
     
     @synchronized
     def get_description(self):
-        return _playlist.get_description(self.__playlist_struct)
+        return self.__playlist_interface.get_description(
+            self.__playlist_struct
+        )
     
     
     @synchronized
     def get_image(self):
         #FIXME: Check if returning a string causes errors
         imgid = ctypes.c_byte * 20
-        if _playlist.get_image(self.__playlist_struct, ctypes.byref(imgid)):
+        if self.__playlist_interface.get_image(self.__playlist_struct, ctypes.byref(imgid)):
             return imgid.value
     
     
     @synchronized
     def has_pending_changes(self):
-        return _playlist.has_pending_changes(self.__playlist_struct)
+        return self.__playlist_interface.has_pending_changes(
+            self.__playlist_struct
+        )
     
     
     @synchronized
     def is_in_ram(self, session):
-        return _playlist.is_in_ram(
+        return self.__playlist_interface.is_in_ram(
             session.get_struct(), self.__playlist_struct
         )
     
     
     @synchronized
     def set_in_ram(self, session, in_ram):
-        _playlist.set_in_ram(
+        self.__playlist_interface.set_in_ram(
             session.get_struct(), self.__playlist_struct, in_ram
         )
     
@@ -316,7 +348,7 @@ class Playlist:
             arr[index] = item.get_struct()
         
         handle_sp_error(
-            _playlist.add_tracks(
+            self.__playlist_interface.add_tracks(
                 self.__playlist_struct,
                 ctypes.byref(arr), len(tracks), position,
                 session.get_struct()
@@ -332,7 +364,7 @@ class Playlist:
             arr[index] = item
         
         handle_sp_error(
-            _playlist.remove_tracks(
+            self.__playlist_interface.remove_tracks(
                 self.__playlist_struct, ctypes.byref(arr), len(tracks)
             )
         )
@@ -346,7 +378,7 @@ class Playlist:
             arr[index] = item
         
         handle_sp_error(
-            _playlist.reorder_tracks(
+            self.__playlist_interface.reorder_tracks(
                 self.__playlist_struct,
                 ctypes.byref(arr), len(tracks), new_position
             )
@@ -355,19 +387,23 @@ class Playlist:
     
     @synchronized
     def num_subscribers(self):
-        return _playlist.num_subscribers(self.__playlist_struct)
+        return self.__playlist_interface.num_subscribers(
+            self.__playlist_struct
+        )
     
     
     @synchronized
     def update_subscribers(self):
-        _playlist.update_subscribers(self.__playlist_struct)
+        self.__playlist_interface.update_subscribers(self.__playlist_struct)
     
     
     #TODO: Rest of the subscribers stuff
     
     
+    @synchronized
     def __del__(self):
         self.remove_all_callbacks()
+        self.__playlist_interface.release(self.__playlist_struct)
     
     
     def get_struct(self):

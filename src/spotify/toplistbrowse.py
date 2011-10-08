@@ -3,7 +3,7 @@ Created on 27/05/2011
 
 @author: mikel
 '''
-from _spotify import toplistbrowse as _toplistbrowse
+from _spotify import toplistbrowse as _toplistbrowse, artist as _artist, album as _album, track as _track
 
 from spotify.utils.decorators import synchronized
 
@@ -67,6 +67,7 @@ class ToplistbrowseCallbacks:
 class Toplistbrowse:
     __proxy_callbacks = None
     __toplistbrowse_struct = None
+    __toplistbrowse_interface = None
     
     
     @synchronized
@@ -79,41 +80,42 @@ class Toplistbrowse:
         else:
             c_callback = None
         
-        self.__toplistbrowse_struct = _toplistbrowse.create(
+        self.__toplistbrowse_interface = _toplistbrowse.ToplistBrowseInterface()
+        self.__toplistbrowse_struct = self.__toplistbrowse_interface.create(
             session.get_struct(), type, region, username, c_callback, None
         )
     
     
     @synchronized
     def is_loaded(self):
-        return _toplistbrowse.is_loaded(self.__toplistbrowse_struct)
+        return self.__toplistbrowse_interface.is_loaded(
+            self.__toplistbrowse_struct
+        )
     
     
     @synchronized
     def error(self):
-        return _toplistbrowse.error(self.__toplistbrowse_struct)
-    
-    
-    @synchronized
-    def add_ref(self):
-        _toplistbrowse.add_ref(self.__toplistbrowse_struct)
-    
-    
-    @synchronized
-    def release(self):
-        _toplistbrowse.release(self.__toplistbrowse_struct)
+        return self.__toplistbrowse_interface.error(
+            self.__toplistbrowse_struct
+        )
     
     
     @synchronized
     def num_artists(self):
-        return _toplistbrowse.num_artists(self.__toplistbrowse_struct)
+        return self.__toplistbrowse_interface.num_artists(
+            self.__toplistbrowse_struct
+        )
     
     
     @synchronized
     def artist(self, index):
-        return artist.Artist(
-            _toplistbrowse.artist(self.__toplistbrowse_struct, index)
+        ai = _artist.ArtistInterface()
+        artist_struct = self.__toplistbrowse_interface.artist(
+            self.__toplistbrowse_struct, index
         )
+        ai.add_ref(artist_struct)
+        
+        return artist.Artist(artist_struct)
     
     
     def artists(self):
@@ -122,14 +124,20 @@ class Toplistbrowse:
     
     @synchronized
     def num_albums(self):
-        return _toplistbrowse.num_albums(self.__toplistbrowse_struct)
+        return self.__toplistbrowse_interface.num_albums(
+            self.__toplistbrowse_struct
+        )
     
     
     @synchronized
     def album(self, index):
-        return album.Album(
-            _toplistbrowse.album(self.__toplistbrowse_struct, index)
+        ai = _album.AlbumInterface()
+        album_struct = self.__toplistbrowse_interface.album(
+            self.__toplistbrowse_struct, index
         )
+        ai.add_ref(album_struct)
+        
+        return album.Album(album_struct)
     
     
     def albums(self):
@@ -138,15 +146,28 @@ class Toplistbrowse:
     
     @synchronized
     def num_tracks(self):
-        return _toplistbrowse.num_tracks(self.__toplistbrowse_struct)
+        return self.__toplistbrowse_interface.num_tracks(
+            self.__toplistbrowse_struct
+        )
     
     
     @synchronized
     def track(self, index):
-        return track.Track(
-            _toplistbrowse.track(self.__toplistbrowse_struct, index)
+        ti = _track.TrackInterface()
+        track_struct = self.__toplistbrowse_interface.track(
+            self.__toplistbrowse_struct, index
         )
+        ti.add_ref(track_struct)
+        
+        return track.Track(track_struct)
     
     
     def tracks(self):
         return CallbackIterator(self.num_tracks, self.track)
+    
+    
+    @synchronized
+    def __del__(self):
+        self.__toplistbrowse_interface.release(
+            self.__toplistbrowse_struct
+        )
