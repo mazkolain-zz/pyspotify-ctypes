@@ -239,14 +239,9 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         full_id = "spotify:artist:%s" % id
         checker = BulkConditionChecker()
         
-        #Initialize all the artist loading stuff
+        #Get the artist object
         link_obj = link.create_from_string(full_id)
         artist_obj = link_obj.as_artist()
-        checker.add_condition(artist_obj.is_loaded)
-        callbacks = ArtistLoadCallbacks(checker)
-        self._session.add_callbacks(callbacks)
-        checker.complete_wait(10)
-        self._session.remove_callbacks(callbacks)
         
         #Now initialize the artistbrowse load stuff
         callbacks = ArtistbrowseLoadCallbacks(checker)
@@ -267,11 +262,6 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         #All the album loading stuff
         link_obj = link.create_from_string(full_id)
         album_obj = link_obj.as_album()
-        checker.add_condition(album_obj.is_loaded)
-        callbacks = AlbumLoadCallbacks(checker)
-        self._session.add_callbacks(callbacks)
-        checker.complete_wait(10)
-        self._session.remove_callbacks(callbacks)
         
         #Now the albumbrowse object
         callbacks = AlbumbrowseLoadCallbacks(checker)
