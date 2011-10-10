@@ -220,9 +220,6 @@ class Session:
     _user_callbacks = None
     _metadata_callbacks = None
     
-    #Playlistcontainer instance
-    _playlistcontainer = None
-    
     
     def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False):
         #Low level interface
@@ -373,18 +370,13 @@ class Session:
     
     @synchronized
     def playlistcontainer(self):
-        if self._playlistcontainer is None:
-            pi = _playlistcontainer.PlaylistContainerInterface()
-            container_struct = self.__session_interface.playlistcontainer(
-                self.__session_struct
-            )
-            pi.add_ref(container_struct)
-            
-            self._playlistcontainer = playlistcontainer.PlaylistContainer(
-                container_struct
-            )
+        pi = _playlistcontainer.PlaylistContainerInterface()
+        container_struct = self.__session_interface.playlistcontainer(
+            self.__session_struct
+        )
+        pi.add_ref(container_struct)
         
-        return self._playlistcontainer
+        return playlistcontainer.PlaylistContainer(container_struct)
     
     
     @synchronized

@@ -87,9 +87,6 @@ class PlaylistContainer:
     #Keep references to callbacks structs an the like
     _callbacks = None
     
-    #To store generated playlist instances
-    _playlist_objects = None
-    
     
     @synchronized
     def __init__(self, container_struct):
@@ -150,24 +147,17 @@ class PlaylistContainer:
         return self.__container_interface.num_playlists(
             self.__container_struct
         )
-    
+        
     
     @synchronized
-    def _get_playlist_object(self, pos):
-        if pos not in self._playlist_objects:
-            pi = _playlist.PlaylistInterface()
-            playlist_struct = self.__container_interface.playlist(
-                self.__container_struct, pos
-            )
-            pi.add_ref(playlist_struct)
-            
-            self._playlist_objects[pos] = playlist.Playlist(playlist_struct)
-        
-        return self._playlist_objects[pos]
-    
-    
     def playlist(self, pos):
-        return self._get_playlist_object(pos)
+        pi = _playlist.PlaylistInterface()
+        playlist_struct = self.__container_interface.playlist(
+            self.__container_struct, pos
+        )
+        pi.add_ref(playlist_struct)
+        
+        return playlist.Playlist(playlist_struct)
     
     
     def playlists(self):
