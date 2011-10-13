@@ -74,7 +74,7 @@ class ProxyPlaylistCallbacks:
     
     #Build up the struct
     def get_callback_struct(self):
-        return self.__playlist_interface.callbacks(
+        return _playlist.callbacks(
             _playlist.cb_tracks_added(self._tracks_added),
             _playlist.cb_tracks_removed(self._tracks_removed),
             _playlist.cb_tracks_moved(self._tracks_moved),
