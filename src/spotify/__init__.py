@@ -136,6 +136,10 @@ class BulkConditionChecker:
         #If list size reaches to zero all conditions have been met
         if len(self._conditions) == 0:
             self._complete()
+            return True
+        
+        else:
+            return False
     
     
     def _complete(self):
