@@ -112,7 +112,7 @@ class Image:
     
     @synchronized
     def remove_all_load_callbacks(self):
-        for item in self.__callbacks:
+        for item in self.__callbacks.itervalues():
             self.remove_load_callback(item["callback"])
     
     

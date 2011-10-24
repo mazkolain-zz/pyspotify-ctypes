@@ -199,7 +199,7 @@ class Playlist:
     
     
     def remove_all_callbacks(self):
-        for item in self.__callbacks:
+        for item in self.__callbacks.itervalues():
             self.remove_callbacks(item["callbacks"])
     
     
