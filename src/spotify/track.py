@@ -76,13 +76,14 @@ class Track:
     
     @synchronized
     def artist(self, index):
-        ai = _artist.ArtistInterface()
         artist_struct = self.__track_interface.artist(
             self.__track_struct, index
         )
-        ai.add_ref(artist_struct)
         
-        return artist.Artist(artist_struct)
+        if artist_struct is not None:
+            ai = _artist.ArtistInterface()
+            ai.add_ref(artist_struct)
+            return artist.Artist(artist_struct)
     
     
     def artists(self):
@@ -91,11 +92,12 @@ class Track:
     
     @synchronized
     def album(self):
-        ai = _album.AlbumInterface()
         album_struct = self.__track_interface.album(self.__track_struct)
-        ai.add_ref(album_struct)
         
-        return album.Album(album_struct)
+        if album_struct is not None:
+            ai = _album.AlbumInterface()
+            ai.add_ref(album_struct)
+            return album.Album(album_struct)
     
     
     @synchronized

@@ -208,13 +208,14 @@ class Playlist:
     
     @synchronized
     def track(self, index):
-        ti = _track.TrackInterface()
         track_struct = self.__playlist_interface.track(
             self.__playlist_struct, index
         )
-        ti.add_ref(track_struct)
         
-        return track.Track(track_struct)
+        if track_struct is not None:
+            ti = _track.TrackInterface()
+            ti.add_ref(track_struct)
+            return track.Track(track_struct)
     
     
     def tracks(self):
@@ -230,13 +231,14 @@ class Playlist:
     
     @synchronized
     def track_creator(self, index):
-        ui = _user.UserInterface()
         user_struct = self.__playlist_interface.track_creator(
             self.__playlist_struct, index
         )
-        ui.add_ref(user_struct)
         
-        return user.User(user_struct)
+        if user_struct is not None:
+            ui = _user.UserInterface()
+            ui.add_ref(user_struct)
+            return user.User(user_struct)
     
     
     @synchronized
@@ -276,11 +278,12 @@ class Playlist:
     
     @synchronized
     def owner(self):
-        ui = _user.UserInterface()
         user_struct = self.__playlist_interface.owner(self.__playlist_struct)
-        ui.add_ref(user_struct)
         
-        return user.User(user_struct)
+        if user_struct is not None:
+            ui = _user.UserInterface()
+            ui.add_ref(user_struct)
+            return user.User(user_struct)
     
     
     @synchronized

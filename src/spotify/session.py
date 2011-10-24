@@ -293,17 +293,19 @@ class Session:
     
     @synchronized
     def user(self, onload=None):
-        ui = _user.UserInterface()
         user_struct = self.__session_interface.user(self.__session_struct)
-        ui.add_ref(user_struct)
-        user_obj = user.User(user_struct)
-            
-        if onload != None:
-            self._user_callbacks.add_callback(
-                user_obj.is_loaded, onload, user_obj
-            )
+        
+        if user_struct is not None:
+            ui = _user.UserInterface()
+            ui.add_ref(user_struct)
+            user_obj = user.User(user_struct)
                 
-        return user_obj
+            if onload != None:
+                self._user_callbacks.add_callback(
+                    user_obj.is_loaded, onload, user_obj
+                )
+                    
+            return user_obj
     
     
     @synchronized
@@ -370,13 +372,14 @@ class Session:
     
     @synchronized
     def playlistcontainer(self):
-        pi = _playlistcontainer.PlaylistContainerInterface()
         container_struct = self.__session_interface.playlistcontainer(
             self.__session_struct
         )
-        pi.add_ref(container_struct)
         
-        return playlistcontainer.PlaylistContainer(container_struct)
+        if container_struct is not None:
+            pi = _playlistcontainer.PlaylistContainerInterface()
+            pi.add_ref(container_struct)
+            return playlistcontainer.PlaylistContainer(container_struct)
     
     
     @synchronized
@@ -425,13 +428,14 @@ class Session:
     
     @synchronized
     def friend(self, index):
-        ui = _user.UserInterface()
         user_struct = self.__session_interface.friend(
             self.__session_struct, index
         )
-        ui.add_ref(user_struct)
         
-        return user.User(user_struct)
+        if user_struct is not None:
+            ui = _user.UserInterface()
+            ui.add_ref(user_struct)
+            return user.User(user_struct)
     
     
     def friends(self):

@@ -88,9 +88,11 @@ class Albumbrowse:
     def artist(self):
         #Increment the refcount so it doesn't get stolen from us
         artist_struct = self.__albumbrowse_interface.artist(self.__albumbrowse_struct)
-        ai = _artist.ArtistInterface()
-        ai.add_ref(artist_struct)
-        return artist.Artist(artist_struct)
+        
+        if artist_struct is not None:
+            ai = _artist.ArtistInterface()
+            ai.add_ref(artist_struct)
+            return artist.Artist(artist_struct)
     
     
     @synchronized
@@ -116,9 +118,11 @@ class Albumbrowse:
     def track(self, index):
         #Increment the refcount so it doesn't get stolen from us
         track_struct = self.__albumbrowse_interface.track(self.__albumbrowse_struct, index)
-        ti = _track.TrackInterface()
-        ti.add_ref(track_struct)
-        return track.Track(track_struct)
+        
+        if track_struct is not None:
+            ti = _track.TrackInterface()
+            ti.add_ref(track_struct)
+            return track.Track(track_struct)
     
 
     def tracks(self):

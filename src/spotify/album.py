@@ -45,9 +45,11 @@ class Album:
     def artist(self):
         #Increment the refcount so it doesn't get stolen from us
         artist_struct = self.__album_interface.artist(self.__album_struct)
-        ai = _artist.ArtistInterface()
-        ai.add_ref(artist_struct)
-        return artist.Artist(artist_struct)
+        
+        if artist_struct is not None:
+            ai = _artist.ArtistInterface()
+            ai.add_ref(artist_struct)
+            return artist.Artist(artist_struct)
     
     
     @synchronized

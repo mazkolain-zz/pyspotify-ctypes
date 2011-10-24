@@ -110,13 +110,14 @@ class Artistbrowse:
     
     @synchronized
     def track(self, index):
-        ti = _track.TrackInterface()
         track_struct = self.__artistbrowse_interface.track(
             self.__artistbrowse_struct, index
         )
-        ti.add_ref(track_struct)
         
-        return track.Track(track_struct)
+        if track_struct is not None:
+            ti = _track.TrackInterface()
+            ti.add_ref(track_struct)
+            return track.Track(track_struct)
     
     
     def tracks(self):
@@ -132,12 +133,14 @@ class Artistbrowse:
     
     @synchronized
     def album(self, index):
-        ai = _album.AlbumInterface()
         album_struct = self.__artistbrowse_interface.album(
             self.__artistbrowse_struct, index
         )
-        ai.add_ref(album_struct)
-        return album.Album(album_struct)
+        
+        if album_struct is not None:
+            ai = _album.AlbumInterface()
+            ai.add_ref(album_struct)
+            return album.Album(album_struct)
     
     
     def albums(self):
@@ -153,13 +156,14 @@ class Artistbrowse:
     
     @synchronized
     def similar_artist(self, index):
-        ai = _artist.ArtistInterface()
         artist_struct = self.__artistbrowse_interface.similar_artist(
             self.__artistbrowse_struct, index
         )
-        ai.add_ref(artist_struct)
         
-        return artist.Artist(artist_struct)
+        if artist_struct is not None:
+            ai = _artist.ArtistInterface()
+            ai.add_ref(artist_struct)
+            return artist.Artist(artist_struct)
     
     
     def similar_artists(self):

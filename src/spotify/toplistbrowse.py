@@ -109,13 +109,14 @@ class Toplistbrowse:
     
     @synchronized
     def artist(self, index):
-        ai = _artist.ArtistInterface()
         artist_struct = self.__toplistbrowse_interface.artist(
             self.__toplistbrowse_struct, index
         )
-        ai.add_ref(artist_struct)
         
-        return artist.Artist(artist_struct)
+        if artist_struct is not None:
+            ai = _artist.ArtistInterface()
+            ai.add_ref(artist_struct)
+            return artist.Artist(artist_struct)
     
     
     def artists(self):
@@ -131,13 +132,14 @@ class Toplistbrowse:
     
     @synchronized
     def album(self, index):
-        ai = _album.AlbumInterface()
         album_struct = self.__toplistbrowse_interface.album(
             self.__toplistbrowse_struct, index
         )
-        ai.add_ref(album_struct)
         
-        return album.Album(album_struct)
+        if album_struct is not None:
+            ai = _album.AlbumInterface()
+            ai.add_ref(album_struct)
+            return album.Album(album_struct)
     
     
     def albums(self):
@@ -153,13 +155,14 @@ class Toplistbrowse:
     
     @synchronized
     def track(self, index):
-        ti = _track.TrackInterface()
         track_struct = self.__toplistbrowse_interface.track(
             self.__toplistbrowse_struct, index
         )
-        ti.add_ref(track_struct)
         
-        return track.Track(track_struct)
+        if track_struct is not None:
+            ti = _track.TrackInterface()
+            ti.add_ref(track_struct)
+            return track.Track(track_struct)
     
     
     def tracks(self):

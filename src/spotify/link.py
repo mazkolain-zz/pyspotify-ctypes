@@ -98,43 +98,53 @@ class Link:
     @synchronized
     def as_track(self):
         track_struct = self.__link_interface.as_track(self.__link_struct)
-        ti = _track.TrackInterface()
-        ti.add_ref(track_struct)
-        return track.Track(track_struct) 
+        
+        if track_struct is not None:
+            ti = _track.TrackInterface()
+            ti.add_ref(track_struct)
+            return track.Track(track_struct) 
     
     
     @synchronized
     def as_track_and_offset(self):
         offset = ctypes.c_int
         track_struct = self.__link_interface.as_track_and_offset
-        ti = _track.TrackInterface()
-        ti.add_ref(track_struct)
-        return track.Track(track_struct), offset.value
+        
+        if track_struct is not None:
+            ti = _track.TrackInterface()
+            ti.add_ref(track_struct)
+            return track.Track(track_struct), offset.value
     
     @synchronized
     def as_album(self):
         album_struct = self.__link_interface.as_album(self.__link_struct)
-        ai = _album.AlbumInterface()
-        ai.add_ref(album_struct)
-        return album.Album(album_struct)
+        
+        if album_struct is not None:
+            ai = _album.AlbumInterface()
+            ai.add_ref(album_struct)
+            return album.Album(album_struct)
     
     
     @synchronized
     def as_artist(self):
         #Increment reference count so it's not stolen from us
         artist_struct = self.__link_interface.as_artist(self.__link_struct)
-        ai = _artist.ArtistInterface()
-        ai.add_ref(artist_struct)
-        return artist.Artist(artist_struct)
+        
+        if artist_struct is not None:
+            ai = _artist.ArtistInterface()
+            ai.add_ref(artist_struct)
+            return artist.Artist(artist_struct)
     
     
     @synchronized
     def as_user(self):
         #Increment reference count so it's not stolen from us
         user_struct = self.__link_interface.as_user(self.__link_struct)
-        ui = _user.UserInterface()
-        ui.add_ref(user_struct)
-        return user.User(user_struct)
+        
+        if user_struct is not None:
+            ui = _user.UserInterface()
+            ui.add_ref(user_struct)
+            return user.User(user_struct)
     
     
     @synchronized

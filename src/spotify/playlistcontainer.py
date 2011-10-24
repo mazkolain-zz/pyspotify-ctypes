@@ -151,13 +151,14 @@ class PlaylistContainer:
     
     @synchronized
     def playlist(self, pos):
-        pi = _playlist.PlaylistInterface()
         playlist_struct = self.__container_interface.playlist(
             self.__container_struct, pos
         )
-        pi.add_ref(playlist_struct)
         
-        return playlist.Playlist(playlist_struct)
+        if playlist_struct is not None:
+            pi = _playlist.PlaylistInterface()
+            pi.add_ref(playlist_struct)
+            return playlist.Playlist(playlist_struct)
     
     
     def playlists(self):
@@ -235,13 +236,14 @@ class PlaylistContainer:
     
     @synchronized
     def owner(self):
-        ui = _user.UserInterface()
         user_struct = self.__container_interface.owner(
             self.__container_struct
         )
-        ui.add_ref(user_struct)
         
-        return user.User(user_struct)
+        if user_struct is not None:
+            ui = _user.UserInterface()
+            ui.add_ref(user_struct)
+            return user.User(user_struct)
     
     
     @synchronized
