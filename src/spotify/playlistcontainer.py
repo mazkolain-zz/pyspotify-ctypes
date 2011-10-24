@@ -15,6 +15,8 @@ from spotify.utils.iterators import CallbackIterator
 
 import playlist
 
+import weakref
+
 
 
 class ProxyPlaylistContainerCallbacks:
@@ -23,7 +25,7 @@ class ProxyPlaylistContainerCallbacks:
     
     
     def __init__(self, container, callbacks):
-        self._container = container
+        self._container = weakref.proxy(container)
         self._callbacks = callbacks
     
     

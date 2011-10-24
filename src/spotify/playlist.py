@@ -13,6 +13,8 @@ from spotify.utils.decorators import synchronized
 
 from spotify.utils.iterators import CallbackIterator
 
+import weakref
+
 
 
 class ProxyPlaylistCallbacks:
@@ -20,7 +22,7 @@ class ProxyPlaylistCallbacks:
     _callbacks = None
     
     def __init__(self, playlist, callbacks):
-        self._playlist = playlist
+        self._playlist = weakref.proxy(playlist)
         self._callbacks = callbacks
     
     #Callback proxies
@@ -149,7 +151,7 @@ class Playlist:
     def __init__(self, playlist_struct):
         self.__playlist_struct = playlist_struct
         self.__playlist_interface = _playlist.PlaylistInterface()
-        self._callbacks = {}
+        self.__callbacks = {}
     
     
     @synchronized
@@ -161,7 +163,7 @@ class Playlist:
     def add_callbacks(self, callbacks):
         cb_id = id(callbacks)
         
-        if cb_id in self._callbacks:
+        if cb_id in self.__callbacks:
             raise DuplicateCallbackError()
         
         else:
@@ -170,7 +172,7 @@ class Playlist:
             struct = proxy.get_callback_struct()
             ptr = ctypes.pointer(struct)
             
-            self._callbacks[cb_id] = {
+            self.__callbacks[cb_id] = {
                 "struct": struct,
                 "ptr": ptr,
                 "callbacks": callbacks,
@@ -185,19 +187,19 @@ class Playlist:
     def remove_callbacks(self, callbacks):
         cb_id = id(callbacks)
         
-        if cb_id not in self._callbacks:
+        if cb_id not in self.__callbacks:
             raise UnknownCallbackError()
         
         else:
-            ptr = self._callbacks[cb_id]["ptr"]
+            ptr = self.__callbacks[cb_id]["ptr"]
             self.__playlist_interface.remove_callbacks(
                 self.__playlist_struct, ptr, None
             )
-            del self._callbacks[cb_id]
+            del self.__callbacks[cb_id]
     
     
     def remove_all_callbacks(self):
-        for item in self._callbacks:
+        for item in self.__callbacks:
             self.remove_callbacks(item["callbacks"])
     
     
