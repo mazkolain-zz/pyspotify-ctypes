@@ -103,17 +103,16 @@ class Image:
             raise UnknownCallbackError()
         
         else:
-            c_callback = self.__callbacks[cb_id]["proxy"].get_c_callback()
+            proxy = self.__callbacks[cb_id]["proxy"]
             self.__image_interface.remove_load_callback(
-                self.__image_struct, ctypes.byref(c_callback), None
+                self.__image_struct, proxy.get_c_callback(), None
             )
             del self.__callbacks[cb_id]
         
     
-    @synchronized
     def remove_all_load_callbacks(self):
-        for item in self.__callbacks.itervalues():
-            self.remove_load_callback(item["callback"])
+        for key in self.__callbacks.keys():
+            self.remove_load_callback(self.__callbacks[key]["callback"])
     
     
     @synchronized
@@ -142,7 +141,7 @@ class Image:
     @synchronized
     def __del__(self):
         self.remove_all_load_callbacks()
-        self.__image_interface.release()
+        self.__image_interface.release(self.__image_struct)
     
     
     def get_struct(self):
