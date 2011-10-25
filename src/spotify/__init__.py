@@ -155,7 +155,13 @@ class BulkConditionChecker:
         #Check conditions first, if there's no need to wait
         self.check_conditions()
         self._event.wait(timeout)
-        self._event.clear()
+        
+        if not self._event.isSet():
+            raise RuntimeError('Timed out while waiting for an event.')
+        
+        else:
+            self._event.clear()
+            
 
 
 
