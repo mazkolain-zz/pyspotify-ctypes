@@ -152,15 +152,16 @@ class BulkConditionChecker:
     
     
     def complete_wait(self, timeout = None):
-        #Check conditions first, if there's no need to wait
+        #Clear the event first, so we make a "clean" check
+        self._event.clear()
+        
+        #Check conditions if they have been already met, and wait
         self.check_conditions()
         self._event.wait(timeout)
         
+        #Fail if we reached here due to a timeout
         if not self._event.isSet():
             raise RuntimeError('Timed out while waiting for an event.')
-        
-        else:
-            self._event.clear()
             
 
 
