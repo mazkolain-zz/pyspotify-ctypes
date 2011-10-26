@@ -129,9 +129,8 @@ class BulkConditionChecker:
     
     @synchronized
     def check_conditions(self):
-        for item in self._conditions:
-            if item():
-                self._conditions.remove(item)
+        #Generate a new list with false conditions
+        self._conditions = [item for item in self._conditions if not item()]
             
         #If list size reaches to zero all conditions have been met
         if len(self._conditions) == 0:
@@ -162,7 +161,6 @@ class BulkConditionChecker:
         #Fail if we reached here due to a timeout
         if not self._event.isSet():
             raise RuntimeError('Timed out while waiting for an event.')
-            
 
 
 
