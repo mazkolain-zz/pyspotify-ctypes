@@ -140,8 +140,8 @@ class PlaylistContainer:
     
     
     def remove_all_callbacks(self):
-        for item in self._callbacks.itervalues():
-            self.remove_callbacks(item["callbacks"])
+        for key in self._callbacks.keys():
+            self.remove_callbacks(self._callbacks[key]["callbacks"])
     
     
     @synchronized
