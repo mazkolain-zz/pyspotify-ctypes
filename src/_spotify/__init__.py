@@ -1,4 +1,5 @@
-import struct, os, ctypes, sys 
+import struct, os, ctypes, sys
+import weakref
 
 
 #Module index
@@ -23,14 +24,10 @@ voidp_size = struct.calcsize("P") * 8
 
 #Platform-specific initializations
 if os.name == "nt" and voidp_size == 32:
-    loader = ctypes.windll
     callback = ctypes.WINFUNCTYPE
-    filename = "libspotify.dll"
 
 elif os.name == "posix" and voidp_size in [32,64]:
-    loader = ctypes.cdll
     callback = ctypes.CFUNCTYPE
-    filename = "libspotify.so"
     
 else:
     raise OSError(
@@ -98,18 +95,77 @@ class LibSpotifyInterface(ModuleInterface):
     
     
     def _load_library(self):
+        ll = CachingLibraryLoader()
+        return ll.load('libspotify')
+
+
+
+class CachingLibraryLoader:
+    __library_cache = {}
+    
+    
+    def _get_ext(self):
+        if os.name == 'nt':
+            return 'dll'
+        
+        elif os.name == 'posix':
+            return 'so'
+    
+    
+    def _get_loader(self):
+        if os.name == 'nt':
+            return ctypes.windll
+        
+        elif os.name == 'posix':
+            return ctypes.cdll
+    
+    
+    def _load(self, name):
+        loader = self._get_loader()
+        
         #Let ctypes find it
         try:
-            return loader.libspotify
+            return getattr(loader, name)
     
         #Bad luck, let's do a quirk
         except OSError:
+            filename = '%s.%s' % (name, self._get_ext())
             for path in sys.path:
                 full_path = os.path.join(path, filename)
                 if os.path.isfile(full_path):
                     return loader.LoadLibrary(full_path)
         
-            raise OSError("Unable to find libspotify")
+            raise OSError("Unable to find '%s'") % name
+    
+    
+    def _unload_library(self, name):
+        data = CachingLibraryLoader.__library_cache[name]
+        data['refs'] -= 1
+        
+        print 'unloading lib'
+        
+        if data['refs'] == 0:
+            print 'destroy lib'
+            del CachingLibraryLoader.__library_cache[name]
+    
+    
+    def load(self, name):
+        #Load if not found on the cache 
+        if name not in self.__library_cache:
+            library = self._load(name)
+            data = {'refs': 1, 'library': library}
+            self.__library_cache[name] = data
+        else:
+            data = CachingLibraryLoader.__library_cache[name]
+            library = data['library']
+            data['refs'] += 1
+        
+        #Callback for the unload event
+        def do_unload():
+            self._unload_library(name)
+        
+        #Return as a proxy object
+        return weakref.proxy(library, do_unload)
 
 
 
