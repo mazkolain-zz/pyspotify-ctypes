@@ -15,6 +15,8 @@ from spotify.utils.iterators import CallbackIterator
 
 import weakref
 
+import binascii
+
 
 
 class ProxyPlaylistCallbacks:
@@ -318,10 +320,13 @@ class Playlist:
     
     @synchronized
     def get_image(self):
-        #FIXME: Check if returning a string causes errors
-        imgid = ctypes.c_byte * 20
-        if self.__playlist_interface.get_image(self.__playlist_struct, ctypes.byref(imgid)):
-            return imgid.value
+        imgid = (ctypes.c_byte * 20)()
+        result = self.__playlist_interface.get_image(
+            self.__playlist_struct, imgid
+        )
+        
+        if result:
+            return binascii.b2a_hex(buffer(imgid))
     
     
     @synchronized
