@@ -54,9 +54,9 @@ class Album:
     
     @synchronized
     def cover(self):
-        res = self.__album_interface.cover(self.__album_struct).contents
-        if res is not None:
-            return binascii.b2a_hex(buffer(res))
+        res = self.__album_interface.cover(self.__album_struct)
+        if res:
+            return binascii.b2a_hex(buffer(res.contents))
     
     
     @synchronized
