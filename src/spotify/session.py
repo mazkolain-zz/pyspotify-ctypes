@@ -281,7 +281,9 @@ class Session:
     @synchronized
     def remembered_user(self):
         buf = (ctypes.c_char * 255)()
-        res = self.__session_interface.remembered_user(self.__session_struct, ctypes.byref(buf), ctypes.sizeof(buf))
+        res = self.__session_interface.remembered_user(
+            self.__session_struct, buf, ctypes.sizeof(buf)
+        )
         if res != -1:
             return buf.value
     
