@@ -226,16 +226,19 @@ audio_buffer_stats._fields_ = [
 class SpotifyInterface(LibSpotifyInterface):
     def __init__(self):
         LibSpotifyInterface.__init__(self)
-        
-        self._register_func(
-            'error_message',
+    
+    
+    def error_message(self, *args):
+        return self._get_func(
             'sp_error_message',
             ctypes.c_char_p,
             ctypes.c_int
-        )
-        
-        self._register_func(
+        )(*args)
+    
+    
+    def build_id(self, *args):
+        return self._get_func(
             'build_id',
             'sp_build_id',
             ctypes.c_char_p
-        )
+        )(*args)
