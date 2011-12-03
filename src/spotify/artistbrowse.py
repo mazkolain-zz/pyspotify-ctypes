@@ -14,6 +14,8 @@ from spotify import artist, album, track
 
 import binascii
 
+import weakref
+
 
 
 class ProxyArtistbrowseCallbacks:
@@ -23,7 +25,7 @@ class ProxyArtistbrowseCallbacks:
     
     
     def __init__(self, artistbrowse, callbacks):
-        self.__artistbrowse = artistbrowse
+        self.__artistbrowse = weakref.proxy(artistbrowse)
         self.__callbacks = callbacks
         self.__c_callback = _artistbrowse.artistbrowse_complete_cb(
             self.artistbrowse_complete
