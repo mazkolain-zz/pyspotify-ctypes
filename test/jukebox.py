@@ -4,17 +4,17 @@ Created on 07/11/2010
 
 @author: mikel
 '''
-import os, os.path
+import sys, os.path
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-#Set resource paths
-import envutils
-envutils.set_library_path("../dlls")
+#Search path for dlls/extensions
+sys.path.append('../dlls')
 
-#Make spotify and cherrypy available on path
-import sys
+#Search path for python libs/eggs
+sys.path.append("../libs")
+
+#Put the spotify bindings on the search path also
 sys.path.append("../src")
-sys.path.append("../lib/CherryPy-3.2.0-py2.4.egg")
 
 #mandatory libspotify imports
 from appkey import appkey
@@ -25,52 +25,40 @@ from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, searc
 import cmd
 import threading
 
-#Proxy http server for resources (separate import as depends on cherrypy)
-#Importing cherrypy before spotify will crash python
-from spotify.utils import httpproxy, audio
-
 
 
 class JukeboxCallbacks(session.SessionCallbacks):
     _mainloop = None
     __buf = None
     
-    def __init__(self, mainloop, buf):
+    
+    def __init__(self, mainloop):
         self._mainloop = mainloop
-        self.__buf = buf
+    
     
     def logged_in(self, session, error):
         handle_sp_error(error)
         print "login successful"  
     
+    
     def logged_out(self, session):
         print "logout successful"
-            
+    
     
     def connection_error(self, session, error):
         print "conn error"
-        
+    
+    
     def log_message(self, session, data):
         print "log: %s" % data
     
-    def streaming_error(self, error):
-        print "streaming error: %d" % error
     
-    def end_of_track(self, session):
-        self.__buf.set_track_ended()
-        
     def notify_main_thread(self, session):
         self._mainloop.notify()
     
+    
     def metadata_updated(self, session):
-        #print "metadata_updated"
         pass
-    
-    def music_delivery(self, session, data, num_samples, sample_type, sample_rate, num_channels):
-        return self.__buf.music_delivery(data, num_samples, sample_type, sample_rate, num_channels)
-    
-    def get_audio_buffer_stats(self, session):
-        return self.__buf.get_stats()
 
 
 
@@ -78,11 +66,11 @@ def print_user(user):
     print "user loaded (cb): %d" % user.is_loaded()
 
 
+
 def main():
     print "uses SPOTIFY(R) CORE"
     ml = MainLoop()
-    buf = audio.BufferManager()
-    cb = JukeboxCallbacks(ml, buf)
+    cb = JukeboxCallbacks(ml)
     s = session.Session(
         cb,
         app_key=appkey,
@@ -91,20 +79,19 @@ def main():
         cache_location="../tmp/cache",
     )
     
-    pr = httpproxy.ProxyRunner(s, buf)
     c = JukeboxCmd(s, ml)
     c.start()
-    pr.start()
     ml.loop(s)
-    pr.stop()
 
 
 
 class JukeboxPlaylistContainerCallbacks(playlistcontainer.PlaylistContainerCallbacks):
     _checker = None
     
+    
     def __init__(self, checker):
         self._checker = checker
+    
     
     def container_loaded(self, container):
         self._checker.check_conditions()
