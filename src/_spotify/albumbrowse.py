@@ -94,6 +94,14 @@ class AlbumBrowseInterface(LibSpotifyInterface):
         )(*args)
 
 
+    def backend_request_duration(self, *args):
+        return self._get_func(
+            'sp_albumbrowse_backend_request_duration',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+
+
     def add_ref(self, *args):
         return self._get_func(
             'sp_albumbrowse_add_ref',

@@ -18,7 +18,7 @@ class ArtistBrowseInterface(LibSpotifyInterface):
         return self._get_func(
             'sp_artistbrowse_create',
             ctypes.c_void_p,
-            ctypes.c_void_p, ctypes.c_void_p, artistbrowse_complete_cb, ctypes.c_void_p
+            ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, artistbrowse_complete_cb, ctypes.c_void_p
         )(*args)
 
 
@@ -114,6 +114,14 @@ class ArtistBrowseInterface(LibSpotifyInterface):
         return self._get_func(
             'sp_artistbrowse_biography',
             ctypes.c_char_p,
+            ctypes.c_void_p
+        )(*args)
+    
+    
+    def backend_request_duration(self, *args):
+        return self._get_func(
+            'sp_artistbrowse_backend_request_duration',
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 

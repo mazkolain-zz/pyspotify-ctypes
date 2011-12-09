@@ -24,6 +24,14 @@ class ArtistInterface(LibSpotifyInterface):
             bool_type,
             ctypes.c_void_p
         )(*args)
+    
+    
+    def portrait(self, *args):
+        return self._get_func(
+            'sp_artist_portrait',
+            ctypes.POINTER(ctypes.c_byte * 20),
+            ctypes.c_void_p
+        )(*args)
 
 
     def add_ref(self, *args):

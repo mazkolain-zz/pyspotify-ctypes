@@ -24,12 +24,20 @@ class TrackInterface(LibSpotifyInterface):
             ctypes.c_int,
             ctypes.c_void_p
         )(*args)
-
-
-    def is_available(self, *args):
+    
+    
+    def offline_get_status(self, *args):
         return self._get_func(
-            'sp_track_is_available',
-            bool_type,
+            'sp_track_offline_get_status',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+
+
+    def get_availability(self, *args):
+        return self._get_func(
+            'sp_track_get_availability',
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_void_p
         )(*args)
 
@@ -47,6 +55,14 @@ class TrackInterface(LibSpotifyInterface):
             'sp_track_is_autolinked',
             bool_type,
             ctypes.c_void_p, ctypes.c_void_p
+        )(*args)
+    
+    
+    def is_placeholder(self, *args):
+        return self._get_func(
+            'sp_track_is_placeholder',
+            bool_type,
+            ctypes.c_void_p
         )(*args)
 
 

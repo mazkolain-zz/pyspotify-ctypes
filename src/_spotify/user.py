@@ -34,30 +34,6 @@ class UserInterface(LibSpotifyInterface):
         )(*args)
 
 
-    def full_name(self, *args):
-        return self._get_func(
-            'sp_user_full_name',
-            ctypes.c_char_p,
-            ctypes.c_void_p
-        )(*args)
-
-
-    def picture(self, *args):
-        return self._get_func(
-            'sp_user_picture',
-            ctypes.c_char_p,
-            ctypes.c_void_p
-        )(*args)
-
-
-    def relation_type(self, *args):
-        return self._get_func(
-            'sp_user_relation_type',
-            ctypes.c_int,
-            ctypes.c_void_p, ctypes.c_void_p
-        )(*args)
-
-
     def add_ref(self, *args):
         return self._get_func(
             'sp_user_add_ref',

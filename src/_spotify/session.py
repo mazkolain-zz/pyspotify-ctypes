@@ -43,6 +43,7 @@ cb_get_audio_buffer_stats = callback(
 )
 
 cb_offline_status_updated = callback(None, ctypes.c_void_p)
+cb_offline_status_error = callback(None, ctypes.c_void_p, ctypes.c_int)
 
 
 #Completion of structure defs
@@ -62,7 +63,8 @@ callbacks._fields_ = [
     ("start_playback", cb_start_playback),
     ("stop_playback", cb_stop_playback),
     ("get_audio_buffer_stats", cb_get_audio_buffer_stats),
-    ("offline_status_updated", cb_offline_status_updated)
+    ("offline_status_updated", cb_offline_status_updated),
+    ("offline_status_error", cb_offline_status_error)
 ]
 
 config._fields_ = [
@@ -77,6 +79,8 @@ config._fields_ = [
     ("compress_playlists", bool_type),
     ("dont_save_metadata_for_playlists", bool_type),
     ("initially_unload_playlists", bool_type),
+    ("device_id", ctypes.c_char_p),
+    ("tracefile", ctypes.c_char_p)
 ]
 
 offline_sync_status._fields_ = [
@@ -286,8 +290,24 @@ class SessionInterface(LibSpotifyInterface):
             None,
             ctypes.c_void_p, ctypes.c_int, bool_type
         )(*args)
-
-
+    
+    
+    def get_volume_normalization(self, *args):
+        return self._get_func(
+            'sp_session_get_volume_normalization',
+            bool_type,
+            ctypes.c_void_p
+        )(*args)
+    
+    
+    def set_volume_normalization(self, *args):
+        return self._get_func(
+            'sp_session_set_volume_normalization',
+            None,
+            ctypes.c_void_p, bool_type
+        )(*args)
+    
+    
     def num_friends(self, *args):
         return self._get_func(
             'sp_session_num_friends',
