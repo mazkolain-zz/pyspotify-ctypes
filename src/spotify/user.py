@@ -29,23 +29,8 @@ class User:
     
     
     @synchronized
-    def full_name(self):
-        return self.__user_interface.full_name(self.__user_struct)
-    
-    
-    @synchronized
     def is_loaded(self):
         return self.__user_interface.is_loaded(self.__user_struct)
-    
-    
-    @synchronized
-    def picture(self):
-        return self.__user_interface.picture(self.__user_struct)
-    
-    
-    @synchronized
-    def relation_type(self, session):
-        return self.__user_interface.relation_type(session.get_struct(), self.__user_struct)
     
     
     @synchronized

@@ -15,6 +15,26 @@ from spotify.utils.iterators import CallbackIterator
 
 
 
+class TrackAvailability:
+    Unavailable = 0
+    Available = 1
+    NotStreamable = 2
+    BannedByArtist = 3
+
+
+
+class TrackOfflineStatus:
+    No = 0
+    Waiting = 1
+    Downloading = 2
+    Done = 3
+    Error = 4
+    DoneExpired = 5
+    LimitExceeded = 6
+    DoneResync = 7
+
+
+
 @synchronized
 def set_starred(session, tracks, star):
     arr = (ctypes.c_void_p * len(tracks))()
@@ -50,23 +70,41 @@ class Track:
     
     
     @synchronized
-    def is_available(self, session):
-        return self.__track_interface.is_available(session.get_struct(), self.get_struct())
+    def offline_get_status(self):
+        return self.__track_interface.offline_get_status(self.__track_struct)
+    
+    
+    @synchronized
+    def get_availability(self, session):
+        return self.__track_interface.get_availability(
+            session.get_struct(), self.__track_struct
+        )
     
     
     @synchronized
     def is_local(self, session):
-        return self.__track_interface.is_local(session.get_struct(), self.get_struct())
+        return self.__track_interface.is_local(
+            session.get_struct(), self.__track_struct
+        )
     
     
     @synchronized
     def is_autolinked(self, session):
-        return self.__track_interface.is_autolinked(session.get_struct(), self.get_struct())
+        return self.__track_interface.is_autolinked(
+            session.get_struct(), self.__track_struct
+        )
+    
+    
+    @synchronized
+    def is_placeholder(self):
+        return self.__track_interface.is_placeholder(self.__track_struct)
     
     
     @synchronized
     def is_starred(self, session):
-        return self.__track_interface.is_starred(session.get_struct(), self.get_struct())
+        return self.__track_interface.is_starred(
+            session.get_struct(), self.__track_struct
+        )
     
     
     @synchronized

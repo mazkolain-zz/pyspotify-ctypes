@@ -1,20 +1,16 @@
 import ctypes
 
-#Import low level api
-from _spotify import session as _session
-
 #Import general classes from the high level module
 import spotify
 
 #Also import this one's siblings
 from spotify import user, handle_sp_error, playlistcontainer, playlist
 
-from _spotify import playlistcontainer as _playlistcontainer, playlist as _playlist, user as _user
+#Import low level api
+from _spotify import playlistcontainer as _playlistcontainer, user as _user, session as _session
 
 #Decorators
 from spotify.utils.decorators import synchronized
-
-from spotify.utils.iterators import CallbackIterator
 
 import weakref
 
@@ -148,7 +144,12 @@ class ProxySessionCallbacks:
     
     def _offline_status_updated(self, session):
         self.__callbacks.offline_status_updated(self.__session)
-        self.__manager._offline_status_updated(self.__session)
+        self.__manager.offline_status_updated(self.__session)
+    
+    
+    def _offline_error(self, session, error):
+        self.__callbacks.offline_error(self.__session, error)
+        self.__manager.offline_error(self.__session, error)
     
     
     def get_callback_struct(self):
@@ -204,12 +205,15 @@ class SessionCallbacks:
     
     def offline_status_updated(self, session):
         pass
+    
+    def offline_error(self, session, error):
+        pass
 
 
 
 #classes
 class Session:
-    api_version = 9
+    api_version = 10
     
     __session_struct = None
     __session_interface = None
@@ -221,7 +225,7 @@ class Session:
     _metadata_callbacks = None
     
     
-    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False):
+    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False, device_id=None, tracefile=""):
         #Low level interface
         self.__session_interface = _session.SessionInterface()
         
@@ -251,6 +255,8 @@ class Session:
             compress_playlists,
             dont_save_metadata_for_playlists,
             initially_unload_playlists,
+            device_id,
+            tracefile
         )
         
         self.__session_struct = ctypes.c_void_p()
@@ -424,34 +430,87 @@ class Session:
     
     
     @synchronized
-    def num_friends(self):
-        return self.__session_interface.num_friends(self.__session_struct)
+    def preferred_offline_bitrate(self, bitrate, allow_resync):
+        self.__session_interface.preferred_offline_bitrate(
+            self.__session_struct, bitrate, allow_resync
+        )
     
     
     @synchronized
-    def friend(self, index):
-        user_struct = self.__session_interface.friend(
-            self.__session_struct, index
+    def get_volume_normalization(self):
+        return self.__session_interface.get_volume_normalization(
+            self.__session_struct
+        )
+    
+    
+    @synchronized
+    def set_volume_normalization(self, on):
+        self.__session_interface.set_volume_normalization(
+            self.__session_struct, on
+        )
+    
+    
+    @synchronized
+    def set_connection_type(self, conn_type):
+        self.__session_interface.set_connection_type(
+            self.__session_struct, conn_type
+        )
+    
+    
+    @synchronized
+    def set_connection_rules(self, conn_rules):
+        self.__session_interface.set_connection_rules(
+            self.__session_struct, conn_rules
+        )
+    
+    
+    @synchronized
+    def offline_tracks_to_sync(self):
+        return self.__session_interface.offline_tracks_to_sync(
+            self.__session_struct
+        )
+    
+    
+    @synchronized
+    def offline_num_playlists(self):
+        return self.__session_interface.offline_num_playlists(
+            self.__session_struct
+        )
+    
+    
+    @synchronized
+    def offline_sync_get_status(self):
+        sync_struct = _session.offline_sync_status()
+        status = self.__session_interface.offline_sync_get_status(
+            self.__session_struct, ctypes.byref(sync_struct)
         )
         
-        if user_struct is not None:
-            ui = _user.UserInterface()
-            ui.add_ref(user_struct)
-            return user.User(user_struct)
-    
-    
-    def friends(self):
-        return CallbackIterator(self.num_friends, self.friend)
+        if status:
+            return{
+                'queued_tracks': sync_struct.queued_tracks,
+                'queued_bytes': sync_struct.queued_bytes,
+                'done_tracks': sync_struct.done_tracks,
+                'done_bytes': sync_struct.done_bytes,
+                'copied_tracks': sync_struct.copied_tracks,
+                'copied_bytes': sync_struct.copied_bytes,
+                'willnotcopy_tracks': sync_struct.willnotcopy_tracks,
+                'error_tracks': sync_struct.error_tracks,
+                'syncing': sync_struct.syncing,
+            }
     
     
     @synchronized
-    def set_connection_rules(self, type):
-        self.__session_interface.set_connection_rules(self.__session_struct, type)
+    def offline_time_left(self):
+        return self.__session_interface.offline_time_left(
+            self.__session_struct
+        )
     
     
     @synchronized
-    def set_connection_type(self, type):
-        self.__session_interface.set_connection_type(self.__session_struct, type)
+    def user_country(self):
+        return self.__session_interface.user_country(
+            self.__session_struct
+        )
     
     
     @synchronized

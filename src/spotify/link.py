@@ -32,9 +32,29 @@ def create_from_artist(artist):
 
 
 @synchronized
+def create_from_artist_portrait(artist):
+    li = _link.LinkInterface()
+    return Link(li.create_from_artist_portrait(artist.get_struct()))
+
+
+@synchronized
+def create_from_artistbrowse_portrait(artistbrowse, index):
+    li = _link.LinkInterface()
+    return Link(
+        li.create_from_artistbrowse_portrait(artistbrowse.get_struct(), index)
+    )
+
+
+@synchronized
 def create_from_album(album):
     li = _link.LinkInterface()
     return Link(li.create_from_album(album.get_struct()))
+
+
+@synchronized
+def create_from_album_cover(album):
+    li = _link.LinkInterface()
+    return Link(li.create_from_album_cover(album.get_struct()))
 
 
 @synchronized
@@ -53,6 +73,12 @@ def create_from_playlist(playlist):
 def create_from_user(user):
     li = _link.LinkInterface()
     return Link(li.create_from_user(user.get_struct()))
+
+
+@synchronized
+def create_from_image(image):
+    li = _link.LinkInterface()
+    return Link(li.create_from_image(image.get_struct()))
 
 
 

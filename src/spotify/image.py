@@ -7,7 +7,7 @@ import ctypes
 
 from _spotify import image as _image
 
-from spotify import DuplicateCallbackError, UnknownCallbackError, handle_sp_error
+from spotify import DuplicateCallbackError, UnknownCallbackError
 
 from spotify.utils.decorators import synchronized
 
@@ -20,12 +20,18 @@ import weakref
 def create(session, image_id):
     buf = (ctypes.c_char * 20)()
     buf.value = binascii.a2b_hex(image_id)
-    
-    #FIXME: mmm, too bad if we only need one call from the interface
     ii = _image.ImageInterface()
     
     return Image(
         ii.create(session.get_struct(), buf)
+    )
+
+
+@synchronized
+def create_from_link(session, link):
+    ii = _image.ImageInterface()
+    return Image(
+        ii.create_from_link(session.get_struct(), link.get_struct())
     )
 
 

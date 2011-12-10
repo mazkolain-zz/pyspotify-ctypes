@@ -21,6 +21,12 @@ def handle_sp_error(errcode):
 
 
 
+def build_id():
+    iface = _spotify.SpotifyInterface()
+    return iface.build_id()
+
+
+
 class LibSpotifyError(Exception):
     pass
 
@@ -56,6 +62,13 @@ class ConnectionType:
     MobileRoaming = 3
     Wifi = 4
     Wired = 5
+
+
+
+class Bitrate:
+    Rate160k = 0
+    Rate320k = 1
+    Rate96k = 2
 
 
 

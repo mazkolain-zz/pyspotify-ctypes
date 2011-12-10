@@ -14,11 +14,20 @@ from spotify import album, artist, track
 import weakref
 
 
+
 class Albumtype:
     Album = 0
     Single = 1
     Compilation = 2
     Unknown = 3
+
+
+
+#FIXME: Check if these are the real values, not published by the API.
+class BrowseType:
+    Full = 0
+    NoTracks = 1
+    NoAlbums = 2
 
 
 
@@ -132,7 +141,14 @@ class Albumbrowse:
     @synchronized
     def review(self):
         return self.__albumbrowse_interface.review(self.__albumbrowse_struct)
-        
+    
+    
+    @synchronized
+    def backend_request_duration(self):
+        return self.__albumbrowse_interface.backend_request_duration(
+            self.__albumbrowse_struct
+        )
+    
     
     @synchronized
     def __del__(self):

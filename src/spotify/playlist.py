@@ -19,6 +19,22 @@ import binascii
 
 
 
+class PlaylistType:
+    Playlist = 0
+    StartFolder = 1
+    EndFolder = 2
+    Placeholder = 3
+
+
+
+class PlaylistOfflineStatus:
+    No = 0
+    Yes = 1
+    Downloading = 2
+    Waiting = 3
+
+
+
 class ProxyPlaylistCallbacks:
     _playlist = None
     _callbacks = None
@@ -408,6 +424,27 @@ class Playlist:
     
     
     #TODO: Rest of the subscribers stuff
+    
+    
+    @synchronized
+    def set_offline_mode(self, session, offline):
+        self.__playlist_interface.set_offline_mode(
+            session.get_struct(), self.__playlist_struct, offline
+        )
+    
+    
+    @synchronized
+    def get_offline_status(self, session):
+        return self.__playlist_interface.get_offline_status(
+            session.get_struct(), self.__playlist_struct
+        )
+    
+    
+    @synchronized
+    def get_offline_download_completed(self, session):
+        return self.__playlist_interface.get_offline_download_completed(
+            session.get_struct(), self.__playlist_struct
+        )
     
     
     @synchronized

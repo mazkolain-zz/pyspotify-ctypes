@@ -56,12 +56,12 @@ class Artistbrowse:
     
     
     @synchronized
-    def __init__(self, session, artist, callbacks):
+    def __init__(self, session, artist, browsetype, callbacks):
         self.__artist = artist
         self.__proxy_callbacks = ProxyArtistbrowseCallbacks(self, callbacks)
         self.__artistbrowse_interface = _artistbrowse.ArtistBrowseInterface()
         self.__artistbrowse_struct = self.__artistbrowse_interface.create(
-            session.get_struct(), artist.get_struct(),
+            session.get_struct(), artist.get_struct(), browsetype,
             self.__proxy_callbacks.get_c_callback(), None
         )
     
@@ -176,6 +176,13 @@ class Artistbrowse:
     def biography(self):
         return self.__artistbrowse_interface.biography(
             self.__artistbrowse_struct
+        )
+    
+    
+    @synchronized
+    def backend_request_duration(self):
+        return self.__artistbrowse_interface.backend_request_duration(
+            self.__artistbrowse_interface
         )
     
     

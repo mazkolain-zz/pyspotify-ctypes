@@ -170,6 +170,13 @@ class Toplistbrowse:
     
     
     @synchronized
+    def backend_request_duration(self):
+        return self.__toplistbrowse_interface.backend_request_duration(
+            self.__toplistbrowse_struct
+        )
+    
+    
+    @synchronized
     def __del__(self):
         self.__toplistbrowse_interface.release(
             self.__toplistbrowse_struct

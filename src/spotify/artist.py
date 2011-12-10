@@ -7,6 +7,8 @@ from _spotify import artist as _artist
 
 from spotify.utils.decorators import synchronized
 
+import binascii
+
 
 
 class Artist:
@@ -27,6 +29,13 @@ class Artist:
     @synchronized
     def is_loaded(self):
         return self.__artist_interface.is_loaded(self.__artist_struct)
+    
+    
+    @synchronized
+    def portrait(self):
+        res = self.__artist_interface.portrait(self.__artist_struct)
+        if res:
+            return binascii.b2a_hex(buffer(res.contents))
     
     
     @synchronized
