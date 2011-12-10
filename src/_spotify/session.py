@@ -85,8 +85,11 @@ config._fields_ = [
 
 offline_sync_status._fields_ = [
     ("queued_tracks", ctypes.c_int),
+    ("queued_bytes", ctypes.c_uint64)
     ("done_tracks", ctypes.c_int),
+    ("done_bytes", ctypes.c_uint64),
     ("copied_tracks", ctypes.c_int),
+    ("copied_bytes", ctypes.c_uint64),
     ("willnotcopy_tracks", ctypes.c_int),
     ("error_tracks", ctypes.c_int),
     ("syncing", bool_type)
@@ -305,22 +308,6 @@ class SessionInterface(LibSpotifyInterface):
             'sp_session_set_volume_normalization',
             None,
             ctypes.c_void_p, bool_type
-        )(*args)
-    
-    
-    def num_friends(self, *args):
-        return self._get_func(
-            'sp_session_num_friends',
-            ctypes.c_int,
-            ctypes.c_void_p
-        )(*args)
-
-
-    def friend(self, *args):
-        return self._get_func(
-            'sp_session_friend',
-            ctypes.c_void_p,
-            ctypes.c_void_p, ctypes.c_int
         )(*args)
 
 
