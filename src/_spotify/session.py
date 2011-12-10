@@ -85,7 +85,7 @@ config._fields_ = [
 
 offline_sync_status._fields_ = [
     ("queued_tracks", ctypes.c_int),
-    ("queued_bytes", ctypes.c_uint64)
+    ("queued_bytes", ctypes.c_uint64),
     ("done_tracks", ctypes.c_int),
     ("done_bytes", ctypes.c_uint64),
     ("copied_tracks", ctypes.c_int),
