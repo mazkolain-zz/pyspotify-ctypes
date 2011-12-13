@@ -18,6 +18,14 @@ import weakref
 
 
 
+#FIXME: Check if these are the real values, not published by the API.
+class BrowseType:
+    Full = 0
+    NoTracks = 1
+    NoAlbums = 2
+
+
+
 class ProxyArtistbrowseCallbacks:
     __artistbrowse = None
     __callbacks = None
