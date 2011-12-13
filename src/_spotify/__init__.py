@@ -135,7 +135,7 @@ class CachingLibraryLoader:
                 if os.path.isfile(full_path):
                     return loader.LoadLibrary(full_path)
         
-            raise OSError("Unable to find '%s'") % name
+            raise OSError("Unable to find '%s'" % name)
     
     
     def _unload_library(self, name):
