@@ -12,3 +12,7 @@ syntax: regexp
 libs/*
 syntax: glob
 tmp/*
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.pydevproject$
