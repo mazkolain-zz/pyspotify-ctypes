@@ -225,7 +225,7 @@ class Session:
     _metadata_callbacks = None
     
     
-    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False, device_id=None, tracefile=""):
+    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False, device_id=None, tracefile=None):
         #Low level interface
         self.__session_interface = _session.SessionInterface()
         
