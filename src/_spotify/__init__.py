@@ -104,12 +104,16 @@ class CachingLibraryLoader:
     __library_cache = {}
     
     
-    def _get_ext(self):
+    def _get_filename(self, name):
         if os.name == 'nt':
-            return 'dll'
+            return '%s.dll' % name
         
         elif os.name == 'posix':
-            return 'so'
+            if sys.platform.startswith('linux'):
+                return '%s.so' % name
+            
+            elif sys.platform == 'darwin':
+                return name
     
     
     def _get_loader(self):
@@ -129,7 +133,7 @@ class CachingLibraryLoader:
     
         #Bad luck, let's do a quirk
         except OSError:
-            filename = '%s.%s' % (name, self._get_ext())
+            filename = self._get_filename(name)
             for path in sys.path:
                 full_path = os.path.join(path, filename)
                 if os.path.isfile(full_path):
