@@ -19,7 +19,7 @@ sys.path.append("../src")
 #mandatory libspotify imports
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
-from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio, toplistbrowse, inbox
+from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio, toplistbrowse, inbox, track
 
 #Imports for jukebox
 import cmd
@@ -412,14 +412,25 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         to_user = args[0]
         track_ids = args[1].split(',')
         message = args[2]
-        
         track_list = []
+        
         for item in track_ids:
             link_obj = link.create_from_string(item)
             track_list.append(link_obj.as_track())
         
         self._do_inboxpost(to_user, track_list, message)
         print "%d track(s) where sent successfully to '%s" % (len(track_list), to_user)
+    
+    
+    def do_set_starred(self, line):
+        track_ids = line.split(',')
+        track_list = []
+        
+        for item in track_ids:
+            link_obj = link.create_from_string(item)
+            track_list.append(link_obj.as_track())
+        
+        track.set_starred(self._session, track_list, True)
     
     
     def do_list(self, line):
