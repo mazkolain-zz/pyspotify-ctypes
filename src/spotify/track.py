@@ -37,14 +37,14 @@ class TrackOfflineStatus:
 
 @synchronized
 def set_starred(session, tracks, star):
-    arr = (ctypes.c_void_p * len(tracks))()
+    track_arr = (ctypes.c_void_p * len(tracks))()
     ti = _track.TrackInterface()
     
     for index, item in enumerate(tracks):
-        arr[index] = item.get_struct()
+        track_arr[index] = item.get_struct()
     
     ti.set_starred(
-        session.get_struct(), ctypes.byref(arr), len(tracks), star
+        session.get_struct(), track_arr, len(tracks), star
     )
 
 
