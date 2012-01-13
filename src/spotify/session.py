@@ -333,7 +333,7 @@ class Session:
     
     @synchronized
     def set_cache_size(self, size):
-        self.__session_interface.set_cache_size(size)
+        self.__session_interface.set_cache_size(self.__session_struct, size)
     
     
     @synchronized
