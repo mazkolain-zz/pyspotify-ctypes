@@ -258,7 +258,3 @@ class CallbackManager:
     
     def __getattr__(self, name):
         return lambda *args, **kwargs: self._call_funcs(name, *args, **kwargs)
-        
-    
-    def __del__(self):
-        self.remove_all_callbacks()

@@ -10,10 +10,10 @@ from spotify import user, handle_sp_error, playlistcontainer, playlist
 from _spotify import playlistcontainer as _playlistcontainer, user as _user, session as _session
 
 #Decorators
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
-import weakref
-
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
 
 
 class ProxySessionCallbacks:
@@ -24,25 +24,25 @@ class ProxySessionCallbacks:
     
     
     def __init__(self, session, callbacks, manager):
-        self.__session = weakref.proxy(session)
+        self.__session = session
         self.__callbacks = callbacks
         self.__manager = manager
         self.__struct = _session.callbacks(
-            _session.cb_logged_in(self._logged_in),
-            _session.cb_logged_out(self._logged_out),
-            _session.cb_metadata_updated(self._metadata_updated),
-            _session.cb_connection_error(self._connection_error),
-            _session.cb_message_to_user(self._message_to_user),
-            _session.cb_notify_main_thread(self._notify_main_thread),
-            _session.cb_music_delivery(self._music_delivery),
-            _session.cb_play_token_lost(self._play_token_lost),
-            _session.cb_log_message(self._log_message),
-            _session.cb_end_of_track(self._end_of_track),
-            _session.cb_streaming_error(self._streaming_error),
-            _session.cb_userinfo_updated(self._userinfo_updated),
-            _session.cb_start_playback(self._start_playback),
-            _session.cb_stop_playback(self._stop_playback),
-            _session.cb_get_audio_buffer_stats(self._get_audio_buffer_stats),
+            _session.cb_logged_in(WeakMethod(self._logged_in)),
+            _session.cb_logged_out(WeakMethod(self._logged_out)),
+            _session.cb_metadata_updated(WeakMethod(self._metadata_updated)),
+            _session.cb_connection_error(WeakMethod(self._connection_error)),
+            _session.cb_message_to_user(WeakMethod(self._message_to_user)),
+            _session.cb_notify_main_thread(WeakMethod(self._notify_main_thread)),
+            _session.cb_music_delivery(WeakMethod(self._music_delivery)),
+            _session.cb_play_token_lost(WeakMethod(self._play_token_lost)),
+            _session.cb_log_message(WeakMethod(self._log_message)),
+            _session.cb_end_of_track(WeakMethod(self._end_of_track)),
+            _session.cb_streaming_error(WeakMethod(self._streaming_error)),
+            _session.cb_userinfo_updated(WeakMethod(self._userinfo_updated)),
+            _session.cb_start_playback(WeakMethod(self._start_playback)),
+            _session.cb_stop_playback(WeakMethod(self._stop_playback)),
+            _session.cb_get_audio_buffer_stats(WeakMethod(self._get_audio_buffer_stats)),
         )
     
     
@@ -211,6 +211,14 @@ class SessionCallbacks:
 
 
 
+@extract_args
+@synchronized
+def _finalize_session(session_interface, session_struct):
+    session_interface.release(session_struct)
+    print "session __del__ called"
+
+
+
 #classes
 class Session:
     api_version = 10
@@ -223,6 +231,8 @@ class Session:
     
     _user_callbacks = None
     _metadata_callbacks = None
+    
+    __callbacks = None
     
     
     def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False, device_id=None, tracefile=None):
@@ -262,6 +272,10 @@ class Session:
         self.__session_struct = ctypes.c_void_p()
         err = self.__session_interface.create(ctypes.byref(config), ctypes.byref(self.__session_struct))
         spotify.handle_sp_error(err)
+    
+        #Register finalizer
+        args = (self.__session_interface, self.__session_struct)
+        track_for_finalization(self, args, _finalize_session)
     
     
     def add_callbacks(self, callbacks):
@@ -516,9 +530,3 @@ class Session:
     @synchronized
     def get_struct(self):
         return self.__session_struct
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__session_interface.release(self.__session_struct)
-        print "session __del__ called"
