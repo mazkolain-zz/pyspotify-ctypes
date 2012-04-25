@@ -9,13 +9,14 @@ from spotify import track, user, DuplicateCallbackError, UnknownCallbackError, h
 
 from _spotify import playlist as _playlist, track as _track, user as _user
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 from spotify.utils.iterators import CallbackIterator
 
-import weakref
-
 import binascii
+
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
 
 
 
@@ -40,7 +41,7 @@ class ProxyPlaylistCallbacks:
     _callbacks = None
     
     def __init__(self, playlist, callbacks):
-        self._playlist = weakref.proxy(playlist)
+        self._playlist = playlist
         self._callbacks = callbacks
     
     #Callback proxies
@@ -95,19 +96,19 @@ class ProxyPlaylistCallbacks:
     #Build up the struct
     def get_callback_struct(self):
         return _playlist.callbacks(
-            _playlist.cb_tracks_added(self._tracks_added),
-            _playlist.cb_tracks_removed(self._tracks_removed),
-            _playlist.cb_tracks_moved(self._tracks_moved),
-            _playlist.cb_playlist_renamed(self._playlist_renamed),
-            _playlist.cb_playlist_state_changed(self._playlist_state_changed),
-            _playlist.cb_playlist_update_in_progress(self._playlist_update_in_progress),
-            _playlist.cb_playlist_metadata_updated(self._playlist_metadata_updated),
-            _playlist.cb_track_created_changed(self._track_created_changed),
-            _playlist.cb_track_seen_changed(self._track_seen_changed),
-            _playlist.cb_description_changed(self._description_changed),
-            _playlist.cb_image_changed(self._image_changed),
-            _playlist.cb_track_message_changed(self._track_message_changed),
-            _playlist.cb_subscribers_changed(self._subscribers_changed),
+            _playlist.cb_tracks_added(WeakMethod(self._tracks_added)),
+            _playlist.cb_tracks_removed(WeakMethod(self._tracks_removed)),
+            _playlist.cb_tracks_moved(WeakMethod(self._tracks_moved)),
+            _playlist.cb_playlist_renamed(WeakMethod(self._playlist_renamed)),
+            _playlist.cb_playlist_state_changed(WeakMethod(self._playlist_state_changed)),
+            _playlist.cb_playlist_update_in_progress(WeakMethod(self._playlist_update_in_progress)),
+            _playlist.cb_playlist_metadata_updated(WeakMethod(self._playlist_metadata_updated)),
+            _playlist.cb_track_created_changed(WeakMethod(self._track_created_changed)),
+            _playlist.cb_track_seen_changed(WeakMethod(self._track_seen_changed)),
+            _playlist.cb_description_changed(WeakMethod(self._description_changed)),
+            _playlist.cb_image_changed(WeakMethod(self._image_changed)),
+            _playlist.cb_track_message_changed(WeakMethod(self._track_message_changed)),
+            _playlist.cb_subscribers_changed(WeakMethod(self._subscribers_changed)),
         )
 
 
@@ -159,6 +160,13 @@ def create(session, link):
     return pi.create(session.get_struct(), link.get_struct())
 
 
+@extract_args
+@synchronized
+def _finalize_playlist(playlist_interface, playlist_struct):
+    playlist_interface.release(playlist_struct)
+    print "playlist __del__ called"
+
+
 
 class Playlist:
     __playlist_struct = None
@@ -170,6 +178,10 @@ class Playlist:
         self.__playlist_struct = playlist_struct
         self.__playlist_interface = _playlist.PlaylistInterface()
         self.__callbacks = {}
+        
+        #Register finalizers
+        args = (self.__playlist_interface, self.__playlist_struct)
+        track_for_finalization(self, args, _finalize_playlist)
     
     
     @synchronized
@@ -445,12 +457,6 @@ class Playlist:
         return self.__playlist_interface.get_offline_download_completed(
             session.get_struct(), self.__playlist_struct
         )
-    
-    
-    @synchronized
-    def __del__(self):
-        self.remove_all_callbacks()
-        self.__playlist_interface.release(self.__playlist_struct)
     
     
     def get_struct(self):

@@ -9,13 +9,14 @@ from spotify import DuplicateCallbackError, UnknownCallbackError, handle_sp_erro
 
 from _spotify import playlistcontainer as _playlistcontainer, playlist as _playlist, user as _user
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 from spotify.utils.iterators import CallbackIterator
 
 import playlist
 
-import weakref
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
 
 
 
@@ -25,7 +26,7 @@ class ProxyPlaylistContainerCallbacks:
     
     
     def __init__(self, container, callbacks):
-        self._container = weakref.proxy(container)
+        self._container = container
         self._callbacks = callbacks
     
     
@@ -54,10 +55,10 @@ class ProxyPlaylistContainerCallbacks:
     
     def get_callback_struct(self):
         return _playlistcontainer.callbacks(
-            _playlistcontainer.cb_playlist_added(self._playlist_added),
-            _playlistcontainer.cb_playlist_removed(self._playlist_removed),
-            _playlistcontainer.cb_playlist_moved(self._playlist_moved),
-            _playlistcontainer.cb_container_loaded(self._container_loaded),
+            _playlistcontainer.cb_playlist_added(WeakMethod(self._playlist_added)),
+            _playlistcontainer.cb_playlist_removed(WeakMethod(self._playlist_removed)),
+            _playlistcontainer.cb_playlist_moved(WeakMethod(self._playlist_moved)),
+            _playlistcontainer.cb_container_loaded(WeakMethod(self._container_loaded)),
         )
 
 
@@ -74,7 +75,15 @@ class PlaylistContainerCallbacks:
     
     def container_loaded(self, container):
         pass
-        
+
+
+
+@extract_args
+@synchronized
+def _finalize_container(container_interface, container_struct):
+    container_interface.release(container_struct)
+    print "container __del__ called"
+
 
 
 class PlaylistContainer:
@@ -96,6 +105,10 @@ class PlaylistContainer:
         self.__container_interface = _playlistcontainer.PlaylistContainerInterface()
         self._playlist_objects = {}
         self._callbacks = {}
+        
+        #Register finalizers
+        args = (self.__container_interface, self.__container_struct)
+        track_for_finalization(self, args, _finalize_container)
     
     
     @synchronized
@@ -246,12 +259,6 @@ class PlaylistContainer:
             ui = _user.UserInterface()
             ui.add_ref(user_struct)
             return user.User(user_struct)
-    
-    
-    @synchronized
-    def __del__(self):
-        self.remove_all_callbacks()
-        self.__container_interface.release(self.__container_struct)
     
     
     def __len__(self):
