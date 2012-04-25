@@ -60,3 +60,20 @@ def run_in_thread(func=None, threads_per_class=10, single_instance=False):
             return self.__class__(self.__func.__get__(obj, type))
     
     return decorator_class
+
+
+
+class extract_args(object):
+    _func = None
+    
+    
+    def __init__(self, func):
+        self._func = func
+    
+    
+    def __call__(self, args):
+        return self._func(*args)
+    
+    
+    def __get__(self, obj, ownerClass=None):
+        return types.MethodType(self, obj)
