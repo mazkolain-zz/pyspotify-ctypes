@@ -23,11 +23,20 @@ from utils.weakmethod import WeakMethod
 class ProxyPlaylistContainerCallbacks:
     _container = None
     _callbacks = None
+    _callback_struct = None
+    _callback_struct_ptr = None
     
     
     def __init__(self, container, callbacks):
         self._container = container
         self._callbacks = callbacks
+        self._callback_struct = _playlistcontainer.callbacks(
+            _playlistcontainer.cb_playlist_added(WeakMethod(self._playlist_added)),
+            _playlistcontainer.cb_playlist_removed(WeakMethod(self._playlist_removed)),
+            _playlistcontainer.cb_playlist_moved(WeakMethod(self._playlist_moved)),
+            _playlistcontainer.cb_container_loaded(WeakMethod(self._container_loaded)),
+        )
+        self._callback_struct_ptr = ctypes.pointer(self._callback_struct)
     
     
     def _playlist_added(self, c_container, c_playlist, position, data):
@@ -53,13 +62,12 @@ class ProxyPlaylistContainerCallbacks:
         self._callbacks.container_loaded(self._container)
         
     
-    def get_callback_struct(self):
-        return _playlistcontainer.callbacks(
-            _playlistcontainer.cb_playlist_added(WeakMethod(self._playlist_added)),
-            _playlistcontainer.cb_playlist_removed(WeakMethod(self._playlist_removed)),
-            _playlistcontainer.cb_playlist_moved(WeakMethod(self._playlist_moved)),
-            _playlistcontainer.cb_container_loaded(WeakMethod(self._container_loaded)),
-        )
+    def get_struct_ptr(self):
+        return self._callback_struct_ptr
+    
+    
+    def get_callbacks(self):
+        return self._callbacks
 
 
 
@@ -124,17 +132,10 @@ class PlaylistContainer:
         
         else:
             proxy = ProxyPlaylistContainerCallbacks(self, callbacks)
-            struct = proxy.get_callback_struct()
-            ptr = ctypes.pointer(struct)
-            
-            self._callbacks[cb_id] = {
-                "struct": struct,
-                "ptr": ptr,
-                "callbacks": callbacks,
-            }
+            self._callbacks[cb_id] = proxy
             
             self.__container_interface.add_callbacks(
-                self.__container_struct, ptr, None
+                self.__container_struct, proxy.get_struct_ptr(), None
             )
     
     
@@ -145,7 +146,7 @@ class PlaylistContainer:
             raise UnknownCallbackError()
         
         else:
-            ptr = self._callbacks[cb_id]["ptr"]
+            ptr = self._callbacks[cb_id].get_struct_ptr()
             self.__container_interface.remove_callbacks(
                 self.__container_struct, ptr, None
             )
@@ -154,7 +155,7 @@ class PlaylistContainer:
     
     def remove_all_callbacks(self):
         for key in self._callbacks.keys():
-            self.remove_callbacks(self._callbacks[key]["callbacks"])
+            self.remove_callbacks(self._callbacks[key].get_callbacks())
     
     
     @synchronized
