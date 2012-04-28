@@ -39,10 +39,29 @@ class PlaylistOfflineStatus:
 class ProxyPlaylistCallbacks:
     _playlist = None
     _callbacks = None
+    _callback_struct = None
+    _callback_struct_ptr = None
+    
     
     def __init__(self, playlist, callbacks):
         self._playlist = playlist
         self._callbacks = callbacks
+        self._callback_struct = _playlist.callbacks(
+            _playlist.cb_tracks_added(WeakMethod(self._tracks_added)),
+            _playlist.cb_tracks_removed(WeakMethod(self._tracks_removed)),
+            _playlist.cb_tracks_moved(WeakMethod(self._tracks_moved)),
+            _playlist.cb_playlist_renamed(WeakMethod(self._playlist_renamed)),
+            _playlist.cb_playlist_state_changed(WeakMethod(self._playlist_state_changed)),
+            _playlist.cb_playlist_update_in_progress(WeakMethod(self._playlist_update_in_progress)),
+            _playlist.cb_playlist_metadata_updated(WeakMethod(self._playlist_metadata_updated)),
+            _playlist.cb_track_created_changed(WeakMethod(self._track_created_changed)),
+            _playlist.cb_track_seen_changed(WeakMethod(self._track_seen_changed)),
+            _playlist.cb_description_changed(WeakMethod(self._description_changed)),
+            _playlist.cb_image_changed(WeakMethod(self._image_changed)),
+            _playlist.cb_track_message_changed(WeakMethod(self._track_message_changed)),
+            _playlist.cb_subscribers_changed(WeakMethod(self._subscribers_changed)),
+        )
+        self._callback_struct_ptr = ctypes.pointer(self._callback_struct)
     
     #Callback proxies
     def _tracks_added(self, playlist, tracks, num_tracks, position, userdata):
@@ -94,22 +113,11 @@ class ProxyPlaylistCallbacks:
         )
     
     #Build up the struct
-    def get_callback_struct(self):
-        return _playlist.callbacks(
-            _playlist.cb_tracks_added(WeakMethod(self._tracks_added)),
-            _playlist.cb_tracks_removed(WeakMethod(self._tracks_removed)),
-            _playlist.cb_tracks_moved(WeakMethod(self._tracks_moved)),
-            _playlist.cb_playlist_renamed(WeakMethod(self._playlist_renamed)),
-            _playlist.cb_playlist_state_changed(WeakMethod(self._playlist_state_changed)),
-            _playlist.cb_playlist_update_in_progress(WeakMethod(self._playlist_update_in_progress)),
-            _playlist.cb_playlist_metadata_updated(WeakMethod(self._playlist_metadata_updated)),
-            _playlist.cb_track_created_changed(WeakMethod(self._track_created_changed)),
-            _playlist.cb_track_seen_changed(WeakMethod(self._track_seen_changed)),
-            _playlist.cb_description_changed(WeakMethod(self._description_changed)),
-            _playlist.cb_image_changed(WeakMethod(self._image_changed)),
-            _playlist.cb_track_message_changed(WeakMethod(self._track_message_changed)),
-            _playlist.cb_subscribers_changed(WeakMethod(self._subscribers_changed)),
-        )
+    def get_callback_struct_ptr(self):
+        return self._callback_struct_ptr
+    
+    def get_callbacks(self):
+        return self._callbacks
 
 
 class PlaylistCallbacks:
@@ -198,18 +206,9 @@ class Playlist:
         
         else:
             proxy = ProxyPlaylistCallbacks(self, callbacks)
-            
-            struct = proxy.get_callback_struct()
-            ptr = ctypes.pointer(struct)
-            
-            self.__callbacks[cb_id] = {
-                "struct": struct,
-                "ptr": ptr,
-                "callbacks": callbacks,
-            }
-            
+            self.__callbacks[cb_id] = proxy
             self.__playlist_interface.add_callbacks(
-                self.__playlist_struct, ptr, None
+                self.__playlist_struct, proxy.get_callback_struct_ptr(), None
             )
     
     
@@ -221,7 +220,7 @@ class Playlist:
             raise UnknownCallbackError()
         
         else:
-            ptr = self.__callbacks[cb_id]["ptr"]
+            ptr = self.__callbacks[cb_id].get_callback_struct_ptr()
             self.__playlist_interface.remove_callbacks(
                 self.__playlist_struct, ptr, None
             )
@@ -230,7 +229,7 @@ class Playlist:
     
     def remove_all_callbacks(self):
         for key in self.__callbacks.keys():
-            self.remove_callbacks(self.__callbacks[key]["callbacks"])
+            self.remove_callbacks(self.__callbacks[key].get_callbacks())
     
     
     @synchronized
