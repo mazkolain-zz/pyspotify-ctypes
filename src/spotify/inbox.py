@@ -7,7 +7,10 @@ import ctypes
 
 from _spotify import inbox as _inbox
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
+
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
 
 
 
@@ -21,7 +24,7 @@ class ProxyInboxpostCallbacks:
         self.__inbox = inbox
         self.__callbacks = callbacks
         self.__c_callback = _inbox.inboxpost_complete_cb(
-            self.inboxpost_complete
+            WeakMethod(self.inboxpost_complete)
         )
     
     
@@ -37,6 +40,14 @@ class ProxyInboxpostCallbacks:
 class InboxpostCallbacks:
     def inboxpost_complete(self, inbox):
         pass
+
+
+
+@extract_args
+@synchronized
+def _finalize_inbox(inbox_interface, inbox_struct):
+    inbox_interface.release(inbox_struct)
+    print "inbox __del__ called"
 
 
 
@@ -62,13 +73,12 @@ class Inbox:
             self._build_track_array(track_list), len(track_list),
             message, self.__proxy_callbacks.get_c_callback(), None
         )
+        
+        #register finalizers
+        args = (self.__inbox_interface, self.__inbox_struct)
+        track_for_finalization(self, args, _finalize_inbox)
     
     
     @synchronized
     def error(self):
         return self.__inbox_interface.error(self.__inbox_struct)
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__inbox_interface.release(self.__inbox_struct)

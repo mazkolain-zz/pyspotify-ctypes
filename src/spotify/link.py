@@ -9,7 +9,9 @@ from _spotify import link as _link, track as _track, user as _user, artist as _a
 
 from spotify import track, user, artist, album
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
+
+from utils.finalize import track_for_finalization
 
 
 
@@ -96,6 +98,14 @@ class LinkType:
 
 
 
+@extract_args
+@synchronized
+def _finalize_link(link_interface, link_struct):
+    link_interface.release(link_struct)
+    print "link __del__ called"
+
+
+
 class Link:
     __link_struct = None
     __link_interface = None
@@ -104,6 +114,10 @@ class Link:
     def __init__(self, link_struct):
         self.__link_struct = link_struct
         self.__link_interface = _link.LinkInterface()
+        
+        #register finalizers
+        args = (self.__link_interface, self.__link_struct)
+        track_for_finalization(self, args, _finalize_link)
     
     
     @synchronized
@@ -171,13 +185,8 @@ class Link:
             ui = _user.UserInterface()
             ui.add_ref(user_struct)
             return user.User(user_struct)
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__link_interface.release(self.__link_struct)
         
-        
+    
     def get_struct(self):
         return self.__link_struct
     

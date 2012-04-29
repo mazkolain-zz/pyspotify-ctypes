@@ -7,6 +7,10 @@ from spotify import search
 
 from _spotify import radio as _radio
 
+from spotify.utils.decorators import synchronized, extract_args
+
+from utils.finalize import track_for_finalization
+
 
 
 class Genre:
@@ -31,10 +35,19 @@ class Genre:
 
 
 
+@extract_args
+@synchronized
+def _finalize_radio_search(search_interface, search_struct):
+    search_interface.release(search_struct)
+    print "radio __del__ called"
+
+
+
 class RadioSearch(search.Search):
     __proxy_callbacks = None
     
     
+    @synchronized
     def __init__(self, session, from_year, to_year, genres, callbacks=None):
         if callbacks is not None:
             self.__proxy_callbacks = search.ProxySearchCallbacks(
@@ -50,3 +63,7 @@ class RadioSearch(search.Search):
             from_year, to_year, genres,
             c_callback, None
         )
+        
+        #register finalizers
+        args = (self.__search_interface, self._search_struct)
+        track_for_finalization(self, args, _finalize_radio_search)

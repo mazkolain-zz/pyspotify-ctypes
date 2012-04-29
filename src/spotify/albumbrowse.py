@@ -3,7 +3,7 @@ Created on 20/05/2011
 
 @author: mikel
 '''
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 from spotify.utils.iterators import CallbackIterator
 
 from _spotify import albumbrowse as _albumbrowse
@@ -11,7 +11,8 @@ from _spotify import album as _album, artist as _artist, track as _track
 
 from spotify import album, artist, track
 
-import weakref
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
 
 
 
@@ -30,14 +31,15 @@ class ProxyAlbumbrowseCallbacks:
     
     
     def __init__(self, albumbrowse, callbacks):
-        self.__albumbrowse = weakref.proxy(albumbrowse)
+        self.__albumbrowse = albumbrowse
         self.__callbacks = callbacks
         self.__c_callback = _albumbrowse.albumbrowse_complete_cb(
-            self.albumbrowse_complete
+            WeakMethod(self.albumbrowse_complete)
         )
     
     
     def albumbrowse_complete(self, albumbrowse_struct, userdata):
+        self.__c_callback = None
         self.__callbacks.albumbrowse_complete(self.__albumbrowse)
     
     
@@ -49,6 +51,14 @@ class ProxyAlbumbrowseCallbacks:
 class AlbumbrowseCallbacks:
     def albumbrowse_complete(self, albumbrowse):
         pass
+
+
+
+@extract_args
+@synchronized
+def _finalize_albumbrowse(albumbrowse_interface, albumbrowse_struct):
+    albumbrowse_interface.release(albumbrowse_struct)
+    print "albumbrowse __del__ called"
 
 
 
@@ -69,6 +79,9 @@ class Albumbrowse:
             session.get_struct(), album.get_struct(),
             self.__proxy_callbacks.get_c_callback(), None
         )
+        
+        args = (self.__albumbrowse_interface, self.__albumbrowse_struct)
+        track_for_finalization(self, args, _finalize_albumbrowse)
     
     
     @synchronized
@@ -140,8 +153,3 @@ class Albumbrowse:
         return self.__albumbrowse_interface.backend_request_duration(
             self.__albumbrowse_struct
         )
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__albumbrowse_interface.release(self.__albumbrowse_struct)

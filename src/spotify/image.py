@@ -9,11 +9,13 @@ from _spotify import image as _image
 
 from spotify import DuplicateCallbackError, UnknownCallbackError
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 import binascii
 
-import weakref
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
+
 
 
 @synchronized
@@ -43,15 +45,20 @@ class ProxyImageCallbacks:
     
     
     def __init__(self, image, callbacks):
-        self.__image = weakref.proxy(image)
+        self.__image = image
         self.__callbacks = callbacks
-        self.__c_callback = _image.image_loaded_cb(self.image_loaded)
+        self.__c_callback = _image.image_loaded_cb(
+            WeakMethod(self.image_loaded)
+        )
     
     def image_loaded(self, image_struct, userdata):
         self.__callbacks.image_loaded(self.__image)
     
     def get_c_callback(self):
         return self.__c_callback
+    
+    def get_callbacks(self):
+        return self.__callbacks
 
 
 
@@ -67,6 +74,14 @@ class ImageFormat:
 
 
 
+@extract_args
+@synchronized
+def _finalize_image(image_interface, image_struct):
+    image_interface.release(image_struct)
+    print "image __del__ called"
+
+
+
 class Image:
     __image_struct = None
     __image_interface = None
@@ -77,6 +92,10 @@ class Image:
         self.__image_struct = image_struct
         self.__image_interface = _image.ImageInterface()
         self.__callbacks = {}
+        
+        #register finalizers
+        args = (self.__image_interface, self.__image_struct)
+        track_for_finalization(self, args, _finalize_image)
     
     
     @synchronized
@@ -87,15 +106,8 @@ class Image:
             raise DuplicateCallbackError()
         
         else:
-            proxy = ProxyImageCallbacks(
-                self, callback
-            )
-            
-            self.__callbacks[cb_id] = {
-                "callback": callback,
-                "proxy": proxy,
-            }
-            
+            proxy = ProxyImageCallbacks(self, callback)
+            self.__callbacks[cb_id] = proxy
             self.__image_interface.add_load_callback(
                 self.__image_struct, proxy.get_c_callback(), None
             )
@@ -109,16 +121,16 @@ class Image:
             raise UnknownCallbackError()
         
         else:
-            proxy = self.__callbacks[cb_id]["proxy"]
+            proxy = self.__callbacks[cb_id]
             self.__image_interface.remove_load_callback(
                 self.__image_struct, proxy.get_c_callback(), None
             )
             del self.__callbacks[cb_id]
-        
+    
     
     def remove_all_load_callbacks(self):
         for key in self.__callbacks.keys():
-            self.remove_load_callback(self.__callbacks[key]["callback"])
+            self.remove_load_callback(self.__callbacks[key].get_callbacks())
     
     
     @synchronized
@@ -142,12 +154,6 @@ class Image:
         raw = self.__image_interface.data(self.__image_struct, ctypes.pointer(size))
         dest = ctypes.cast(raw, ctypes.POINTER(ctypes.c_char * size.value))
         return str(buffer(dest.contents))
-    
-    
-    @synchronized
-    def __del__(self):
-        self.remove_all_load_callbacks()
-        self.__image_interface.release(self.__image_struct)
     
     
     def get_struct(self):

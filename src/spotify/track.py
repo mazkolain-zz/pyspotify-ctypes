@@ -9,9 +9,11 @@ from _spotify import track as _track, album as _album, artist as _artist
 
 from spotify import artist, album
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 from spotify.utils.iterators import CallbackIterator
+
+from spotify.utils.finalize import track_for_finalization
 
 
 
@@ -49,6 +51,14 @@ def set_starred(session, tracks, star):
 
 
 
+@extract_args
+@synchronized
+def _finalize_track(track_interface, track_struct):
+    track_interface.release(track_struct)
+    print "track __del__ called"
+
+
+
 class Track:
     __track_struct = None
     __track_interface = None
@@ -57,6 +67,10 @@ class Track:
     def __init__(self, track_struct):
         self.__track_struct = track_struct
         self.__track_interface = _track.TrackInterface()
+        
+        #register finalizers
+        args = (self.__track_interface, self.__track_struct)
+        track_for_finalization(self, args, _finalize_track)
     
     
     @synchronized
@@ -161,11 +175,6 @@ class Track:
     @synchronized
     def index(self):
         return self.__track_interface.index(self.__track_struct)
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__track_interface.release(self.__track_struct)
     
     
     def get_struct(self):

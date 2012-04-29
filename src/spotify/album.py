@@ -5,11 +5,13 @@ Created on 30/04/2011
 '''
 from _spotify import album as _album, artist as _artist
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 from spotify import artist
 
 import binascii
+
+from utils.finalize import track_for_finalization
 
 
 
@@ -21,6 +23,14 @@ class AlbumType:
 
 
 
+@extract_args
+@synchronized
+def _finalize_album(album_interface, album_struct):
+    album_interface.release(album_struct)
+    print "album __del__ called"
+
+
+
 class Album:
     __album_struct = None
     __album_interface = None
@@ -29,6 +39,10 @@ class Album:
     def __init__(self, album_struct):
         self.__album_struct = album_struct
         self.__album_interface = _album.AlbumInterface()
+        
+        #Register finalizers
+        args = (self.__album_interface, self.__album_struct)
+        track_for_finalization(self, args, _finalize_album)
     
     
     @synchronized
@@ -72,11 +86,6 @@ class Album:
     @synchronized
     def type(self):
         return self.__album_interface.type(self.__album_struct)
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__album_interface.release(self.__album_struct)
     
     
     def get_struct(self):

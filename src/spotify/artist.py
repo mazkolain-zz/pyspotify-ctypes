@@ -5,9 +5,19 @@ Created on 30/04/2011
 '''
 from _spotify import artist as _artist
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 import binascii
+
+from utils.finalize import track_for_finalization
+
+
+
+@extract_args
+@synchronized
+def _finalize_artist(artist_interface, artist_struct):
+    artist_interface.release(artist_struct)
+    print "artist __del__ called"
 
 
 
@@ -19,6 +29,10 @@ class Artist:
     def __init__(self, artist_struct):
         self.__artist_struct = artist_struct
         self.__artist_interface = _artist.ArtistInterface()
+        
+        #register finalizers
+        args = (self.__artist_interface, self.__artist_struct)
+        track_for_finalization(self, args, _finalize_artist)
 
     
     @synchronized
@@ -36,11 +50,6 @@ class Artist:
         res = self.__artist_interface.portrait(self.__artist_struct)
         if res:
             return binascii.b2a_hex(buffer(res.contents))
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__artist_interface.release(self.__artist_struct)
     
     
     def get_struct(self):

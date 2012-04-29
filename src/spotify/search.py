@@ -6,11 +6,12 @@ Created on 25/05/2011
 from _spotify import search as _search, track as _track, album as _album, artist as _artist
 from spotify import track, album, artist
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 from spotify.utils.iterators import CallbackIterator
 
-import weakref
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
 
 
 
@@ -21,9 +22,11 @@ class ProxySearchCallbacks:
     
     
     def __init__(self, search, callbacks):
-        self.__search = weakref.proxy(search)
+        self.__search = search
         self.__callbacks = callbacks
-        self.__c_callback = _search.search_complete_cb(self.search_complete)
+        self.__c_callback = _search.search_complete_cb(
+            WeakMethod(self.search_complete)
+        )
         
         
     def search_complete(self, search_struct, userdata):
@@ -38,6 +41,14 @@ class ProxySearchCallbacks:
 class SearchCallbacks:
     def search_complete(self, result):
         pass
+
+
+
+@extract_args
+@synchronized
+def _finalize_search(search_interface, search_struct):
+    search_interface.release(search_struct)
+    print "search __del__ called"
 
 
 
@@ -61,6 +72,10 @@ class Search:
             None
         )
         
+        #register finalizers
+        args = (self.__search_interface, self._search_struct)
+        track_for_finalization(self, args, _finalize_search)
+    
     
     @synchronized
     def is_loaded(self):
@@ -155,9 +170,3 @@ class Search:
     @synchronized
     def total_artists(self):
         return self.__search_interface.total_artists(self._search_struct)
-    
-    
-    @synchronized
-    def __del__(self):
-        print "search __del__ called"
-        self.__search_interface.release(self._search_struct)

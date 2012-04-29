@@ -1,6 +1,16 @@
 from _spotify import user as _user
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
+
+from spotify.utils.finalize import track_for_finalization
+
+
+
+@extract_args
+@synchronized
+def _finalize_user(user_interface, user_struct):
+    user_interface.release(user_struct)
+    print "user __del__ called"
 
 
 
@@ -16,6 +26,10 @@ class User:
         
         #Ref counting
         self.__user_interface.add_ref(self.__user_struct)
+        
+        #register finalizers
+        args = (self.__user_interface, self.__user_struct)
+        track_for_finalization(self, args, _finalize_user)
     
     
     @synchronized
@@ -31,10 +45,6 @@ class User:
     @synchronized
     def is_loaded(self):
         return self.__user_interface.is_loaded(self.__user_struct)
-    
-    
-    @synchronized
-    def __del__(self):
         self.__user_interface.release(self.__user_struct)
     
     

@@ -5,11 +5,14 @@ Created on 27/05/2011
 '''
 from _spotify import toplistbrowse as _toplistbrowse, artist as _artist, album as _album, track as _track
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 from spotify.utils.iterators import CallbackIterator
 
 from spotify import artist, album, track
+
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
 
 
 
@@ -45,7 +48,7 @@ class ProxyToplistbrowseCallbacks:
         self.__toplistbrowse = toplistbrowse
         self.__callbacks = callbacks
         self.__c_callback = _toplistbrowse.toplistbrowse_complete_cb(
-            self.toplistbrowse_complete
+            WeakMethod(self.toplistbrowse_complete)
         )
     
     
@@ -61,6 +64,14 @@ class ProxyToplistbrowseCallbacks:
 class ToplistbrowseCallbacks:
     def toplistbrowse_complete(self, toplisbrowse):
         pass
+
+
+
+@extract_args
+@synchronized
+def _finalize_toplistbrowse(toplistbrowse_interface, toplistbrowse_struct):
+    toplistbrowse_interface.release(toplistbrowse_struct)
+    print "toplistbrowse __del__ called"
 
 
 
@@ -84,6 +95,11 @@ class Toplistbrowse:
         self.__toplistbrowse_struct = self.__toplistbrowse_interface.create(
             session.get_struct(), type, region, username, c_callback, None
         )
+        
+        #register finalizers
+        args = (self.__toplistbrowse_interface, self.__toplistbrowse_struct)
+        track_for_finalization(self, args, _finalize_toplistbrowse)
+        
     
     
     @synchronized
@@ -172,12 +188,5 @@ class Toplistbrowse:
     @synchronized
     def backend_request_duration(self):
         return self.__toplistbrowse_interface.backend_request_duration(
-            self.__toplistbrowse_struct
-        )
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__toplistbrowse_interface.release(
             self.__toplistbrowse_struct
         )

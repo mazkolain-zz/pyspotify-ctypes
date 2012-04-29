@@ -6,7 +6,7 @@ Created on 21/05/2011
 
 from _spotify import artistbrowse as _artistbrowse, track as _track, artist as _artist, album as _album
 
-from spotify.utils.decorators import synchronized
+from spotify.utils.decorators import synchronized, extract_args
 
 from spotify.utils.iterators import CallbackIterator
 
@@ -14,7 +14,8 @@ from spotify import artist, album, track
 
 import binascii
 
-import weakref
+from utils.finalize import track_for_finalization
+from utils.weakmethod import WeakMethod
 
 
 
@@ -33,10 +34,10 @@ class ProxyArtistbrowseCallbacks:
     
     
     def __init__(self, artistbrowse, callbacks):
-        self.__artistbrowse = weakref.proxy(artistbrowse)
+        self.__artistbrowse = artistbrowse
         self.__callbacks = callbacks
         self.__c_callback = _artistbrowse.artistbrowse_complete_cb(
-            self.artistbrowse_complete
+            WeakMethod(self.artistbrowse_complete)
         )
     
     
@@ -52,6 +53,14 @@ class ProxyArtistbrowseCallbacks:
 class ArtistbrowseCallbacks:
     def artistbrowse_complete(self, artistbrowse):
         pass
+
+
+
+@extract_args
+@synchronized
+def _finalize_artistbrowse(artistbrowse_interface, artistbrowse_struct):
+    artistbrowse_interface.release(artistbrowse_struct)
+    print "artistbrowse __del__ called"
 
 
 
@@ -72,6 +81,9 @@ class Artistbrowse:
             session.get_struct(), artist.get_struct(), browsetype,
             self.__proxy_callbacks.get_c_callback(), None
         )
+        
+        args = (self.__artistbrowse_interface, self.__artistbrowse_struct)
+        track_for_finalization(self, args, _finalize_artistbrowse)
     
     
     @synchronized
@@ -192,8 +204,3 @@ class Artistbrowse:
         return self.__artistbrowse_interface.backend_request_duration(
             self.__artistbrowse_interface
         )
-    
-    
-    @synchronized
-    def __del__(self):
-        self.__artistbrowse_interface.release(self.__artistbrowse_struct)
