@@ -16,6 +16,7 @@ import binascii
 
 from utils.finalize import track_for_finalization
 from utils.weakmethod import WeakMethod
+import weakref
 
 
 
@@ -34,7 +35,7 @@ class ProxyArtistbrowseCallbacks:
     
     
     def __init__(self, artistbrowse, callbacks):
-        self.__artistbrowse = artistbrowse
+        self.__artistbrowse = weakref.proxy(artistbrowse)
         self.__callbacks = callbacks
         self.__c_callback = _artistbrowse.artistbrowse_complete_cb(
             WeakMethod(self.artistbrowse_complete)

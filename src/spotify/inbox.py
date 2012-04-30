@@ -11,6 +11,7 @@ from spotify.utils.decorators import synchronized, extract_args
 
 from utils.finalize import track_for_finalization
 from utils.weakmethod import WeakMethod
+import weakref
 
 
 
@@ -21,7 +22,7 @@ class ProxyInboxpostCallbacks:
     
     
     def __init__(self, inbox, callbacks):
-        self.__inbox = inbox
+        self.__inbox = weakref.proxy(inbox)
         self.__callbacks = callbacks
         self.__c_callback = _inbox.inboxpost_complete_cb(
             WeakMethod(self.inboxpost_complete)

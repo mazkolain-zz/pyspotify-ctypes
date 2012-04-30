@@ -13,6 +13,7 @@ from spotify import artist, album, track
 
 from utils.finalize import track_for_finalization
 from utils.weakmethod import WeakMethod
+import weakref
 
 
 
@@ -45,7 +46,7 @@ class ProxyToplistbrowseCallbacks:
     
     
     def __init__(self, toplistbrowse, callbacks):
-        self.__toplistbrowse = toplistbrowse
+        self.__toplistbrowse = weakref.proxy(toplistbrowse)
         self.__callbacks = callbacks
         self.__c_callback = _toplistbrowse.toplistbrowse_complete_cb(
             WeakMethod(self.toplistbrowse_complete)

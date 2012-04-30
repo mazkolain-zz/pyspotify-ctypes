@@ -13,6 +13,7 @@ from spotify import album, artist, track
 
 from utils.finalize import track_for_finalization
 from utils.weakmethod import WeakMethod
+import weakref
 
 
 
@@ -31,7 +32,7 @@ class ProxyAlbumbrowseCallbacks:
     
     
     def __init__(self, albumbrowse, callbacks):
-        self.__albumbrowse = albumbrowse
+        self.__albumbrowse = weakref.proxy(albumbrowse)
         self.__callbacks = callbacks
         self.__c_callback = _albumbrowse.albumbrowse_complete_cb(
             WeakMethod(self.albumbrowse_complete)

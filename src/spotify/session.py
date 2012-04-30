@@ -14,6 +14,8 @@ from spotify.utils.decorators import synchronized, extract_args
 
 from utils.finalize import track_for_finalization
 from utils.weakmethod import WeakMethod
+import weakref
+
 
 
 class ProxySessionCallbacks:
@@ -24,7 +26,7 @@ class ProxySessionCallbacks:
     
     
     def __init__(self, session, callbacks, manager):
-        self.__session = session
+        self.__session = weakref.proxy(session)
         self.__callbacks = callbacks
         self.__manager = manager
         self.__struct = _session.callbacks(

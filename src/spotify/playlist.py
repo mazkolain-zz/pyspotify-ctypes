@@ -17,6 +17,7 @@ import binascii
 
 from utils.finalize import track_for_finalization
 from utils.weakmethod import WeakMethod
+import weakref
 
 
 
@@ -44,7 +45,7 @@ class ProxyPlaylistCallbacks:
     
     
     def __init__(self, playlist, callbacks):
-        self._playlist = playlist
+        self._playlist = weakref.proxy(playlist)
         self._callbacks = callbacks
         self._callback_struct = _playlist.callbacks(
             _playlist.cb_tracks_added(WeakMethod(self._tracks_added)),
