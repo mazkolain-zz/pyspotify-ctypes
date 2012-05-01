@@ -1,5 +1,7 @@
 import struct, os, ctypes, sys
 import weakref
+from spotify.utils.finalize import track_for_finalization
+from spotify.utils.decorators import extract_args
 
 
 #Module index
@@ -20,6 +22,12 @@ else:
 
 #Calculate void pointer size, 32 or 64
 voidp_size = struct.calcsize("P") * 8
+
+#Impor library loading routine
+if os.name == "nt":
+    from _ctypes import FreeLibrary as dlclose
+else:
+    from _ctypes import dlclose
 
 
 #Platform-specific initializations
@@ -100,10 +108,35 @@ class LibSpotifyInterface(ModuleInterface):
 
 
 
+_library_refs = {}
+
+
+
+def unload_library():
+    li = LibSpotifyInterface()
+    _unload_library('libspotify', li.get_library()._handle)
+
+
+
+def _unload_library(name, handle):
+    #delete from the library refs dict
+    if name in _library_refs:
+        del _library_refs[name]
+    
+    #unload it
+    dlclose(handle)
+    print "dll unloaded"
+    print handle
+
+
+
+@extract_args
+def _run_library_finalizer(name, handle):
+    _unload_library(name, handle)
+
+
+
 class CachingLibraryLoader:
-    __library_cache = {}
-    
-    
     def _get_filename(self, name):
         if os.name == 'nt':
             return '%s.dll' % name
@@ -142,56 +175,21 @@ class CachingLibraryLoader:
             raise OSError("Unable to find '%s'" % name)
     
     
-    def _unload_library(self, name):
-        data = CachingLibraryLoader.__library_cache[name]
-        data['refs'] -= 1
-        
-        print 'unloading lib'
-        
-        if data['refs'] == 0:
-            print 'destroy lib'
-            del CachingLibraryLoader.__library_cache[name]
-    
-    
     def load(self, name):
         #Load if not found on the cache 
-        if name not in self.__library_cache:
+        if name not in _library_refs:
             library = self._load(name)
-            data = {'refs': 1, 'library': library}
-            self.__library_cache[name] = data
+            _library_refs[name] = weakref.ref(library)
+            
+            #register a finalizer for it
+            args = (name, library._handle)
+            track_for_finalization(library, args, _run_library_finalizer)
+        
         else:
-            data = CachingLibraryLoader.__library_cache[name]
-            library = data['library']
-            data['refs'] += 1
+            ref = _library_refs[name]
+            library = ref()
         
-        #Callback for the unload event
-        def do_unload():
-            self._unload_library(name)
-        
-        #Return as a proxy object
-        return weakref.proxy(library, do_unload)
-
-
-
-def unload_library():
-    li = LibSpotifyInterface()
-    handle = li.get_library()._handle
-    print dir(li.get_library())
-    del li
-    
-    import os
-    
-    if os.name == "nt":
-        from _ctypes import FreeLibrary
-        FreeLibrary(handle)
-        print "dll unloaded"
-    print handle
-    
-    #FreeLibrary = ctypes.cdll.kernel32.FreeLibrary
-    #FreeLibrary.argtypes = [ctypes.c_void_p]
-    #FreeLibrary.restype = ctypes.wintypes.BOOL
-    
-    
+        return library
 
 
 
