@@ -50,6 +50,9 @@ class ProxyImageCallbacks:
     def image_loaded(self, image_struct, userdata):
         self.__callbacks.image_loaded(self.__image)
     
+    def get_callbacks(self):
+        return self.__callbacks
+    
     def get_c_callback(self):
         return self.__c_callback
 
@@ -87,15 +90,8 @@ class Image:
             raise DuplicateCallbackError()
         
         else:
-            proxy = ProxyImageCallbacks(
-                self, callback
-            )
-            
-            self.__callbacks[cb_id] = {
-                "callback": callback,
-                "proxy": proxy,
-            }
-            
+            proxy = ProxyImageCallbacks(self, callback)
+            self.__callbacks[cb_id] = proxy
             self.__image_interface.add_load_callback(
                 self.__image_struct, proxy.get_c_callback(), None
             )
@@ -109,7 +105,7 @@ class Image:
             raise UnknownCallbackError()
         
         else:
-            proxy = self.__callbacks[cb_id]["proxy"]
+            proxy = self.__callbacks[cb_id]
             self.__image_interface.remove_load_callback(
                 self.__image_struct, proxy.get_c_callback(), None
             )
@@ -117,8 +113,8 @@ class Image:
         
     
     def remove_all_load_callbacks(self):
-        for key in self.__callbacks.keys():
-            self.remove_load_callback(self.__callbacks[key]["callback"])
+        for proxy in self.__callbacks.values():
+            self.remove_load_callback(proxy.get_callbacks())
     
     
     @synchronized
