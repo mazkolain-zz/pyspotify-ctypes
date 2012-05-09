@@ -1,7 +1,5 @@
 import struct, os, ctypes, sys
 import weakref
-from spotify.utils.finalize import track_for_finalization
-from spotify.utils.decorators import extract_args
 
 
 #Module index
@@ -130,12 +128,6 @@ def _unload_library(name, handle):
 
 
 
-@extract_args
-def _run_library_finalizer(name, handle):
-    _unload_library(name, handle)
-
-
-
 class CachingLibraryLoader:
     def _get_filename(self, name):
         if os.name == 'nt':
@@ -180,10 +172,6 @@ class CachingLibraryLoader:
         if name not in _library_refs:
             library = self._load(name)
             _library_refs[name] = weakref.ref(library)
-            
-            #register a finalizer for it
-            args = (name, library._handle)
-            track_for_finalization(library, args, _run_library_finalizer)
         
         else:
             ref = _library_refs[name]
