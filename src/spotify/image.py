@@ -11,6 +11,8 @@ from spotify import DuplicateCallbackError, UnknownCallbackError
 
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.weakmethod import WeakMethod
+
 import binascii
 
 import weakref
@@ -45,7 +47,9 @@ class ProxyImageCallbacks:
     def __init__(self, image, callbacks):
         self.__image = weakref.proxy(image)
         self.__callbacks = callbacks
-        self.__c_callback = _image.image_loaded_cb(self.image_loaded)
+        self.__c_callback = _image.image_loaded_cb(
+            WeakMethod(self.image_loaded)
+        )
     
     def image_loaded(self, image_struct, userdata):
         self.__callbacks.image_loaded(self.__image)

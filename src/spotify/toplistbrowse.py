@@ -9,6 +9,8 @@ from spotify.utils.decorators import synchronized
 
 from spotify.utils.iterators import CallbackIterator
 
+from spotify.utils.weakmethod import WeakMethod
+
 from spotify import artist, album, track
 
 
@@ -45,7 +47,7 @@ class ProxyToplistbrowseCallbacks:
         self.__toplistbrowse = toplistbrowse
         self.__callbacks = callbacks
         self.__c_callback = _toplistbrowse.toplistbrowse_complete_cb(
-            self.toplistbrowse_complete
+            WeakMethod(self.toplistbrowse_complete)
         )
     
     

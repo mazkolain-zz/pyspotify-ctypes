@@ -13,6 +13,8 @@ from spotify.utils.decorators import synchronized
 
 from spotify.utils.iterators import CallbackIterator
 
+from spotify.utils.weakmethod import WeakMethod
+
 import playlist
 
 import weakref
@@ -30,10 +32,10 @@ class ProxyPlaylistContainerCallbacks:
         self._container = weakref.proxy(container)
         self._callbacks = callbacks
         self._callback_struct = _playlistcontainer.callbacks(
-            _playlistcontainer.cb_playlist_added(self._playlist_added),
-            _playlistcontainer.cb_playlist_removed(self._playlist_removed),
-            _playlistcontainer.cb_playlist_moved(self._playlist_moved),
-            _playlistcontainer.cb_container_loaded(self._container_loaded),
+            _playlistcontainer.cb_playlist_added(WeakMethod(self._playlist_added)),
+            _playlistcontainer.cb_playlist_removed(WeakMethod(self._playlist_removed)),
+            _playlistcontainer.cb_playlist_moved(WeakMethod(self._playlist_moved)),
+            _playlistcontainer.cb_container_loaded(WeakMethod(self._container_loaded)),
         )
         self._callback_struct_ptr = ctypes.pointer(self._callback_struct)
     

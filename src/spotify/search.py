@@ -10,6 +10,8 @@ from spotify.utils.decorators import synchronized
 
 from spotify.utils.iterators import CallbackIterator
 
+from spotify.utils.weakmethod import WeakMethod
+
 import weakref
 
 
@@ -23,7 +25,9 @@ class ProxySearchCallbacks:
     def __init__(self, search, callbacks):
         self.__search = weakref.proxy(search)
         self.__callbacks = callbacks
-        self.__c_callback = _search.search_complete_cb(self.search_complete)
+        self.__c_callback = _search.search_complete_cb(
+            WeakMethod(self.search_complete)
+        )
         
         
     def search_complete(self, search_struct, userdata):

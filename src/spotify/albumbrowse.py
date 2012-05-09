@@ -5,6 +5,7 @@ Created on 20/05/2011
 '''
 from spotify.utils.decorators import synchronized
 from spotify.utils.iterators import CallbackIterator
+from spotify.utils.weakmethod import WeakMethod
 
 from _spotify import albumbrowse as _albumbrowse
 from _spotify import album as _album, artist as _artist, track as _track
@@ -33,7 +34,7 @@ class ProxyAlbumbrowseCallbacks:
         self.__albumbrowse = weakref.proxy(albumbrowse)
         self.__callbacks = callbacks
         self.__c_callback = _albumbrowse.albumbrowse_complete_cb(
-            self.albumbrowse_complete
+            WeakMethod(self.albumbrowse_complete)
         )
     
     

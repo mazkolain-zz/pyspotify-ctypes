@@ -10,6 +10,8 @@ from spotify.utils.decorators import synchronized
 
 from spotify.utils.iterators import CallbackIterator
 
+from spotify.utils.weakmethod import WeakMethod
+
 from spotify import artist, album, track
 
 import binascii
@@ -36,7 +38,7 @@ class ProxyArtistbrowseCallbacks:
         self.__artistbrowse = weakref.proxy(artistbrowse)
         self.__callbacks = callbacks
         self.__c_callback = _artistbrowse.artistbrowse_complete_cb(
-            self.artistbrowse_complete
+            WeakMethod(self.artistbrowse_complete)
         )
     
     

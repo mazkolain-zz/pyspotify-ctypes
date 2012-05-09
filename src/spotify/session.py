@@ -12,6 +12,8 @@ from _spotify import playlistcontainer as _playlistcontainer, user as _user, ses
 #Decorators
 from spotify.utils.decorators import synchronized
 
+from spotify.utils.weakmethod import WeakMethod
+
 import weakref
 
 
@@ -28,21 +30,21 @@ class ProxySessionCallbacks:
         self.__callbacks = callbacks
         self.__manager = manager
         self.__struct = _session.callbacks(
-            _session.cb_logged_in(self._logged_in),
-            _session.cb_logged_out(self._logged_out),
-            _session.cb_metadata_updated(self._metadata_updated),
-            _session.cb_connection_error(self._connection_error),
-            _session.cb_message_to_user(self._message_to_user),
-            _session.cb_notify_main_thread(self._notify_main_thread),
-            _session.cb_music_delivery(self._music_delivery),
-            _session.cb_play_token_lost(self._play_token_lost),
-            _session.cb_log_message(self._log_message),
-            _session.cb_end_of_track(self._end_of_track),
-            _session.cb_streaming_error(self._streaming_error),
-            _session.cb_userinfo_updated(self._userinfo_updated),
-            _session.cb_start_playback(self._start_playback),
-            _session.cb_stop_playback(self._stop_playback),
-            _session.cb_get_audio_buffer_stats(self._get_audio_buffer_stats),
+            _session.cb_logged_in(WeakMethod(self._logged_in)),
+            _session.cb_logged_out(WeakMethod(self._logged_out)),
+            _session.cb_metadata_updated(WeakMethod(self._metadata_updated)),
+            _session.cb_connection_error(WeakMethod(self._connection_error)),
+            _session.cb_message_to_user(WeakMethod(self._message_to_user)),
+            _session.cb_notify_main_thread(WeakMethod(self._notify_main_thread)),
+            _session.cb_music_delivery(WeakMethod(self._music_delivery)),
+            _session.cb_play_token_lost(WeakMethod(self._play_token_lost)),
+            _session.cb_log_message(WeakMethod(self._log_message)),
+            _session.cb_end_of_track(WeakMethod(self._end_of_track)),
+            _session.cb_streaming_error(WeakMethod(self._streaming_error)),
+            _session.cb_userinfo_updated(WeakMethod(self._userinfo_updated)),
+            _session.cb_start_playback(WeakMethod(self._start_playback)),
+            _session.cb_stop_playback(WeakMethod(self._stop_playback)),
+            _session.cb_get_audio_buffer_stats(WeakMethod(self._get_audio_buffer_stats)),
         )
     
     

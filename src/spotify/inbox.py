@@ -8,6 +8,7 @@ import ctypes
 from _spotify import inbox as _inbox
 
 from spotify.utils.decorators import synchronized
+from spotify.utils.weakmethod import WeakMethod
 
 
 
@@ -21,7 +22,7 @@ class ProxyInboxpostCallbacks:
         self.__inbox = inbox
         self.__callbacks = callbacks
         self.__c_callback = _inbox.inboxpost_complete_cb(
-            self.inboxpost_complete
+            WeakMethod(self.inboxpost_complete)
         )
     
     
