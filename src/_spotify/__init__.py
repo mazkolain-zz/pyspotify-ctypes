@@ -1,5 +1,6 @@
 import struct, os, ctypes, sys
 import weakref
+from _spotify.utils import moduletracker
 
 
 #Module index
@@ -7,7 +8,7 @@ __all__ = [
     "album", "albumbrowse", "artist", "artistbrowse",
     "image", "inbox", "link", "localtrack",
     "playlist", "playlistcontainer", "radio", "search",
-    "session", "toplistbrowse", "track", "user",
+    "session", "toplistbrowse", "track", "user", "utils",
 ]
 
 
@@ -98,6 +99,7 @@ class ModuleInterface(object):
 class LibSpotifyInterface(ModuleInterface):
     def __init__(self):
         ModuleInterface.__init__(self)
+        moduletracker.track_module(self)
     
     
     def _load_library(self):
@@ -113,6 +115,11 @@ _library_refs = {}
 def unload_library():
     li = LibSpotifyInterface()
     _unload_library('libspotify', li.get_library()._handle)
+
+
+
+def can_unload_library():
+    return moduletracker.count_tracked_modules() == 0
 
 
 
