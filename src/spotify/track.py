@@ -7,7 +7,7 @@ import ctypes
 
 from _spotify import track as _track, album as _album, artist as _artist
 
-from spotify import artist, album
+import artist, album, link
 
 from spotify.utils.decorators import synchronized
 
@@ -161,6 +161,11 @@ class Track:
     @synchronized
     def index(self):
         return self.__track_interface.index(self.__track_struct)
+    
+    
+    def __str__(self):
+        l = link.create_from_track(self)
+        return l.as_string()
     
     
     @synchronized

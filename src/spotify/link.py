@@ -7,7 +7,7 @@ import ctypes
 
 from _spotify import link as _link, track as _track, user as _user, artist as _artist, album as _album
 
-from spotify import track, user, artist, album
+import track, user, artist, album
 
 from spotify.utils.decorators import synchronized
 
