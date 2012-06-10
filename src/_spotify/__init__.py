@@ -113,13 +113,32 @@ _library_refs = {}
 
 
 def unload_library():
-    li = LibSpotifyInterface()
-    _unload_library('libspotify', li.get_library()._handle)
+    if os.name != 'nt':
+        """
+        Don't unload the library on windows, as it may result in a crash when
+        this gets really unloaded.
+        """
+        li = LibSpotifyInterface()
+        _unload_library('libspotify', li.get_library()._handle)
 
 
 
 def can_unload_library():
     return moduletracker.count_tracked_modules() == 0
+
+
+
+def _get_handle_by_name(name):
+    if os.name != 'nt':
+        raise RuntimeError('This function is Windows only.')
+    
+    #Get a reference to GetModuleHandle
+    k32 = ctypes.windll.kernel32
+    get_handle = k32.GetModuleHandleA
+    get_handle.argtypes = [ctypes.c_char_p]
+    get_handle.restype = ctypes.c_ulong
+    
+    return get_handle(name)
 
 
 
@@ -156,8 +175,17 @@ class CachingLibraryLoader:
             return ctypes.cdll
     
     
+    
+    
+    
     def _load(self, name):
         loader = self._get_loader()
+        
+        #Unload on Windows first
+        if os.name == 'nt':
+            handle = _get_handle_by_name(name)
+            if handle != 0:
+                _unload_library(name, handle)
         
         #Let ctypes find it
         try:
