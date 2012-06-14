@@ -149,8 +149,6 @@ def _unload_library(name, handle):
     
     #unload it
     dlclose(handle)
-    print "dll unloaded"
-    print handle
 
 
 
