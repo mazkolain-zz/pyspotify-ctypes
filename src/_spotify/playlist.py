@@ -97,7 +97,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def add_callbacks(self, *args):
         return self._get_func(
             'sp_playlist_add_callbacks',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
         )(*args)
 
@@ -105,7 +105,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def remove_callbacks(self, *args):
         return self._get_func(
             'sp_playlist_remove_callbacks',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
         )(*args)
 
@@ -201,7 +201,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def set_collaborative(self, *args):
         return self._get_func(
             'sp_playlist_set_collaborative',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, bool_type
         )(*args)
 
@@ -209,7 +209,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def set_autolink_tracks(self, *args):
         return self._get_func(
             'sp_playlist_set_autolink_tracks',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, bool_type
         )(*args)
 
@@ -282,7 +282,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def subscribers_free(self, *args):
         return self._get_func(
             'sp_playlist_subscribers_free',
-            None,
+            ctypes.c_int,
             ctypes.POINTER(_subscribers)
         )(*args)
 
@@ -290,7 +290,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def update_subscribers(self, *args):
         return self._get_func(
             'sp_playlist_update_subscribers',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_void_p
         )(*args)
 
@@ -306,7 +306,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def set_in_ram(self, *args):
         return self._get_func(
             'sp_playlist_set_in_ram',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_void_p, bool_type
         )(*args)
 
@@ -322,7 +322,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def set_offline_mode(self, *args):
         return self._get_func(
             'sp_playlist_set_offline_mode',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_void_p, bool_type
         )(*args)
 
@@ -346,7 +346,7 @@ class PlaylistInterface(LibSpotifyInterface):
     def add_ref(self, *args):
         return self._get_func(
             'sp_playlist_add_ref',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -354,6 +354,6 @@ class PlaylistInterface(LibSpotifyInterface):
     def release(self, *args):
         return self._get_func(
             'sp_playlist_release',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)

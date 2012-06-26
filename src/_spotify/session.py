@@ -43,7 +43,11 @@ cb_get_audio_buffer_stats = callback(
 )
 
 cb_offline_status_updated = callback(None, ctypes.c_void_p)
-cb_offline_status_error = callback(None, ctypes.c_void_p, ctypes.c_int)
+cb_offline_error = callback(None, ctypes.c_void_p, ctypes.c_int)
+cb_credentials_blob_updated = callback(None, ctypes.c_void_p, ctypes.c_char_p)
+cb_connectionstate_updated = callback(None, ctypes.c_void_p)
+cb_scrobble_error = callback(None, ctypes.c_void_p, ctypes.c_int)
+cb_private_session_mode_changed = callback(None, ctypes.c_void_p, bool_type)
 
 
 #Completion of structure defs
@@ -64,7 +68,11 @@ callbacks._fields_ = [
     ("stop_playback", cb_stop_playback),
     ("get_audio_buffer_stats", cb_get_audio_buffer_stats),
     ("offline_status_updated", cb_offline_status_updated),
-    ("offline_status_error", cb_offline_status_error)
+    ("offline_error", cb_offline_error),
+    ("credentials_blob_updated", cb_credentials_blob_updated),
+    ("connectionstate_updated", cb_connectionstate_updated),
+    ("scrobble_error", cb_scrobble_error),
+    ("private_session_mode_changed", cb_private_session_mode_changed)
 ]
 
 config._fields_ = [
@@ -80,6 +88,9 @@ config._fields_ = [
     ("dont_save_metadata_for_playlists", bool_type),
     ("initially_unload_playlists", bool_type),
     ("device_id", ctypes.c_char_p),
+    ("proxy", ctypes.c_char_p),
+    ("proxy_username", ctypes.c_char_p),
+    ("proxy_password", ctypes.c_char_p),
     ("tracefile", ctypes.c_char_p)
 ]
 
@@ -114,7 +125,7 @@ class SessionInterface(LibSpotifyInterface):
     def release(self, *args):
         return self._get_func(
             'sp_session_release',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -122,8 +133,8 @@ class SessionInterface(LibSpotifyInterface):
     def login(self, *args):
         return self._get_func(
             "sp_session_login",
-            None,
-            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, bool_type
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, bool_type, ctypes.c_char_p
         )(*args)
 
 
@@ -141,12 +152,20 @@ class SessionInterface(LibSpotifyInterface):
             ctypes.c_int,
             ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int
         )(*args)
+    
+    
+    def user_name(self, *args):
+        return self._get_func(
+            'sp_session_user_name',
+            ctypes.c_int,
+            ctypes.c_void_p, 
+        )(*args)
 
 
     def forget_me(self, *args):
         return self._get_func(
             'sp_session_forget_me',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -162,7 +181,15 @@ class SessionInterface(LibSpotifyInterface):
     def logout(self, *args):
         return self._get_func(
             "sp_session_logout",
-            None,
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+    
+    
+    def flush_caches(self, *args):
+        return self._get_func(
+            'sp_session_flush_caches',
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -186,7 +213,7 @@ class SessionInterface(LibSpotifyInterface):
     def set_cache_size(self, *args):
         return self._get_func(
             'sp_session_set_cache_size',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_size_t
         )(*args)
 
@@ -194,7 +221,7 @@ class SessionInterface(LibSpotifyInterface):
     def process_events(self, *args):
         return self._get_func(
             'sp_session_process_events',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.POINTER(ctypes.c_int)
         )(*args)
 
@@ -210,7 +237,7 @@ class SessionInterface(LibSpotifyInterface):
     def player_seek(self, *args):
         return self._get_func(
             'sp_session_player_seek',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_int
         )(*args)
 
@@ -218,7 +245,7 @@ class SessionInterface(LibSpotifyInterface):
     def player_play(self, *args):
         return self._get_func(
             'sp_session_player_play',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, bool_type
         )(*args)
 
@@ -226,7 +253,7 @@ class SessionInterface(LibSpotifyInterface):
     def player_unload(self, *args):
         return self._get_func(
             'sp_session_player_unload',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -282,7 +309,7 @@ class SessionInterface(LibSpotifyInterface):
     def preferred_bitrate(self, *args):
         return self._get_func(
             'sp_session_preferred_bitrate',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_int
         )(*args)
 
@@ -290,7 +317,7 @@ class SessionInterface(LibSpotifyInterface):
     def preferred_offline_bitrate(self, *args):
         return self._get_func(
             'sp_session_preferred_offline_bitrate',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_int, bool_type
         )(*args)
     
@@ -306,15 +333,63 @@ class SessionInterface(LibSpotifyInterface):
     def set_volume_normalization(self, *args):
         return self._get_func(
             'sp_session_set_volume_normalization',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, bool_type
         )(*args)
-
-
+    
+    
+    def set_private_session(self, *args):
+        return self._get_func(
+            'sp_session_set_private_session',
+            ctypes.c_int,
+            ctypes.c_void_p, bool_type
+        )(*args)
+    
+    
+    def is_private_session(self, *args):
+        return self._get_func(
+            'sp_session_is_private_session',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+    
+    
+    def set_scrobbling(self, *args):
+        return self._get_func(
+            'sp_session_set_scrobbling',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int, ctypes.c_int
+        )(*args)
+    
+    
+    def is_scrobbling(self, *args):
+        return self._get_func(
+            'sp_session_is_scrobbling',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int, ctypes.POINTER(ctypes.c_int)
+        )(*args)
+    
+    
+    def is_scrobbling_possible(self, *args):
+        return self._get_func(
+            'sp_session_is_scrobbling_possible',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int, ctypes.POINTER(bool_type)
+        )(*args)
+    
+    
+    def set_social_credentials(self, *args):
+        return self._get_func(
+            'sp_session_set_social_credentials',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p
+        )(*args)
+    
+    
     def set_connection_type(self, *args):
         return self._get_func(
             'sp_session_set_connection_type',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_int
         )(*args)
 
@@ -322,7 +397,7 @@ class SessionInterface(LibSpotifyInterface):
     def set_connection_rules(self, *args):
         return self._get_func(
             'sp_session_set_connection_rules',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.c_int
         )(*args)
 

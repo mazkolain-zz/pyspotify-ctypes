@@ -76,8 +76,24 @@ class ArtistBrowseInterface(LibSpotifyInterface):
             ctypes.c_void_p,
             ctypes.c_void_p, ctypes.c_int
         )(*args)
-
-
+    
+    
+    def num_tophit_tracks(self, *args):
+        return self._get_func(
+            'sp_artistbrowse_num_tophit_tracks',
+            ctypes.c_int,
+            ctypes.c_void_p
+        )(*args)
+    
+    
+    def tophit_track(self, *args):
+        return self._get_func(
+            'sp_artistbrowse_tophit_track',
+            ctypes.c_void_p,
+            ctypes.c_void_p, ctypes.c_int
+        )(*args)
+    
+    
     def num_albums(self, *args):
         return self._get_func(
             'sp_artistbrowse_num_albums',
@@ -129,7 +145,7 @@ class ArtistBrowseInterface(LibSpotifyInterface):
     def add_ref(self, *args):
         return self._get_func(
             'sp_artistbrowse_add_ref',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -137,6 +153,6 @@ class ArtistBrowseInterface(LibSpotifyInterface):
     def release(self, *args):
         return self._get_func(
             'sp_artistbrowse_release',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)

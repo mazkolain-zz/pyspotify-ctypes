@@ -38,7 +38,7 @@ class AlbumInterface(LibSpotifyInterface):
         return self._get_func(
             'sp_album_cover',
             ctypes.POINTER(ctypes.c_byte * 20),
-            ctypes.c_void_p
+            ctypes.c_void_p, ctypes.c_int
         )(*args)
 
 
@@ -69,7 +69,7 @@ class AlbumInterface(LibSpotifyInterface):
     def add_ref(self, *args):
         return self._get_func(
             'sp_album_add_ref',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p,
         )(*args)
 
@@ -77,6 +77,6 @@ class AlbumInterface(LibSpotifyInterface):
     def release(self, *args):
         return self._get_func(
             'sp_album_release',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)

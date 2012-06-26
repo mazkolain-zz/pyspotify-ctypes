@@ -49,7 +49,7 @@ class PlaylistContainerInterface(LibSpotifyInterface):
     def add_callbacks(self, *args):
         return self._get_func(
             'sp_playlistcontainer_add_callbacks',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
         )(*args)
 
@@ -57,7 +57,7 @@ class PlaylistContainerInterface(LibSpotifyInterface):
     def remove_callbacks(self, *args):
         return self._get_func(
             'sp_playlistcontainer_remove_callbacks',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, ctypes.POINTER(callbacks), ctypes.c_void_p
         )(*args)
 
@@ -161,7 +161,7 @@ class PlaylistContainerInterface(LibSpotifyInterface):
     def add_ref(self, *args):
         return self._get_func(
             'sp_playlistcontainer_add_ref',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -169,6 +169,22 @@ class PlaylistContainerInterface(LibSpotifyInterface):
     def release(self, *args):
         return self._get_func(
             'sp_playlistcontainer_release',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
+        )(*args)
+    
+    
+    def get_unseen_tracks(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_get_unseen_tracks',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p), ctypes.c_int
+        )(*args)
+    
+    
+    def clear_unseen_tracks(self, *args):
+        return self._get_func(
+            'sp_playlistcontainer_clear_unseen_tracks',
+            ctypes.c_int,
+            ctypes.c_void_p, ctypes.c_void_p
         )(*args)

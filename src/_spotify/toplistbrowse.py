@@ -42,7 +42,7 @@ class ToplistBrowseInterface(LibSpotifyInterface):
     def add_ref(self, *args):
         return self._get_func(
             'sp_toplistbrowse_add_ref',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -50,7 +50,7 @@ class ToplistBrowseInterface(LibSpotifyInterface):
     def release(self, *args):
         return self._get_func(
             'sp_toplistbrowse_release',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 

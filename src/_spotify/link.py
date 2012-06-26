@@ -38,7 +38,7 @@ class LinkInterface(LibSpotifyInterface):
         return self._get_func(
             'sp_link_create_from_album_cover',
             ctypes.c_void_p,
-            ctypes.c_void_p
+            ctypes.c_void_p, ctypes.c_int
         )(*args)
 
 
@@ -54,7 +54,7 @@ class LinkInterface(LibSpotifyInterface):
         return self._get_func(
             'sp_link_create_from_artist_portrait',
             ctypes.c_void_p,
-            ctypes.c_void_p
+            ctypes.c_void_p, ctypes.c_int
         )(*args)
 
 
@@ -157,7 +157,7 @@ class LinkInterface(LibSpotifyInterface):
     def add_ref(self, *args):
         return self._get_func(
             'sp_link_add_ref',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -165,6 +165,6 @@ class LinkInterface(LibSpotifyInterface):
     def release(self, *args):
         return self._get_func(
             'sp_link_release',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)

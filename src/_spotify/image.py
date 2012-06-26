@@ -33,7 +33,7 @@ class ImageInterface(LibSpotifyInterface):
     def add_load_callback(self, *args):
         return self._get_func(
             'sp_image_add_load_callback',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, image_loaded_cb, ctypes.c_void_p
         )(*args)
 
@@ -41,7 +41,7 @@ class ImageInterface(LibSpotifyInterface):
     def remove_load_callback(self, *args):
         return self._get_func(
             'sp_image_remove_load_callback',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p, image_loaded_cb, ctypes.c_void_p
         )(*args)
 
@@ -89,7 +89,7 @@ class ImageInterface(LibSpotifyInterface):
     def add_ref(self, *args):
         return self._get_func(
             'sp_image_add_ref',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
 
@@ -97,6 +97,6 @@ class ImageInterface(LibSpotifyInterface):
     def release(self, *args):
         return self._get_func(
             'sp_image_release',
-            None,
+            ctypes.c_int,
             ctypes.c_void_p
         )(*args)
