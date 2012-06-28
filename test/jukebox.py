@@ -19,7 +19,7 @@ sys.path.append("../src")
 #mandatory libspotify imports
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
-from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, radio, toplistbrowse, inbox, track
+from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, toplistbrowse, inbox, track
 
 #Imports for jukebox
 import cmd
@@ -341,20 +341,6 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         
         if search_obj.did_you_mean() != "":
             print "did you mean: %s" % search_obj.did_you_mean()
-    
-    
-    def do_radio(self, line):
-        args = line.split(' ', 4)
-        if len(args) != 3:
-            print "error: this command takes exactly three arguments"
-        
-        else:
-            radio_obj = self._load_radio(
-                int(args[0]), int(args[1]), int(args[2])
-            )
-            print "total tracks: %d" % radio_obj.total_tracks()
-            print "total artists: %d" % radio_obj.total_artists()
-            print "total albums: %d" % radio_obj.total_albums()
     
     
     def do_toplist(self, line):
