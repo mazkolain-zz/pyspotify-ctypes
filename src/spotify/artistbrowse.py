@@ -137,6 +137,29 @@ class Artistbrowse:
     
     
     @synchronized
+    def num_tophit_tracks(self):
+        return self.__artistbrowse_interface.num_tophit_tracks(
+            self.__artistbrowse_struct
+        )
+    
+    
+    @synchronized
+    def tophit_track(self, index):
+        track_struct = self.__artistbrowse_interface.tophit_track(
+            self.__artistbrowse_struct, index
+        )
+        
+        if track_struct is not None:
+            ti = _track.TrackInterface()
+            ti.add_ref(track_struct)
+            return track.Track(track_struct)
+    
+    
+    def tophit_tracks(self):
+        return CallbackIterator(self.num_tophit_tracks, self.tophit_track)
+    
+    
+    @synchronized
     def num_albums(self):
         return self.__artistbrowse_interface.num_albums(
             self.__artistbrowse_struct

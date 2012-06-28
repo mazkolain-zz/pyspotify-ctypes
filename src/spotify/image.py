@@ -18,6 +18,14 @@ import binascii
 import weakref
 
 
+
+class ImageSize:
+    Normal = 0
+    Small = 1
+    Large = 2
+
+
+
 @synchronized
 def create(session, image_id):
     buf = (ctypes.c_char * 20)()

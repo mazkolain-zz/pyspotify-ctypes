@@ -76,6 +76,9 @@ class ErrorType:
     OfflineNotAllowed = 34
     OfflineLicenseLost = 35
     OfflineLicenseError = 36
+    LastfmAuthError = 39
+    InvalidArgument = 40
+    SystemFailure = 41
 
 
 
@@ -106,6 +109,22 @@ class Bitrate:
     Rate160k = 0
     Rate320k = 1
     Rate96k = 2
+
+
+
+class SocialProvider:
+    Spotify = 0
+    Facebook = 1
+    Lastfm = 2
+
+
+
+class ScrobblingState:
+    UseGlobalSetting = 0
+    LocalEnabled = 1
+    LocalDisabled = 2
+    GlobalEnabled = 3
+    GlobalDisabled = 4
 
 
 

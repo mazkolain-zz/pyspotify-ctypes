@@ -45,6 +45,12 @@ class ProxySessionCallbacks:
             _session.cb_start_playback(WeakMethod(self._start_playback)),
             _session.cb_stop_playback(WeakMethod(self._stop_playback)),
             _session.cb_get_audio_buffer_stats(WeakMethod(self._get_audio_buffer_stats)),
+            _session.cb_offline_status_updated(WeakMethod(self._offline_status_updated)),
+            _session.cb_offline_error(WeakMethod(self._offline_error)),
+            _session.cb_credentials_blob_updated(WeakMethod(self._credentials_blob_updated)),
+            _session.cb_connectionstate_updated(WeakMethod(self._connectionstate_updated)),
+            _session.cb_scrobble_error(WeakMethod(self._scrobble_error)),
+            _session.cb_private_session_mode_changed(WeakMethod(self._private_session_mode_changed)),
         )
     
     
@@ -154,6 +160,26 @@ class ProxySessionCallbacks:
         self.__manager.offline_error(self.__session, error)
     
     
+    def _credentials_blob_updated(self, session, blob):
+        self.__callbacks.credentials_blob_updated(self.__session, blob)
+        self.__manager.credentials_blob_updated(self.__session, blob)
+    
+    
+    def _connectionstate_updated(self, session):
+        self.__callbacks.connectionstate_updated(self.__session)
+        self.__manager.connectionstate_updated(self.__session)
+    
+    
+    def _scrobble_error(self, session, error):
+        self.__callbacks.scrobble_error(self.__session, error)
+        self.__manager.scrobble_error(self.__session, error)
+    
+    
+    def _private_session_mode_changed(self, session, is_private):
+        self.__callbacks.private_session_mode_changed(self.__session, is_private)
+        self.__manager.private_session_mode_changed(self.__session, is_private)
+    
+    
     def get_callback_struct(self):
         return self.__struct
 
@@ -210,12 +236,24 @@ class SessionCallbacks:
     
     def offline_error(self, session, error):
         pass
+    
+    def credentials_blob_updated(self, session, blob):
+        pass
+    
+    def connectionstate_updated(self, session):
+        pass
+    
+    def scrobble_error(self, session, error):
+        pass
+    
+    def private_session_mode_changed(self, session, is_private):
+        pass
 
 
 
 #classes
 class Session:
-    api_version = 10
+    api_version = 12
     
     __session_struct = None
     __session_interface = None
@@ -227,7 +265,7 @@ class Session:
     _metadata_callbacks = None
     
     
-    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False, device_id=None, tracefile=None):
+    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False, device_id=None, tracefile=None, proxy=None, proxy_username=None, proxy_password=None):
         #Low level interface
         self.__session_interface = _session.SessionInterface()
         
@@ -258,7 +296,10 @@ class Session:
             dont_save_metadata_for_playlists,
             initially_unload_playlists,
             device_id,
-            tracefile
+            proxy,
+            proxy_username,
+            proxy_password,
+            tracefile,
         )
         
         self.__session_struct = ctypes.c_void_p()
@@ -275,8 +316,10 @@ class Session:
     
     
     @synchronized
-    def login(self, username, password, remember_me=False):
-        self.__session_interface.login(self.__session_struct, username, password, remember_me)
+    def login(self, username, password, remember_me=False, blob=None):
+        self.__session_interface.login(
+            self.__session_struct, username, password, remember_me, blob
+        )
     
     
     @synchronized
@@ -294,6 +337,11 @@ class Session:
         )
         if res != -1:
             return buf.value
+    
+    
+    @synchronized
+    def user_name(self):
+        return self.__session_interface.user_name(self.__session_struct)
     
     
     @synchronized
@@ -321,6 +369,11 @@ class Session:
     @synchronized
     def logout(self):
         self.__session_interface.logout(self.__session_struct)
+    
+    
+    @synchronized
+    def flush_caches(self):
+        self.__session_interface.flush_caches(self.__session_struct)
     
     
     @synchronized
@@ -426,15 +479,19 @@ class Session:
     
     @synchronized
     def preferred_bitrate(self, bitrate):
-        self.__session_interface.preferred_bitrate(
-            self.__session_struct, bitrate
+        handle_sp_error(
+            self.__session_interface.preferred_bitrate(
+                self.__session_struct, bitrate
+            )
         )
     
     
     @synchronized
     def preferred_offline_bitrate(self, bitrate, allow_resync):
-        self.__session_interface.preferred_offline_bitrate(
-            self.__session_struct, bitrate, allow_resync
+        handle_sp_error(
+            self.__session_interface.preferred_offline_bitrate(
+                self.__session_struct, bitrate, allow_resync
+            )
         )
     
     
@@ -453,9 +510,65 @@ class Session:
     
     
     @synchronized
+    def set_private_session(self, enabled):
+        self.__session_interface.set_private_session(
+            self.__session_struct, enabled
+        )
+    
+    
+    @synchronized
+    def is_private_session(self):
+        return self.__session_interface.is_private_session(
+            self.__session_struct
+        )
+    
+    
+    @synchronized
+    def set_scrobbling(self, provider, state):
+        handle_sp_error(
+            self.__session_interface.set_scrobbling(
+                self.__session_struct, provider, state
+            )
+        )
+    
+    
+    @synchronized
     def set_connection_type(self, conn_type):
         self.__session_interface.set_connection_type(
             self.__session_struct, conn_type
+        )
+    
+    
+    @synchronized
+    def is_scrobbling(self, provider):
+        state = None
+        handle_sp_error(
+            self.__session_interface.is_scrobbling(
+                self.__session_struct, provider, state
+            )
+        )
+        
+        return state
+    
+    
+    @synchronized
+    def is_scrobbling_possible(self, provider):
+        out = None
+        handle_sp_error(
+            self.__session_interface.is_scrobbling_possible(
+                self.__session_struc, provider, out
+            )
+        )
+        
+        return out
+    
+    
+    @synchronized
+    def set_social_credentials(self, provider, username, password):
+        handle_sp_error(
+            self.__session_interface.set_social_credentials(
+                self.__session_struct, provider, username, password
+            )
         )
     
     

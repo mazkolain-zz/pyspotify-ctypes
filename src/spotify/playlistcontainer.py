@@ -5,7 +5,7 @@ Created on 10/04/2011
 '''
 import ctypes
 
-from spotify import DuplicateCallbackError, UnknownCallbackError, handle_sp_error, user
+from spotify import DuplicateCallbackError, UnknownCallbackError, handle_sp_error, user, track
 
 from _spotify import playlistcontainer as _playlistcontainer, playlist as _playlist, user as _user
 
@@ -248,6 +248,32 @@ class PlaylistContainer:
             ui = _user.UserInterface()
             ui.add_ref(user_struct)
             return user.User(user_struct)
+    
+    
+    @synchronized
+    def get_unseen_tracks(self, playlist):
+        max_tracks = 100
+        track_arr = (ctypes.c_void_p * len(max_tracks))()
+        num_tracks = self.__container_interface.get_unseen_tracks(
+            self.__container_struct, playlist.get_struct(),
+            track_arr, max_tracks
+        )
+        
+        #Build the track object array from the struct
+        out_tracks = []
+        
+        if num_tracks > 0:
+            for index in range(num_tracks):
+                out_tracks.append(track.Track(track_arr[index]))
+        
+        return out_tracks
+    
+    
+    @synchronized
+    def clear_unseen_tracks(self, playlist):
+        self.__container_interface.clear_unseen_tracks(
+            self.__container_struct, playlist.get_struct()
+        )
     
     
     @synchronized

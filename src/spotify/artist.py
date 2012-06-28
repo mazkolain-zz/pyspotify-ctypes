@@ -7,6 +7,8 @@ from _spotify import artist as _artist
 
 from spotify.utils.decorators import synchronized
 
+from image import ImageSize
+
 import binascii
 
 
@@ -32,8 +34,8 @@ class Artist:
     
     
     @synchronized
-    def portrait(self):
-        res = self.__artist_interface.portrait(self.__artist_struct)
+    def portrait(self, size=ImageSize.Normal):
+        res = self.__artist_interface.portrait(self.__artist_struct, size)
         if res:
             return binascii.b2a_hex(buffer(res.contents))
     

@@ -9,6 +9,8 @@ from spotify.utils.decorators import synchronized
 
 from spotify import artist
 
+from image import ImageSize
+
 import binascii
 
 
@@ -53,8 +55,8 @@ class Album:
     
     
     @synchronized
-    def cover(self):
-        res = self.__album_interface.cover(self.__album_struct)
+    def cover(self, size=ImageSize.Normal):
+        res = self.__album_interface.cover(self.__album_struct, size)
         if res:
             return binascii.b2a_hex(buffer(res.contents))
     

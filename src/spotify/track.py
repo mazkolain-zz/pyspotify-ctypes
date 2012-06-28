@@ -96,6 +96,17 @@ class Track:
     
     
     @synchronized
+    def get_playable(self, session):
+        track_struct = self.__track_interface.get_playable(
+            session.get_struct(), self.__track_struct
+        )
+        
+        if track_struct is not None:
+            self.__track_interface.add_ref(track_struct)
+            return Track(track_struct)
+    
+    
+    @synchronized
     def is_placeholder(self):
         return self.__track_interface.is_placeholder(self.__track_struct)
     

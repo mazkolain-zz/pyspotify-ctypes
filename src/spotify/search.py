@@ -4,7 +4,7 @@ Created on 25/05/2011
 @author: mazkolain
 '''
 from _spotify import search as _search, track as _track, album as _album, artist as _artist
-from spotify import track, album, artist
+from spotify import track, album, artist, playlist
 
 from spotify.utils.decorators import synchronized
 
@@ -13,6 +13,12 @@ from spotify.utils.iterators import CallbackIterator
 from spotify.utils.weakmethod import WeakMethod
 
 import weakref
+
+
+
+class SearchType:
+    Standard = 0
+    Suggest = 1
 
 
 
@@ -53,7 +59,7 @@ class Search:
     
     
     @synchronized
-    def __init__(self, session, query, track_offset=0, track_count=0, album_offset=0, album_count=0, artist_offset=0, artist_count=0, callbacks=None):
+    def __init__(self, session, query, track_offset=0, track_count=0, album_offset=0, album_count=0, artist_offset=0, artist_count=0, playlist_offset=0, playlist_count=0, search_type=SearchType.Standard, callbacks=None):
         self.__proxy_callbacks = ProxySearchCallbacks(self, callbacks)
         self.__search_interface = _search.SearchInterface()
         self._search_struct = self.__search_interface.create(
@@ -61,10 +67,12 @@ class Search:
             track_offset, track_count,
             album_offset, album_count,
             artist_offset, artist_count,
+            playlist_offset, playlist_count,
+            search_type,
             self.__proxy_callbacks.get_c_callback(),
             None
         )
-        
+    
     
     @synchronized
     def is_loaded(self):
@@ -117,6 +125,31 @@ class Search:
     
     
     @synchronized
+    def num_playlists(self):
+        return self.__search_interface.num_playlists(
+            self.__search_interface
+        )
+    
+    
+    @synchronized
+    def playlist(self, index):
+        playlist_struct = self.__search_interface.playlist(
+            self.__search_interface, index
+        )
+        
+        if playlist_struct is not None:
+            """
+            Do not increment references here, as the official docs say
+            that the reference is owned by the caller.
+            """
+            return playlist.Playlist(playlist_struct)
+    
+    
+    def playlists(self):
+        return CallbackIterator(self.num_playlists, self.playlist)
+    
+    
+    @synchronized
     def num_artists(self):
         return self.__search_interface.num_artists(self._search_struct)
     
@@ -159,6 +192,11 @@ class Search:
     @synchronized
     def total_artists(self):
         return self.__search_interface.total_artists(self._search_struct)
+    
+    
+    @synchronized
+    def total_playlists(self):
+        return self.__search_interface.total_playlists(self._search_struct)
     
     
     @synchronized

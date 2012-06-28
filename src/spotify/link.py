@@ -7,7 +7,7 @@ import ctypes
 
 from _spotify import link as _link, track as _track, user as _user, artist as _artist, album as _album
 
-import track, user, artist, album
+import album, track, artist, user, image
 
 from spotify.utils.decorators import synchronized
 
@@ -32,9 +32,9 @@ def create_from_artist(artist):
 
 
 @synchronized
-def create_from_artist_portrait(artist):
+def create_from_artist_portrait(artist, size=image.ImageSize.Normal):
     li = _link.LinkInterface()
-    return Link(li.create_from_artist_portrait(artist.get_struct()))
+    return Link(li.create_from_artist_portrait(artist.get_struct(), size))
 
 
 @synchronized
@@ -52,9 +52,9 @@ def create_from_album(album):
 
 
 @synchronized
-def create_from_album_cover(album):
+def create_from_album_cover(album, size=image.ImageSize.Normal):
     li = _link.LinkInterface()
-    return Link(li.create_from_album_cover(album.get_struct()))
+    return Link(li.create_from_album_cover(album.get_struct(), size))
 
 
 @synchronized
