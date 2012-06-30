@@ -397,7 +397,8 @@ class Session:
         self.__session_interface.process_events(
             self.__session_struct, ctypes.byref(next_timeout)
         )
-        return next_timeout.value / 1000
+        
+        return next_timeout.value / 1000.0
         
     
     @synchronized
