@@ -141,8 +141,8 @@ class MainLoop:
         
         while not self._quit:
             self._event.wait(timeout)
-            timeout = session.process_events()
             self._event.clear()
+            timeout = session.process_events()
     
     def notify(self):
         self._event.set()
