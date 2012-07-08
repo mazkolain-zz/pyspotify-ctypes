@@ -145,9 +145,9 @@ class ProxySessionCallbacks:
     
     def _get_audio_buffer_stats(self, session, stats_p):
         st = stats_p.contents
-        st.samples, st.stutter = self.__callbacks.get_audio_buffer_stats(
-            self.__session
-        )
+        res = self.__callbacks.get_audio_buffer_stats(self.__session)
+        if res is not None:
+            st.samples, st.stutter = res 
     
     
     def _offline_status_updated(self, session):
