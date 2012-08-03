@@ -7,7 +7,7 @@ import spotify
 from spotify import user, handle_sp_error, playlistcontainer, playlist
 
 #Import low level api
-from _spotify import playlistcontainer as _playlistcontainer, user as _user, session as _session
+from _spotify import playlistcontainer as _playlistcontainer, user as _user, session as _session, is_linux
 
 #Decorators
 from spotify.utils.decorators import synchronized
@@ -265,7 +265,7 @@ class Session:
     _metadata_callbacks = None
     
     
-    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False, device_id=None, tracefile=None, proxy=None, proxy_username=None, proxy_password=None):
+    def __init__(self, callbacks, cache_location="", settings_location="", app_key=None, user_agent=None, compress_playlists=False, dont_save_metadata_for_playlists=False, initially_unload_playlists=False, device_id=None, proxy=None, proxy_username=None, proxy_password=None, ca_certs_filename=None, tracefile=None):
         #Low level interface
         self.__session_interface = _session.SessionInterface()
         
@@ -282,8 +282,7 @@ class Session:
         #app key conversion
         appkey_c = (ctypes.c_byte * len(app_key))(*app_key)
         
-        #initialize app config
-        config = _session.config(
+        args = [
             self.api_version,
             cache_location,
             settings_location,
@@ -300,7 +299,14 @@ class Session:
             proxy_username,
             proxy_password,
             tracefile,
-        )
+        ]
+        
+        #Linux builds have an extra member just before tracefile
+        if is_linux():
+            args.insert(-1, ca_certs_filename)
+        
+        #initialize app config
+        config = _session.config(*args)
         
         self.__session_struct = ctypes.c_void_p()
         err = self.__session_interface.create(ctypes.byref(config), ctypes.byref(self.__session_struct))

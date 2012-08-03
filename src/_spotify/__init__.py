@@ -43,6 +43,10 @@ else:
     )
 
 
+def is_linux():
+    return sys.platform.startswith('linux')
+
+
 
 class ModuleInterface(object):
     __registered_funcs = None

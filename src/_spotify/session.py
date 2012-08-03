@@ -2,7 +2,7 @@ import ctypes
 import _spotify
 
 #Import handy globals
-from _spotify import LibSpotifyInterface, callback, bool_type
+from _spotify import LibSpotifyInterface, callback, bool_type, is_linux
 
 
 #Structure definitions
@@ -75,7 +75,7 @@ callbacks._fields_ = [
     ("private_session_mode_changed", cb_private_session_mode_changed)
 ]
 
-config._fields_ = [
+tmp_field_list = [
     ("api_version", ctypes.c_int),
     ("cache_location", ctypes.c_char_p),
     ("settings_location", ctypes.c_char_p),
@@ -93,6 +93,14 @@ config._fields_ = [
     ("proxy_password", ctypes.c_char_p),
     ("tracefile", ctypes.c_char_p)
 ]
+
+#Linux builds have an extra member just before tracefile
+if is_linux():
+    tmp_field_list.insert(-1, ("ca_certs_filename", ctypes.c_char_p))
+    
+config._fields_ = tmp_field_list
+tmp_field_list = None
+
 
 offline_sync_status._fields_ = [
     ("queued_tracks", ctypes.c_int),
