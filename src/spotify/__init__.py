@@ -219,7 +219,7 @@ class BulkConditionChecker:
         pass
     
     
-    def complete_wait(self, timeout = None):
+    def try_complete_wait(self, timeout = None):
         #Clear the event first, so we make a "clean" check
         self._event.clear()
         
@@ -227,8 +227,13 @@ class BulkConditionChecker:
         self.check_conditions()
         self._event.wait(timeout)
         
-        #Fail if we reached here due to a timeout
-        if not self._event.isSet():
+        #Return the events's status
+        return self._event.isSet()
+    
+    
+    def complete_wait(self, timeout = None):
+        #Fail if the call returns due to a timeout
+        if not self.try_complete_wait(timeout):
             raise RuntimeError('Timed out while waiting for an event.')
 
 
