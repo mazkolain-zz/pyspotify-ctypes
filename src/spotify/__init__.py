@@ -129,38 +129,39 @@ class ScrobblingState:
 
 
 class MainLoop:
-    _event = None
-    _quit = None
+    __notify_flag = None
+    __quit_flag = None
     __quit_test = None
     
+    
     def __init__(self):
-        self._event = threading.Event()
-        self._quit = threading.Event()
+        self.__notify_flag = threading.Event()
+        self.__quit_flag = threading.Event()
         
         #Py 2.6+
-        if hasattr(self._quit, 'is_set'):
-            self.__quit_test = self._quit.is_set
+        if hasattr(self.__quit_flag, 'is_set'):
+            self.__quit_test = self.__quit_flag.is_set
         
         #Fallback for earlier python versions
         else:
-            self.__quit_test = self._quit.isSet
+            self.__quit_test = self.__quit_flag.isSet
     
     
     def loop(self, session):
         timeout = None
         
         while not self.__quit_test():
-            self._event.wait(timeout)
-            self._event.clear()
+            self.__notify_flag.wait(timeout)
+            self.__notify_flag.clear()
             timeout = session.process_events()
     
     
     def notify(self):
-        self._event.set()
+        self.__notify_flag.set()
     
     
     def quit(self):
-        self._quit.set()
+        self.__quit_flag.set()
         self.notify()
 
 
