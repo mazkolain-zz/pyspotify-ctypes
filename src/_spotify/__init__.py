@@ -177,7 +177,21 @@ class CachingLibraryLoader:
             return ctypes.cdll
     
     
+    def _load_from_sys_path(self, loader, name):
+        filename = self._get_filename(name)
+        for path in sys.path:
+            full_path = os.path.join(path, filename)
+            
+            #Library file exists
+            if os.path.isfile(full_path):
+                try:
+                    return loader.LoadLibrary(full_path)
+                
+                #An exception may indicate wrong arch or abi, continue loop
+                except:
+                    pass
     
+        raise OSError("Unable to find '%s'" % name)
     
     
     def _load(self, name):
@@ -193,15 +207,9 @@ class CachingLibraryLoader:
         try:
             return getattr(loader, name)
     
-        #Bad luck, let's do a quirk
+        #Bad luck, let's search on sys.path
         except OSError:
-            filename = self._get_filename(name)
-            for path in sys.path:
-                full_path = os.path.join(path, filename)
-                if os.path.isfile(full_path):
-                    return loader.LoadLibrary(full_path)
-        
-            raise OSError("Unable to find '%s'" % name)
+            return self._load_from_sys_path(loader, name)
     
     
     def load(self, name):
