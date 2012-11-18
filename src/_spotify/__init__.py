@@ -112,18 +112,19 @@ class LibSpotifyInterface(ModuleInterface):
 
 
 
-_library_refs = {}
+_library_cache = {}
 
 
 
-def unload_library():
+def unload_library(name):
     if os.name != 'nt':
         """
         Don't unload the library on windows, as it may result in a crash when
         this gets really unloaded.
         """
-        li = LibSpotifyInterface()
-        _unload_library('libspotify', li.get_library()._handle)
+        if name in _library_cache:
+            dlclose(_library_cache[name]._handle)
+            del _library_cache[name]
 
 
 
@@ -143,16 +144,6 @@ def _get_handle_by_name(name):
     get_handle.restype = ctypes.c_ulong
     
     return get_handle(name)
-
-
-
-def _unload_library(name, handle):
-    #delete from the library refs dict
-    if name in _library_refs:
-        del _library_refs[name]
-    
-    #unload it
-    dlclose(handle)
 
 
 
@@ -201,7 +192,7 @@ class CachingLibraryLoader:
         if os.name == 'nt':
             handle = _get_handle_by_name(name)
             if handle != 0:
-                _unload_library(name, handle)
+                dlclose(handle)
         
         #Let ctypes find it
         try:
@@ -214,15 +205,10 @@ class CachingLibraryLoader:
     
     def load(self, name):
         #Load if not found on the cache 
-        if name not in _library_refs:
-            library = self._load(name)
-            _library_refs[name] = weakref.ref(library)
+        if name not in _library_cache:
+            _library_cache[name] = self._load(name)
         
-        else:
-            ref = _library_refs[name]
-            library = ref()
-        
-        return library
+        return _library_cache[name]
 
 
 
