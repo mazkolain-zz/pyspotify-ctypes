@@ -105,6 +105,15 @@ class ConnectionType:
 
 
 
+class ConnectionState:
+    LoggedOut = 0
+    LoggedIn = 1
+    Disconnected = 2
+    Undefined = 3
+    Offline = 4
+
+
+
 class Bitrate:
     Rate160k = 0
     Rate320k = 1
