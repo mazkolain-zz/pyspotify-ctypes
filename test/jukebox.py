@@ -19,7 +19,7 @@ sys.path.append("../src")
 #mandatory libspotify imports
 from appkey import appkey
 from spotify import session, MainLoop, playlistcontainer, playlist, handle_sp_error
-from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, toplistbrowse, inbox, track
+from spotify import BulkConditionChecker, link, artistbrowse, albumbrowse, search, toplistbrowse, inbox, track, link
 
 #Imports for jukebox
 import cmd
@@ -341,6 +341,14 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         
         if search_obj.did_you_mean() != "":
             print "did you mean: %s" % search_obj.did_you_mean()
+    
+    
+    def do_link(self, line):
+        lo = link.create_from_string(line)
+        if lo is not None:
+            print "link parsed OK"
+        else:
+            print "failed parsing link"
     
     
     def do_toplist(self, line):
