@@ -16,7 +16,9 @@ from spotify.utils.decorators import synchronized
 @synchronized
 def create_from_string(string):
     li = _link.LinkInterface()
-    return Link(li.create_from_string(string))
+    link_struct = li.create_from_string(string)
+    if link_struct is not None:
+        return Link(link_struct)
 
 
 @synchronized
@@ -66,7 +68,9 @@ def create_from_search(search):
 @synchronized
 def create_from_playlist(playlist):
     li = _link.LinkInterface()
-    return Link(li.create_from_playlist(playlist.get_struct()))
+    link_struct = li.create_from_playlist(playlist.get_struct())
+    if link_struct is not None:
+        return Link(link_struct)
 
 
 @synchronized
