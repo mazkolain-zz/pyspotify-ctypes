@@ -5,7 +5,6 @@ Created on 18/04/2011
 '''
 import threading
 import types
-import threads
 
 
 class synchronized(object):
