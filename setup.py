@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='PyspotifyCtypes',
-    version='0.4',
+    version='0.5',
     description='Ctypes-based Spotify bindings for python',
     author='Mikel Azkolain',
     author_email='azkotoki@gmail.com',
