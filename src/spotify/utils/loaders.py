@@ -3,58 +3,60 @@ Created on 11/08/2012
 
 @author: mazkolain
 '''
-import spotify
-import spotify.albumbrowse
+from spotify import LibSpotifyError
+from spotify.albumbrowse import Albumbrowse, AlbumbrowseCallbacks
+from threading import Event
 
 
 
-class LoadAlbumCallback(spotify.albumbrowse.AlbumbrowseCallbacks):
-    __checker = None
+class LoadTimeoutError(LibSpotifyError):
+    pass
+
+
+
+class LoadAlbumCallbacks(AlbumbrowseCallbacks):
+    __event = None
     
     
-    def __init__(self, checker):
-        self.__checker = checker
+    def __init__(self):
+        self.__event = Event()
     
     
-    def albumbrowse_complete(self, artistbrowse):
-        self.__checker.check_conditions()
+    def albumbrowse_complete(self, albumbrowse):
+        self.__event.set()
+    
+    
+    def wait(self, albumbrowse, timeout=None):
+        if not albumbrowse.is_loaded():
+            self.__event.wait(timeout)
+        
+        return albumbrowse.is_loaded()
 
 
 
 def load_albumbrowse(session, album, timeout=5, ondelay=None):
+    
     #Check a valid number on timeout
     if timeout <= 1:
         raise ValueError('Timeout value must be higher than one second.')
     
-    checker = spotify.BulkConditionChecker()
-    cb = LoadAlbumCallback(checker)
-    albumbrowse = spotify.albumbrowse.Albumbrowse(session, album, cb)
+    callbacks = LoadAlbumCallbacks()
+    albumbrowse = Albumbrowse(session, album, callbacks)
     
-    def is_loaded():
-        return albumbrowse.is_loaded()
-    
-    #If it's already loaded
-    if is_loaded():
+    #Wait a single second for the album
+    if callbacks.wait(albumbrowse, 1):
         return albumbrowse
     
-    #Otherwise we'll have to wait
+    #It needs more time...
     else:
         
-        #Add the wait condition
-        checker.add_condition(is_loaded)
+        #Notify about the delay
+        if ondelay is not None:
+            ondelay()
         
-        #Let's see what happens within a second...
-        if checker.try_complete_wait(1):
+        #And keep waiting
+        if callbacks.wait(albumbrowse, timeout - 1):
             return albumbrowse
-        
-        #We need to wait more time
+    
         else:
-            
-            #Notify outside code about the delay
-            if ondelay is not None:
-                ondelay()
-            
-            #Now try again with the rest of the timeout
-            checker.complete_wait(timeout - 1)
-            
-            return albumbrowse
+            raise LoadTimeoutError('Albumbrowse object failed to load')
