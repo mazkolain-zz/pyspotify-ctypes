@@ -5,6 +5,7 @@ Created on 11/08/2012
 '''
 from spotify import LibSpotifyError
 from spotify.albumbrowse import Albumbrowse, AlbumbrowseCallbacks
+from spotify.session import SessionCallbacks
 from threading import Event
 
 
@@ -60,3 +61,58 @@ def load_albumbrowse(session, album, timeout=5, ondelay=None):
     
         else:
             raise LoadTimeoutError('Albumbrowse object failed to load')
+
+
+
+class TrackLoadCallback(SessionCallbacks):
+    __event = None
+    __track = None
+    
+    
+    def __init__(self, track):
+        self.__track = track
+        self.__event = Event()
+    
+    
+    def metadata_updated(self, session):
+        if self.__track.is_loaded():
+            self.__event.set()
+    
+    
+    def wait(self, timeout=None):
+        if not self.__track.is_loaded():
+            self.__event.wait(timeout)
+        
+        return self.__track.is_loaded()
+
+
+
+def load_track(session, track, timeout=5, ondelay=None):
+    
+    #Check a valid number on timeout
+    if timeout <= 1:
+        raise ValueError('Timeout value must be higher than one second.')
+    
+    if not track.is_loaded():
+    
+        #Set callbacks for loading the track
+        callbacks = TrackLoadCallback(track)
+        session.add_callbacks(callbacks)
+        
+        try:
+            #Wait a single second
+            if not callbacks.wait(timeout):
+                
+                #Notify about the delay
+                if ondelay is not None:
+                    ondelay()
+                
+                #And keep waiting
+                if not callbacks.wait(timeout - 1):
+                    raise LoadTimeoutError('Track object failed to load.')
+        
+        finally:
+            #Remove that callback, or will be around forever
+            session.remove_callbacks(callbacks)
+    
+    return track
