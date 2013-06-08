@@ -15,7 +15,7 @@ class LoadTimeoutError(LibSpotifyError):
 
 
 
-class LoadAlbumCallbacks(AlbumbrowseCallbacks):
+class _LoadAlbumCallbacks(AlbumbrowseCallbacks):
     __event = None
     
     
@@ -41,7 +41,7 @@ def load_albumbrowse(session, album, timeout=5, ondelay=None):
     if timeout <= 1:
         raise ValueError('Timeout value must be higher than one second.')
     
-    callbacks = LoadAlbumCallbacks()
+    callbacks = _LoadAlbumCallbacks()
     albumbrowse = Albumbrowse(session, album, callbacks)
     
     #Wait a single second for the album
@@ -64,7 +64,7 @@ def load_albumbrowse(session, album, timeout=5, ondelay=None):
 
 
 
-class TrackLoadCallback(SessionCallbacks):
+class _TrackLoadCallback(SessionCallbacks):
     __event = None
     __track = None
     
@@ -96,7 +96,7 @@ def load_track(session, track, timeout=5, ondelay=None):
     if not track.is_loaded():
     
         #Set callbacks for loading the track
-        callbacks = TrackLoadCallback(track)
+        callbacks = _TrackLoadCallback(track)
         session.add_callbacks(callbacks)
         
         try:
