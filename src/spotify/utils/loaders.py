@@ -6,6 +6,7 @@ Created on 11/08/2012
 from spotify import LibSpotifyError
 from spotify.albumbrowse import Albumbrowse, AlbumbrowseCallbacks
 from spotify.session import SessionCallbacks
+from spotify.image import ImageCallbacks
 from threading import Event
 
 
@@ -116,3 +117,57 @@ def load_track(session, track, timeout=5, ondelay=None):
             session.remove_callbacks(callbacks)
     
     return track
+
+
+
+class _ImageLoadCallbacks(ImageCallbacks):
+    __event = None
+    __image = None
+    
+    
+    def __init__(self, image):
+        self.__event = Event()
+        self.__image = image
+    
+    
+    def image_loaded(self, image):
+        self.__event.set()
+    
+    
+    def wait(self, timeout=None):
+        if not self.__image.is_loaded():
+            self.__event.wait(timeout)
+        
+        return self.__image.is_loaded()
+
+
+
+def load_image(image, timeout=5, ondelay=None):
+    
+    #Check a valid number on timeout
+    if timeout <= 1:
+        raise ValueError('Timeout value must be higher than one second.')
+    
+    if not image.is_loaded():
+    
+        #Set callbacks for loading the track
+        callbacks = _ImageLoadCallbacks(image)
+        image.add_load_callback(callbacks)
+        
+        try:
+            #Wait a single second
+            if not callbacks.wait(timeout):
+                
+                #Notify about the delay
+                if ondelay is not None:
+                    ondelay()
+                
+                #And keep waiting
+                if not callbacks.wait(timeout - 1):
+                    raise LoadTimeoutError('Image object failed to load.')
+        
+        finally:
+            #Remove that callback, or will be around forever
+            image.remove_load_callback(callbacks)
+    
+    return image
