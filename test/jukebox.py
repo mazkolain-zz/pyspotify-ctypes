@@ -275,18 +275,6 @@ class JukeboxCmd(cmd.Cmd, threading.Thread):
         return search_obj
     
     
-    def _load_radio(self, from_year, to_year, genres):
-        checker = BulkConditionChecker()
-        callbacks = SearchLoadCallbacks(checker)
-        radio_obj = radio.RadioSearch(
-            self._session, from_year, to_year, genres, callbacks
-        )
-        checker.add_condition(radio_obj.is_loaded)
-        checker.complete_wait(10)
-        
-        return radio_obj
-    
-    
     def _load_toplist(self, type, region, user):
         checker = BulkConditionChecker()
         callbacks = ToplistbrowseLoadCallbacks(checker)
