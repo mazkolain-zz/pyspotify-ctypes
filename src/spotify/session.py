@@ -100,8 +100,6 @@ class ProxySessionCallbacks:
         dest = ctypes.cast(frames, ctypes.POINTER(ctypes.c_char * size))
         data = str(buffer(dest.contents))
         
-        #print "frames_size: %d" % size
-        
         return self.__callbacks.music_delivery(
             self.__session, data, num_frames,
             format.sample_type, format.sample_rate, format.channels
@@ -643,4 +641,3 @@ class Session:
     @synchronized
     def __del__(self):
         self.__session_interface.release(self.__session_struct)
-        print "session __del__ called"

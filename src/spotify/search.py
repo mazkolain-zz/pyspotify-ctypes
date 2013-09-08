@@ -201,5 +201,4 @@ class Search:
     
     @synchronized
     def __del__(self):
-        print "search __del__ called"
         self.__search_interface.release(self._search_struct)

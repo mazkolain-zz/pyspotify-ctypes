@@ -77,7 +77,6 @@ class ProxyPlaylistCallbacks:
         self._callbacks.playlist_renamed(self._playlist)
     
     def _playlist_state_changed(self, playlist, userdata):
-        #print "_playlist_state_changed"
         self._callbacks.playlist_state_changed(self._playlist)
     
     def _playlist_update_in_progress(self, playlist, done, userdata):
