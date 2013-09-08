@@ -1,7 +1,8 @@
 __all__ = [
+    "utils",
     "album", "albumbrowse", "artist", "artistbrowse",
     "image", "inbox", "link", "localtrack",
-    "playlist", "playlistcontainer", "radio", "search",
+    "playlist", "playlistcontainer", "search",
     "session", "toplistbrowse", "track", "user",
 ]
 
