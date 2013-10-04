@@ -14,7 +14,7 @@ class WeakMethod():
     
     def __init__(self, method):
         if not inspect.ismethod(method):
-            raise RuntimeError('Inly bound methods are allowed')
+            raise RuntimeError('Only bound methods are allowed')
         
         self.__obj = weakref.ref(method.im_self)
         self.__func = weakref.ref(method.im_func)
