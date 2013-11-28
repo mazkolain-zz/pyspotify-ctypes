@@ -153,11 +153,11 @@ class CachingLibraryLoader:
             return '%s.dll' % name
         
         elif os.name == 'posix':
-            if sys.platform.startswith('linux'):
-                return '%s.so' % name
-            
-            elif sys.platform == 'darwin':
+            if sys.platform == 'darwin':
                 return name
+            
+            else:
+                return '%s.so' % name
     
     
     def _get_loader(self):
