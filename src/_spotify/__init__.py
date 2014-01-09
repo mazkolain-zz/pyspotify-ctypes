@@ -68,35 +68,15 @@ class ModuleInterface(object):
         return self.__library
     
     
-    def __getattr__(self, name):
-        if name not in self.__registered_funcs:
-            raise AttributeError
-        
-        else:
-            def func_caller(*args):
-                func = self.__registered_funcs[name]
-                return func(*args)
-            
-            return func_caller
-    
-    
-    def _get_func2(self, name, orig_name, restype, *argtypes):
+    def _get_func(self, name, restype, *argtypes):
         if name not in self.__registered_funcs:
             lib = self.get_library()
-            func = getattr(lib, orig_name)
-            func.argtypes = argtypes
+            func = getattr(lib, name)
             func.restype = restype
+            func.argtypes = argtypes
             self.__registered_funcs[name] = func
         
         return self.__registered_funcs[name]
-    
-    
-    def _get_func(self, name, restype, *argtypes):
-        return self._get_func2(name, name, restype, *argtypes)
-    
-    
-    def _register_func(self, name, orig_name, restype, *argtypes):
-        return self._get_func2(name, orig_name, restype, *argtypes)
 
 
 
