@@ -44,7 +44,7 @@ else:
 
 
 def is_linux():
-    return sys.platform.startswith('linux')
+    return sys.platform.lower().startswith('linux')
 
 
 
